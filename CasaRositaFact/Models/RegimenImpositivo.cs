@@ -2,7 +2,7 @@
 
 namespace CasaRositaFact.Models
 {
-    public class RegimenesImpositivos
+    public class RegimenImpositivo
     {
         [Key]
         public int IdRegimenImpositivo { get; set; }

@@ -1,0 +1,133 @@
+﻿@page "/clientes/nuevo"
+@page "/clientes/editar/{ClienteId:int}"
+@using Microsoft.AspNetCore.Components.Forms
+@using Services
+@using Models
+@inject ClienteService ClienteService
+
+@inject NavigationManager NavigationManager
+
+<h3>@(ClienteId == null ? "Nuevo Cliente" : "Editar Cliente")</h3>
+
+<EditForm Model="cliente" OnValidSubmit="SaveCliente">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="Nombre">Nombre</label>
+        <InputText id="Nombre" class="form-control" @bind-Value="cliente.Nombre" />
+    </div>
+
+    <div class="form-group">
+        <label for="Apellido">Apellido</label>
+        <InputText id="Apellido" class="form-control" @bind-Value="cliente.Apellido" />
+    </div>
+
+    <div class="form-group">
+        <label for="IdTipoDocumento">Tipo de Documento</label>
+        <InputSelect id="IdTipoDocumento" class="form-control" @bind-Value="cliente.IdTipoDocumento">
+            <option value="">-- Seleccione --</option>
+            @foreach (var tiposDoc in tiposDocumentos)
+            {
+                <option value="@tiposDoc.IdTipoDocumento">@tiposDoc.Descripcion</option>
+            }
+        </InputSelect>
+    </div>
+
+    @if (cliente.IdTipoDocumento == 1)
+
+    {
+        <div class="form-group">
+            <label for="Documento">Documento</label>
+            <InputText id="Documento" class="form-control" @bind-Value="cliente.Documento" />
+        </div>
+    }
+    else
+    {
+        <div class="form-group">
+            <label for="CUIT">CUIT</label>
+            <InputText id="CUIT" class="form-control" @bind-Value="cliente.CUIT" />
+        </div>
+    }
+
+    <div class="form-group">
+        <label for="Provincia">Provincia</label>
+        <InputText id="Provincia" class="form-control" @bind-Value="cliente.Provincia" />
+    </div>
+
+    <div class="form-group">
+        <label for="Localidad">Localidad</label>
+        <InputText id="Localidad" class="form-control" @bind-Value="cliente.Localidad" />
+    </div>
+
+    <div class="form-group">
+        <label for="IdRegimenImpositivo">Régimen Impositivo</label>
+        <InputSelect id="IdRegimenImpositivo" class="form-control" @bind-Value="cliente.IdRegimenImpositivo">
+            <option value="">-- Seleccione --</option>
+            @foreach (var regimen in regimenes)
+            {
+                <option value="@regimen.IdRegimenImpositivo">@regimen.Descripcion</option>
+            }
+        </InputSelect>
+    </div>
+
+    <div class="form-group">
+        <label for="Telefono">Teléfono</label>
+        <InputText id="Telefono" class="form-control" @bind-Value="cliente.Telefono" />
+    </div>
+
+    <div class="form-group">
+        <label for="CorreoElectronico">Correo Electrónico</label>
+        <InputText id="CorreoElectronico" class="form-control" @bind-Value="cliente.CorreoElectronico" />
+    </div>
+
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+</EditForm>
+
+@code {
+    [Parameter] public int? ClienteId { get; set; }
+    private Cliente cliente = new Cliente
+        {
+            Nombre = string.Empty,
+            Apellido = string.Empty
+        };
+
+    private List<RegimenImpositivo> regimenes = new List<RegimenImpositivo>();
+    private List<TipoDocumento> tiposDocumentos = new List<TipoDocumento>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (ClienteId.HasValue)
+        {
+            cliente = await ClienteService.GetClienteByIdAsync(ClienteId.Value);
+        }
+
+        regimenes = new List<RegimenImpositivo>
+        {
+            new RegimenImpositivo { IdRegimenImpositivo = 1, Descripcion = "Consumidor Final" },
+            new RegimenImpositivo { IdRegimenImpositivo = 2, Descripcion = "Responsable Inscripto" },
+            new RegimenImpositivo { IdRegimenImpositivo = 3, Descripcion = "Monotributista" }
+        };
+
+        tiposDocumentos = new List<TipoDocumento>
+        {
+            new TipoDocumento { IdTipoDocumento = 1, Descripcion = "DNI" },
+            new TipoDocumento { IdTipoDocumento = 2, Descripcion = "CUIL" },
+            new TipoDocumento { IdTipoDocumento = 3, Descripcion = "CUIT" }
+        };
+    }
+
+    private async Task SaveCliente()
+    {
+        if (cliente.IdCliente == 0)
+        {
+            await ClienteService.AddClienteAsync(cliente);
+        }
+        else
+        {
+            await ClienteService.UpdateClienteAsync(cliente);
+        }
+        NavigationManager.NavigateTo("/clientes");
+    }
+}

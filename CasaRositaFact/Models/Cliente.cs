@@ -7,11 +7,13 @@ namespace CasaRositaFact.Models
     {
         [Key]
         public int IdCliente { get; set; }
+        [Required(ErrorMessage = "El nombre es obligatorio")]
         public required string Nombre { get; set; }
+        [Required(ErrorMessage = "El nombre es obligatorio")]
         public required string Apellido { get; set; }
         public string Documento { get; set; } = string.Empty;
-        public string TipoDocumento { get; set; } = string.Empty;
-        public string CUIT { get; set; } = string.Empty;
+        public int IdTipoDocumento { get; set; }
+        public string? CUIT { get; set; } = string.Empty;
         public string Direccion { get; set; } = string.Empty;
         public string Localidad { get; set; } = string.Empty;
         public string Provincia { get; set; } = string.Empty;
@@ -24,7 +26,8 @@ namespace CasaRositaFact.Models
         public enum EstadoCliente { Activo, Inactivo, Suspendido }
         public EstadoCliente Estado { get; set; } = EstadoCliente.Activo;
         public string Observaciones { get; set; } = string.Empty;
-        public RegimenesImpositivos? RegimenImpositivo { get; set; } = null;
+        public RegimenImpositivo RegimenImpositivo { get; set; } = null!;
+        public TipoDocumento TipoDocumento { get; set; } = null!;
 
     }
 }

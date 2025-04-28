@@ -1,19 +1,25 @@
 using CasaRositaFact.Components;
 using CasaRositaFact.Data;
+using CasaRositaFact.Data.Repositories;
+using CasaRositaFact.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+//Configuracion de Razor Pages
+builder.Services.AddRazorPages();
 
 //Configuracion de entity framework core
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-//Configuracion de Razor Pages
-builder.Services.AddRazorPages();
-
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddScoped<ClienteService>();
+builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
 
 var app = builder.Build();
 

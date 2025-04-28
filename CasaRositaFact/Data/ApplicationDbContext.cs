@@ -10,7 +10,8 @@ namespace CasaRositaFact.Data
         {
         }
         public DbSet<Cliente> Clientes { get; set; } = null!;
-        public DbSet<RegimenesImpositivos> RegimenesImpositivos { get; set; } = null!;
+        public DbSet<RegimenImpositivo> RegimenesImpositivos { get; set; } = null!;
+        public DbSet<TipoDocumento> TiposDocumentos { get; set; } = null!;
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Cliente>()
@@ -28,18 +29,25 @@ namespace CasaRositaFact.Data
             // Relación con el régimen impositivo
             modelBuilder.Entity<Cliente>()
                 .HasOne(c => c.RegimenImpositivo) // Relación de Cliente con RegimenImpositivo
-                .WithMany()  // Asumiendo que no necesitas la relación inversa (si la necesitas, puedes usar WithMany(r => r.Clientes))
+                .WithMany()  // Si el régimen tiene una lista de clientes, puedes usar .WithMany(r => r.Clientes)
                 .HasForeignKey(c => c.IdRegimenImpositivo) // Clave foránea en Cliente
-                .OnDelete(DeleteBehavior.SetNull); // Comportamiento en caso de eliminar un régimen (opcional, depende de tus necesidades)
+                .OnDelete(DeleteBehavior.Cascade); // Comportamiento en caso de eliminar un régimen (opcional)
+
+            // Relación con el TipoDocumento
+            modelBuilder.Entity<Cliente>()
+                .HasOne(c => c.TipoDocumento) // Relación con TipoDocumento
+                .WithMany() // Si TipoDocumento tiene una lista de Clientes, puedes usar .WithMany(t => t.Clientes)
+                .HasForeignKey(c => c.IdTipoDocumento) // Clave foránea en Cliente
+                .OnDelete(DeleteBehavior.Cascade); // Comportamiento en caso de eliminación (puedes cambiarlo según lo necesites)
 
             // Configuración de RegimenesImpositivos
-            modelBuilder.Entity<RegimenesImpositivos>()
+            modelBuilder.Entity<RegimenImpositivo>()
                 .HasKey(r => r.IdRegimenImpositivo); // Clave primaria en RegimenesImpositivos
 
-            modelBuilder.Entity<RegimenesImpositivos>()
-                .Property(r => r.Descripcion)
-                .IsRequired()
-                .HasMaxLength(100);
+            // Configuración de TiposDocumentos
+            modelBuilder.Entity<TipoDocumento>()
+                .HasKey(t => t.IdTipoDocumento); // Clave primaria en TiposDocumentos
         }
+
     }
 }

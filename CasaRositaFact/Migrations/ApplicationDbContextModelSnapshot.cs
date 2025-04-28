@@ -36,7 +36,6 @@ namespace CasaRositaFact.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("CUIT")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CodigoPostal")
@@ -67,6 +66,9 @@ namespace CasaRositaFact.Migrations
                     b.Property<int>("IdRegimenImpositivo")
                         .HasColumnType("int");
 
+                    b.Property<int>("IdTipoDocumento")
+                        .HasColumnType("int");
+
                     b.Property<string>("Localidad")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -88,18 +90,21 @@ namespace CasaRositaFact.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("TipoDocumento")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("TipoDocumentoIdTipoDocumento")
+                        .HasColumnType("int");
 
                     b.HasKey("IdCliente");
 
                     b.HasIndex("IdRegimenImpositivo");
 
+                    b.HasIndex("IdTipoDocumento");
+
+                    b.HasIndex("TipoDocumentoIdTipoDocumento");
+
                     b.ToTable("Clientes");
                 });
 
-            modelBuilder.Entity("CasaRositaFact.Models.RegimenesImpositivos", b =>
+            modelBuilder.Entity("CasaRositaFact.Models.RegimenImpositivo", b =>
                 {
                     b.Property<int>("IdRegimenImpositivo")
                         .ValueGeneratedOnAdd()
@@ -109,23 +114,56 @@ namespace CasaRositaFact.Migrations
 
                     b.Property<string>("Descripcion")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("IdRegimenImpositivo");
 
                     b.ToTable("RegimenesImpositivos");
                 });
 
+            modelBuilder.Entity("CasaRositaFact.Models.TipoDocumento", b =>
+                {
+                    b.Property<int>("IdTipoDocumento")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdTipoDocumento"));
+
+                    b.Property<string>("Descripcion")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("IdTipoDocumento");
+
+                    b.ToTable("TiposDocumentos");
+                });
+
             modelBuilder.Entity("CasaRositaFact.Models.Cliente", b =>
                 {
-                    b.HasOne("CasaRositaFact.Models.RegimenesImpositivos", "RegimenImpositivo")
+                    b.HasOne("CasaRositaFact.Models.RegimenImpositivo", "RegimenImpositivo")
                         .WithMany()
                         .HasForeignKey("IdRegimenImpositivo")
-                        .OnDelete(DeleteBehavior.SetNull)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("CasaRositaFact.Models.TipoDocumento", "TipoDocumento")
+                        .WithMany()
+                        .HasForeignKey("IdTipoDocumento")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CasaRositaFact.Models.TipoDocumento", null)
+                        .WithMany("Clientes")
+                        .HasForeignKey("TipoDocumentoIdTipoDocumento");
+
                     b.Navigation("RegimenImpositivo");
+
+                    b.Navigation("TipoDocumento");
+                });
+
+            modelBuilder.Entity("CasaRositaFact.Models.TipoDocumento", b =>
+                {
+                    b.Navigation("Clientes");
                 });
 #pragma warning restore 612, 618
         }

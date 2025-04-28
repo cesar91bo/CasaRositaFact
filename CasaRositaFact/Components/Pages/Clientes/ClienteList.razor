@@ -1,0 +1,66 @@
+﻿@page "/clientes"
+@using Services
+@using Models
+@inject ClienteService ClienteService
+@inject NavigationManager NavigationManager
+
+<h3>Lista de Clientes</h3>
+
+<button type="button" @onclick="CreateNewCliente">Nuevo Cliente</button>
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>Documento</th>
+            <th>Teléfono</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var cliente in clientes)
+        {
+            <tr>
+                <td>@cliente.Nombre</td>
+                <td>@cliente.Apellido</td>
+                <td>@cliente.Documento</td>
+                <td>@cliente.Telefono</td>
+                <td>
+                    <a href="@($"/clientes/editar/{cliente.IdCliente}")">Editar</a> |
+                    <button @onclick="() => DeleteCliente(cliente.IdCliente)">Eliminar</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<Cliente> clientes = new List<Cliente>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            clientes = (await ClienteService.GetAllClientesAsync()).ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al inicializar el componente: {ex.Message}");
+        }
+    }
+
+
+    private void CreateNewCliente()
+    {
+        NavigationManager.NavigateTo("/clientes/nuevo");
+    }
+
+    private async Task DeleteCliente(int id)
+    {
+        await ClienteService.DeleteClienteAsync(id);
+        clientes = (await ClienteService.GetAllClientesAsync()).ToList(); // Actualizar la lista
+    }
+}
+

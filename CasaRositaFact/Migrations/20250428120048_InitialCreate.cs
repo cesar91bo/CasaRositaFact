@@ -17,11 +17,24 @@ namespace CasaRositaFact.Migrations
                 {
                     IdRegimenImpositivo = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Descripcion = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
+                    Descripcion = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_RegimenesImpositivos", x => x.IdRegimenImpositivo);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TiposDocumentos",
+                columns: table => new
+                {
+                    IdTipoDocumento = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Descripcion = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TiposDocumentos", x => x.IdTipoDocumento);
                 });
 
             migrationBuilder.CreateTable(
@@ -33,8 +46,8 @@ namespace CasaRositaFact.Migrations
                     Nombre = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Apellido = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Documento = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    TipoDocumento = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CUIT = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IdTipoDocumento = table.Column<int>(type: "int", nullable: false),
+                    CUIT = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Direccion = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Localidad = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Provincia = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -45,7 +58,8 @@ namespace CasaRositaFact.Migrations
                     FechaBaja = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IdRegimenImpositivo = table.Column<int>(type: "int", nullable: false),
                     Estado = table.Column<int>(type: "int", nullable: false),
-                    Observaciones = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Observaciones = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TipoDocumentoIdTipoDocumento = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -56,12 +70,33 @@ namespace CasaRositaFact.Migrations
                         principalTable: "RegimenesImpositivos",
                         principalColumn: "IdRegimenImpositivo",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Clientes_TiposDocumentos_IdTipoDocumento",
+                        column: x => x.IdTipoDocumento,
+                        principalTable: "TiposDocumentos",
+                        principalColumn: "IdTipoDocumento",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Clientes_TiposDocumentos_TipoDocumentoIdTipoDocumento",
+                        column: x => x.TipoDocumentoIdTipoDocumento,
+                        principalTable: "TiposDocumentos",
+                        principalColumn: "IdTipoDocumento");
                 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Clientes_IdRegimenImpositivo",
                 table: "Clientes",
                 column: "IdRegimenImpositivo");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Clientes_IdTipoDocumento",
+                table: "Clientes",
+                column: "IdTipoDocumento");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Clientes_TipoDocumentoIdTipoDocumento",
+                table: "Clientes",
+                column: "TipoDocumentoIdTipoDocumento");
         }
 
         /// <inheritdoc />
@@ -72,6 +107,9 @@ namespace CasaRositaFact.Migrations
 
             migrationBuilder.DropTable(
                 name: "RegimenesImpositivos");
+
+            migrationBuilder.DropTable(
+                name: "TiposDocumentos");
         }
     }
 }
