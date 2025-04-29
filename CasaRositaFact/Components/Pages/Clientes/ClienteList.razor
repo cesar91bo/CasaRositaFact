@@ -6,27 +6,33 @@
 
 <h3>Lista de Clientes</h3>
 
-<button type="button" @onclick="CreateNewCliente" class="btn btn-primary">Nuevo Cliente</button>
+<button type="button" @onclick="CreateNewCliente" class="btn btn-primary mb-3">Nuevo Cliente</button>
 
+<input type="text" @bind="filtro" @bind:event="oninput" class="form-control mb-3" placeholder="Buscar por nombre o apellido" />
 
 <table class="table">
     <thead>
         <tr>
+            <th>Id</th>
             <th>Nombre</th>
             <th>Apellido</th>
-            <th>Documento</th>
             <th>Teléfono</th>
+            <th>Estado</th>
             <th>Acciones</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var cliente in clientes)
+        @foreach (var cliente in clientesFiltrados)
         {
             <tr>
+                <td>@cliente.IdCliente</td>
                 <td>@cliente.Nombre</td>
                 <td>@cliente.Apellido</td>
-                <td>@cliente.Documento</td>
                 <td>@cliente.Telefono</td>
+                <td class="@(cliente.Estado == Cliente.EstadoCliente.Suspendido ? "text-danger fw-bold"
+            :       cliente.Estado == Cliente.EstadoCliente.Inactivo ? "text-warning fw-bold" : "")">
+                    @cliente.Estado
+                </td>
                 <td>
                     <a class="btn btn-secondary" href="@($"/clientes/editar/{cliente.IdCliente}")">Editar</a> |
                     <button class="btn btn-danger" @onclick="() => DeleteCliente(cliente.IdCliente)">Eliminar</button>
@@ -38,16 +44,43 @@
 
 @code {
     private List<Cliente> clientes = new List<Cliente>();
+    private List<Cliente> clientesFiltrados = new();
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             clientes = (await ClienteService.GetAllClientesAsync()).ToList();
+            clientesFiltrados = clientes;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error al inicializar el componente: {ex.Message}");
+        }
+    }
+
+    private string filtro
+    {
+        get => _filtro;
+        set
+        {
+            _filtro = value;
+            FiltrarClientes();
+        }
+    }
+    private string _filtro = "";
+
+    private void FiltrarClientes()
+    {
+        if (_filtro.Length >= 2)
+        {
+            clientesFiltrados = clientes
+                .Where(c => $"{c.Nombre} {c.Apellido}".Contains(_filtro, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+        else if (string.IsNullOrWhiteSpace(_filtro))
+        {
+            clientesFiltrados = clientes.ToList(); // vuelve a cargar toda la grilla
         }
     }
 
@@ -60,7 +93,6 @@
     private async Task DeleteCliente(int id)
     {
         await ClienteService.DeleteClienteAsync(id);
-        clientes = (await ClienteService.GetAllClientesAsync()).ToList(); // Actualizar la lista
+        clientesFiltrados = (await ClienteService.GetAllClientesAsync()).ToList(); // Actualizar la lista
     }
 }
-

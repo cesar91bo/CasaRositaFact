@@ -3,7 +3,10 @@
 @using Microsoft.AspNetCore.Components.Forms
 @using Services
 @using Models
+@using static CasaRositaFact.Models.Cliente
 @inject ClienteService ClienteService
+@inject RegimenService RegimenService
+@inject IJSRuntime JS
 
 @inject NavigationManager NavigationManager
 
@@ -24,12 +27,18 @@
             <InputText id="Apellido" class="form-control" @bind-Value="cliente.Apellido" />
         </div>
     </div>
+    @if (MostrarSugerenciaRegimen)
+    {
+        <div class="alert alert-warning mt-2" role="alert">
+            Verificá que el régimen impositivo coincida con el tipo de documento seleccionado (CUIT o CUIL).
+        </div>
+    }
 
     <div class="row mb-3">
         <div class="col-md-6">
             <label for="IdTipoDocumento">Tipo de Documento</label>
-            <InputSelect id="IdTipoDocumento" class="form-select" @bind-Value="cliente.IdTipoDocumento">
-                <option value="">-- Seleccione --</option>
+            <InputSelect id="IdTipoDocumento" class="form-select"
+            @bind-Value="TipoDocumentoSeleccionado">
                 @foreach (var tiposDoc in tiposDocumentos)
                 {
                     <option value="@tiposDoc.IdTipoDocumento">@tiposDoc.Descripcion</option>
@@ -41,14 +50,28 @@
         {
             <div class="col-md-6">
                 <label for="Documento" class="form-label">Documento</label>
-                <InputText id="Documento" class="form-control" @bind-Value="cliente.Documento" />
+                <InputText id="Documento" class="form-control" @bind-Value="cliente.Documento" maxlength="8"
+                oninput="this.value=this.value.replace(/[^0-9]/g,'');" />
             </div>
         }
         else
         {
             <div class="col-md-6">
                 <label for="CUIT" class="form-label">CUIT</label>
-                <InputText id="CUIT" class="form-control" @bind-Value="cliente.CUIT" />
+                <div class="d-flex gap-1">
+                    <InputText class="form-control" style="width: 60px"
+                    maxlength="2"
+                    @bind-Value="CuitParte1Sanitized" />
+
+                    <InputText class="form-control" style="width: 120px"
+                    maxlength="8"
+                    @bind-Value="CuitParte2Sanitized" />
+
+                    <InputText class="form-control" style="width: 40px"
+                    maxlength="1"
+                    @bind-Value="CuitParte3Sanitized" />
+
+                </div>
             </div>
         }
     </div>
@@ -68,7 +91,6 @@
         <div class="col-md-6">
             <label for="IdRegimenImpositivo" class="form-label">Régimen Impositivo</label>
             <InputSelect id="IdRegimenImpositivo" class="form-select" @bind-Value="cliente.IdRegimenImpositivo">
-                <option value="">-- Seleccione --</option>
                 @foreach (var regimen in regimenes)
                 {
                     <option value="@regimen.IdRegimenImpositivo">@regimen.Descripcion</option>
@@ -81,10 +103,20 @@
             <InputText id="Telefono" class="form-control" @bind-Value="cliente.Telefono" />
         </div>
     </div>
-    <div class="row mb-3"> 
+    <div class="row mb-3">
         <div class="col-md-6">
             <label for="CorreoElectronico" class="form-label">Correo Electrónico</label>
             <InputText id="CorreoElectronico" class="form-control" @bind-Value="cliente.CorreoElectronico" />
+        </div>
+
+        <div class="col-md-6">
+            <label for="Estado" class="form-label">Estado</label>
+            <InputSelect id="Estado" class="form-select" @bind-Value="cliente.Estado">
+                @foreach (var estado in estadosCliente)
+                {
+                    <option value="@estado.Key">@estado.Value</option>
+                }
+            </InputSelect>
         </div>
     </div>
 
@@ -98,25 +130,31 @@
     private Cliente cliente = new Cliente
         {
             Nombre = string.Empty,
-            Apellido = string.Empty
+            Apellido = string.Empty,
+            IdTipoDocumento = 0,
+            IdRegimenImpositivo = 0
         };
 
     private List<RegimenImpositivo> regimenes = new List<RegimenImpositivo>();
     private List<TipoDocumento> tiposDocumentos = new List<TipoDocumento>();
+    private List<KeyValuePair<EstadoCliente, string>> estadosCliente = new();
+
 
     protected override async Task OnInitializedAsync()
     {
+        InicializarEstados();
         if (ClienteId.HasValue)
         {
             cliente = await ClienteService.GetClienteByIdAsync(ClienteId.Value);
         }
 
-        regimenes = new List<RegimenImpositivo>
-        {
-            new RegimenImpositivo { IdRegimenImpositivo = 1, Descripcion = "Consumidor Final" },
-            new RegimenImpositivo { IdRegimenImpositivo = 2, Descripcion = "Responsable Inscripto" },
-            new RegimenImpositivo { IdRegimenImpositivo = 3, Descripcion = "Monotributista" }
-        };
+        var regimenesDTO = await RegimenService.GetAllRegimenesAsync();
+        regimenes = regimenesDTO.Select(r => new RegimenImpositivo
+            {
+                IdRegimenImpositivo = r.IdRegimenImpositivo,
+                Descripcion = r.Descripcion
+            }).ToList();
+
 
         tiposDocumentos = new List<TipoDocumento>
         {
@@ -124,10 +162,50 @@
             new TipoDocumento { IdTipoDocumento = 2, Descripcion = "CUIL" },
             new TipoDocumento { IdTipoDocumento = 3, Descripcion = "CUIT" }
         };
+
+        if (cliente.IdTipoDocumento == 0)
+        {
+            cliente.IdTipoDocumento = tiposDocumentos[0].IdTipoDocumento;
+        }
+        if (cliente.IdRegimenImpositivo == 0)
+        {
+            cliente.IdRegimenImpositivo = regimenes[0].IdRegimenImpositivo;
+        }
+    }
+
+    private void InicializarEstados()
+    {
+        estadosCliente = Enum.GetValues(typeof(EstadoCliente))
+            .Cast<EstadoCliente>()
+            .Select(e => new KeyValuePair<EstadoCliente, string>(e, e.ToString()))
+            .ToList();
     }
 
     private async Task SaveCliente()
     {
+        var nombre = cliente.Nombre.Trim().ToLower();
+        var apellido = cliente.Apellido.Trim().ToLower();
+
+
+        var clientesExistentes = await ClienteService.GetAllClientesAsync();
+        var yaExiste = clientesExistentes.Any(c =>
+            c.Nombre.Trim().ToLower() == nombre &&
+            c.Apellido.Trim().ToLower() == apellido);
+
+        if (yaExiste && cliente.IdCliente == 0)
+        {
+            // Mostrar un mensaje de error o advertencia al usuario
+            await JS.InvokeVoidAsync("mostrarModalClienteExiste");
+            return;
+        }
+        cliente.CUIT = CuitCompleto;
+
+        if ((cliente.IdTipoDocumento == 2 || cliente.IdTipoDocumento == 3) && string.IsNullOrWhiteSpace(cliente.CUIT))
+        {
+            await JS.InvokeVoidAsync("alert", "Debe completar el CUIT/CUIL.");
+            return;
+        }
+
         if (cliente.IdCliente == 0)
         {
             await ClienteService.AddClienteAsync(cliente);
@@ -138,4 +216,106 @@
         }
         NavigationManager.NavigateTo("/clientes");
     }
+
+    private string _cuitParte1;
+    private string _cuitParte2;
+    private string _cuitParte3;
+
+    private string CuitParte1Sanitized
+    {
+        get => _cuitParte1;
+        set
+        {
+            _cuitParte1 = new string(value.Where(char.IsDigit).ToArray());
+            ActualizarCUIT();
+        }
+    }
+
+    private string CuitParte2Sanitized
+    {
+        get => _cuitParte2;
+        set
+        {
+            _cuitParte2 = new string(value.Where(char.IsDigit).ToArray());
+            ActualizarCUIT();
+        }
+    }
+
+    private string CuitParte3Sanitized
+    {
+        get => _cuitParte3;
+        set
+        {
+            _cuitParte3 = new string(value.Where(char.IsDigit).ToArray());
+            ActualizarCUIT();
+        }
+    }
+
+    private string CuitCompleto => $"{_cuitParte1}{_cuitParte2}{_cuitParte3}";
+
+    private void ActualizarCUIT()
+    {
+        cliente.CUIT = CuitCompleto;
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (!string.IsNullOrWhiteSpace(cliente.CUIT) && cliente.CUIT.Length == 11)
+        {
+            _cuitParte1 = cliente.CUIT.Substring(0, 2);
+            _cuitParte2 = cliente.CUIT.Substring(2, 8);
+            _cuitParte3 = cliente.CUIT.Substring(10, 1);
+        }
+    }
+
+    private bool MostrarSugerenciaRegimen;
+    private int TipoDocumentoSeleccionado
+    {
+        get => cliente.IdTipoDocumento;
+        set
+        {
+            cliente.IdTipoDocumento = value;
+
+            MostrarSugerenciaRegimen = (value == 2 || value == 3);
+
+            if (value == 1) // DNI
+            {
+                cliente.CUIT = string.Empty;
+                CuitParte1Sanitized = string.Empty;
+                CuitParte2Sanitized = string.Empty;
+                CuitParte3Sanitized = string.Empty;
+
+                cliente.IdRegimenImpositivo = 1;
+            }
+            else // CUIT o CUIL
+            {
+                cliente.Documento = string.Empty;
+            }
+        }
+    }
+
+
 }
+
+<div class="modal fade" id="clienteExisteModal" tabindex="-1" aria-labelledby="clienteExisteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="clienteExisteModalLabel">Atención</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                Ya existe un cliente con ese nombre y apellido.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function mostrarModalClienteExiste() {
+        var myModal = new bootstrap.Modal(document.getElementById('clienteExisteModal'));
+        myModal.show();
+    }
+</script>
