@@ -12,6 +12,8 @@ namespace CasaRositaFact.Data
         public DbSet<Cliente> Clientes { get; set; } = null!;
         public DbSet<RegimenImpositivo> RegimenesImpositivos { get; set; } = null!;
         public DbSet<TipoDocumento> TiposDocumentos { get; set; } = null!;
+        public DbSet<Localidad> Localidades { get; set; } = null!;
+        public DbSet<Provincia> Provincias { get; set; } = null!;
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Cliente>()
@@ -47,6 +49,13 @@ namespace CasaRositaFact.Data
             // Configuración de TiposDocumentos
             modelBuilder.Entity<TipoDocumento>()
                 .HasKey(t => t.IdTipoDocumento); // Clave primaria en TiposDocumentos
+
+            // Configuración de Localidades
+            modelBuilder.Entity<TipoDocumento>()
+                .HasKey(t => t.IdTipoDocumento); // Clave primaria en TiposDocumentos
+
+            modelBuilder.Entity<Provincia>()
+                .HasKey(p => p.IdProvincia); // Clave primaria en Provincias
         }
 
     }

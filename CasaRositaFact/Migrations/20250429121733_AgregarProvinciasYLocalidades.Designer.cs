@@ -4,6 +4,7 @@ using CasaRositaFact.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CasaRositaFact.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250429121733_AgregarProvinciasYLocalidades")]
+    partial class AgregarProvinciasYLocalidades
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -119,9 +122,12 @@ namespace CasaRositaFact.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("ProvinciaIdProvincia")
+                        .HasColumnType("int");
+
                     b.HasKey("IdLocalidad");
 
-                    b.HasIndex("IdProvincia");
+                    b.HasIndex("ProvinciaIdProvincia");
 
                     b.ToTable("Localidades");
                 });
@@ -204,7 +210,7 @@ namespace CasaRositaFact.Migrations
                 {
                     b.HasOne("CasaRositaFact.Models.Provincia", "Provincia")
                         .WithMany("Localidades")
-                        .HasForeignKey("IdProvincia")
+                        .HasForeignKey("ProvinciaIdProvincia")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

@@ -20,9 +20,15 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddScoped<ClienteService>();
 builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
+
 builder.Services.AddScoped<RegimenService>();
 builder.Services.AddScoped<IRegimenRepository, RegimenRepository>();
 
+builder.Services.AddScoped<ProvinciaService>();
+builder.Services.AddScoped<IProvinciaRepository, ProvinciaRepository>();
+
+builder.Services.AddScoped<LocalidadService>();
+builder.Services.AddScoped<ILocalidadRepository, LocalidadRepository>();
 
 var app = builder.Build();
 

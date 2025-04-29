@@ -6,6 +6,8 @@
 @using static CasaRositaFact.Models.Cliente
 @inject ClienteService ClienteService
 @inject RegimenService RegimenService
+@inject ProvinciaService ProvinciaService
+@inject LocalidadService LocalidadService
 @inject IJSRuntime JS
 
 @inject NavigationManager NavigationManager
@@ -78,12 +80,23 @@
     <div class="row mb-3">
         <div class="col-md-6">
             <label for="Provincia" class="form-label">Provincia</label>
-            <InputText id="Provincia" class="form-control" @bind-Value="cliente.Provincia" />
+            <InputSelect id="Provincia" class="form-select" @bind-Value="ProvinciaSeleccionada">
+                @foreach (var provincia in provincias)
+                {
+                    <option value="@provincia.Nombre">@provincia.Nombre</option>
+                }
+            </InputSelect>
         </div>
+
 
         <div class="col-md-6">
             <label for="Localidad" class="form-label">Localidad</label>
-            <InputText id="Localidad" class="form-control" @bind-Value="cliente.Localidad" />
+            <InputSelect id="Localidad" class="form-select" @bind-Value="cliente.Localidad">
+                @foreach (var localidad in localidades)
+                {
+                    <option value="@localidad.Nombre">@localidad.Nombre</option>
+                }
+            </InputSelect>
         </div>
     </div>
 
@@ -123,6 +136,7 @@
 
 
     <button type="submit" class="btn btn-primary">Guardar</button>
+    <button type="button" class="btn btn-secondary" @onclick="NavigateToClientes">Cancelar</button>
 </EditForm>
 
 @code {
@@ -138,6 +152,8 @@
     private List<RegimenImpositivo> regimenes = new List<RegimenImpositivo>();
     private List<TipoDocumento> tiposDocumentos = new List<TipoDocumento>();
     private List<KeyValuePair<EstadoCliente, string>> estadosCliente = new();
+    private List<Provincia> provincias = new List<Provincia>();
+    private List<Localidad> localidades = new List<Localidad>();
 
 
     protected override async Task OnInitializedAsync()
@@ -155,6 +171,40 @@
                 Descripcion = r.Descripcion
             }).ToList();
 
+        var provinciaDTO = await ProvinciaService.GetAllProvinciasAsync();
+        provincias = provinciaDTO.Select(p => new Provincia
+            {
+                IdProvincia = p.IdProvincia,
+                Nombre = p.Nombre
+            }).ToList();
+
+        if (!string.IsNullOrEmpty(cliente.Provincia))
+        {
+            var provinciaExistente = provincias
+        .FirstOrDefault(p => string.Equals(p.Nombre?.Trim(), cliente.Provincia?.Trim(), StringComparison.OrdinalIgnoreCase));
+
+
+            if (provinciaExistente != null)
+            {
+                var localidadDTO = await LocalidadService.GetLocalidadByProvinciaIdAsync(provinciaExistente.IdProvincia);
+                localidades = localidadDTO.Select(l => new Localidad
+                    {
+                        IdLocalidad = l.IdLocalidad,
+                        Nombre = l.Nombre
+                    }).ToList();
+            }
+
+        }
+        else
+        {
+
+            var localidadDTO = await LocalidadService.GetLocalidadByProvinciaIdAsync(5);
+            localidades = localidadDTO.Select(l => new Localidad
+                {
+                    IdLocalidad = l.IdLocalidad,
+                    Nombre = l.Nombre
+                }).ToList();
+        }
 
         tiposDocumentos = new List<TipoDocumento>
         {
@@ -171,7 +221,55 @@
         {
             cliente.IdRegimenImpositivo = regimenes[0].IdRegimenImpositivo;
         }
+        if (cliente.Provincia == "")
+        {
+            cliente.Provincia = provincias[4].Nombre;
+        }
+        if (cliente.Localidad == "")
+        {
+            cliente.Localidad = localidades[50].Nombre;
+        }
     }
+
+    private string ProvinciaSeleccionada
+    {
+        get => cliente.Provincia;
+        set
+        {
+            if (cliente.Provincia != value)
+            {
+                cliente.Provincia = value;
+                CargarLocalidades(value);
+            }
+        }
+    }
+
+    private async void CargarLocalidades(string nombreProvincia)
+    {
+        var provinciaSeleccionada = provincias.FirstOrDefault(p => p.Nombre == nombreProvincia);
+        if (provinciaSeleccionada != null)
+        {
+            var localidadesDTO = await LocalidadService.GetLocalidadByProvinciaIdAsync(provinciaSeleccionada.IdProvincia);
+            localidades = localidadesDTO.Select(l => new Localidad
+                {
+                    IdLocalidad = l.IdLocalidad,
+                    Nombre = l.Nombre
+                }).ToList();
+        }
+        else
+        {
+            localidades.Clear();
+        }
+
+        cliente.Localidad = null;
+        StateHasChanged(); // necesario si el método no es async Task
+    }
+
+    private void NavigateToClientes()
+    {
+        NavigationManager.NavigateTo("/clientes");
+    }
+
 
     private void InicializarEstados()
     {
