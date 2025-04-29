@@ -13,73 +13,81 @@
     <DataAnnotationsValidator />
     <ValidationSummary />
 
-    <div class="form-group">
-        <label for="Nombre">Nombre</label>
-        <InputText id="Nombre" class="form-control" @bind-Value="cliente.Nombre" />
-    </div>
-
-    <div class="form-group">
-        <label for="Apellido">Apellido</label>
-        <InputText id="Apellido" class="form-control" @bind-Value="cliente.Apellido" />
-    </div>
-
-    <div class="form-group">
-        <label for="IdTipoDocumento">Tipo de Documento</label>
-        <InputSelect id="IdTipoDocumento" class="form-control" @bind-Value="cliente.IdTipoDocumento">
-            <option value="">-- Seleccione --</option>
-            @foreach (var tiposDoc in tiposDocumentos)
-            {
-                <option value="@tiposDoc.IdTipoDocumento">@tiposDoc.Descripcion</option>
-            }
-        </InputSelect>
-    </div>
-
-    @if (cliente.IdTipoDocumento == 1)
-
-    {
-        <div class="form-group">
-            <label for="Documento">Documento</label>
-            <InputText id="Documento" class="form-control" @bind-Value="cliente.Documento" />
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="Nombre" class="form-label">Nombre</label>
+            <InputText id="Nombre" class="form-control" @bind-Value="cliente.Nombre" />
         </div>
-    }
-    else
-    {
-        <div class="form-group">
-            <label for="CUIT">CUIT</label>
-            <InputText id="CUIT" class="form-control" @bind-Value="cliente.CUIT" />
+
+        <div class="col-md-6">
+            <label for="Apellido" class="form-label">Apellido</label>
+            <InputText id="Apellido" class="form-control" @bind-Value="cliente.Apellido" />
         </div>
-    }
-
-    <div class="form-group">
-        <label for="Provincia">Provincia</label>
-        <InputText id="Provincia" class="form-control" @bind-Value="cliente.Provincia" />
     </div>
 
-    <div class="form-group">
-        <label for="Localidad">Localidad</label>
-        <InputText id="Localidad" class="form-control" @bind-Value="cliente.Localidad" />
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="IdTipoDocumento">Tipo de Documento</label>
+            <InputSelect id="IdTipoDocumento" class="form-select" @bind-Value="cliente.IdTipoDocumento">
+                <option value="">-- Seleccione --</option>
+                @foreach (var tiposDoc in tiposDocumentos)
+                {
+                    <option value="@tiposDoc.IdTipoDocumento">@tiposDoc.Descripcion</option>
+                }
+            </InputSelect>
+        </div>
+
+        @if (cliente.IdTipoDocumento == 1)
+        {
+            <div class="col-md-6">
+                <label for="Documento" class="form-label">Documento</label>
+                <InputText id="Documento" class="form-control" @bind-Value="cliente.Documento" />
+            </div>
+        }
+        else
+        {
+            <div class="col-md-6">
+                <label for="CUIT" class="form-label">CUIT</label>
+                <InputText id="CUIT" class="form-control" @bind-Value="cliente.CUIT" />
+            </div>
+        }
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="Provincia" class="form-label">Provincia</label>
+            <InputText id="Provincia" class="form-control" @bind-Value="cliente.Provincia" />
+        </div>
+
+        <div class="col-md-6">
+            <label for="Localidad" class="form-label">Localidad</label>
+            <InputText id="Localidad" class="form-control" @bind-Value="cliente.Localidad" />
+        </div>
     </div>
 
-    <div class="form-group">
-        <label for="IdRegimenImpositivo">Régimen Impositivo</label>
-        <InputSelect id="IdRegimenImpositivo" class="form-control" @bind-Value="cliente.IdRegimenImpositivo">
-            <option value="">-- Seleccione --</option>
-            @foreach (var regimen in regimenes)
-            {
-                <option value="@regimen.IdRegimenImpositivo">@regimen.Descripcion</option>
-            }
-        </InputSelect>
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="IdRegimenImpositivo" class="form-label">Régimen Impositivo</label>
+            <InputSelect id="IdRegimenImpositivo" class="form-select" @bind-Value="cliente.IdRegimenImpositivo">
+                <option value="">-- Seleccione --</option>
+                @foreach (var regimen in regimenes)
+                {
+                    <option value="@regimen.IdRegimenImpositivo">@regimen.Descripcion</option>
+                }
+            </InputSelect>
+        </div>
+
+        <div class="col-md-6">
+            <label for="Telefono" class="form-label">Teléfono</label>
+            <InputText id="Telefono" class="form-control" @bind-Value="cliente.Telefono" />
+        </div>
+    </div>
+    <div class="row mb-3"> 
+        <div class="col-md-6">
+            <label for="CorreoElectronico" class="form-label">Correo Electrónico</label>
+            <InputText id="CorreoElectronico" class="form-control" @bind-Value="cliente.CorreoElectronico" />
+        </div>
     </div>
 
-    <div class="form-group">
-        <label for="Telefono">Teléfono</label>
-        <InputText id="Telefono" class="form-control" @bind-Value="cliente.Telefono" />
-    </div>
-
-    <div class="form-group">
-        <label for="CorreoElectronico">Correo Electrónico</label>
-        <InputText id="CorreoElectronico" class="form-control" @bind-Value="cliente.CorreoElectronico" />
-    </div>
 
 
     <button type="submit" class="btn btn-primary">Guardar</button>

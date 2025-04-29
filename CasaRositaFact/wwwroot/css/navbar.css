@@ -1,0 +1,21 @@
+﻿.navbar-custom {
+    background: linear-gradient(to bottom, #FF1493, #FF69B4); /* Gradiente de rosado más oscuro a más claro */
+    color: white;
+}
+
+.navbar-custom-titulo {
+    background: linear-gradient(to bottom, #FF1493, #FF69B4) !important;
+    color: white;
+}
+
+.navbar-custom .nav-link {
+   color: white;
+}
+
+.navbar-custom .nav-link:hover {
+   color: #FFD700; /* Amarillo brillante para hover */
+}
+
+.navbar-custom .navbar-brand {
+    color: white;
+ }

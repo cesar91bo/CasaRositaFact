@@ -6,7 +6,7 @@
 
 <h3>Lista de Clientes</h3>
 
-<button type="button" @onclick="CreateNewCliente">Nuevo Cliente</button>
+<button type="button" @onclick="CreateNewCliente" class="btn btn-primary">Nuevo Cliente</button>
 
 
 <table class="table">
@@ -28,8 +28,8 @@
                 <td>@cliente.Documento</td>
                 <td>@cliente.Telefono</td>
                 <td>
-                    <a href="@($"/clientes/editar/{cliente.IdCliente}")">Editar</a> |
-                    <button @onclick="() => DeleteCliente(cliente.IdCliente)">Eliminar</button>
+                    <a class="btn btn-secondary" href="@($"/clientes/editar/{cliente.IdCliente}")">Editar</a> |
+                    <button class="btn btn-danger" @onclick="() => DeleteCliente(cliente.IdCliente)">Eliminar</button>
                 </td>
             </tr>
         }
