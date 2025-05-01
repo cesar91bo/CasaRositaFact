@@ -40,7 +40,7 @@
         <div class="col-md-6">
             <label for="IdTipoDocumento">Tipo de Documento</label>
             <InputSelect id="IdTipoDocumento" class="form-select"
-            @bind-Value="TipoDocumentoSeleccionado">
+                         @bind-Value="TipoDocumentoSeleccionado">
                 @foreach (var tiposDoc in tiposDocumentos)
                 {
                     <option value="@tiposDoc.IdTipoDocumento">@tiposDoc.Descripcion</option>
@@ -53,7 +53,7 @@
             <div class="col-md-6">
                 <label for="Documento" class="form-label">Documento</label>
                 <InputText id="Documento" class="form-control" @bind-Value="cliente.Documento" maxlength="8"
-                oninput="this.value=this.value.replace(/[^0-9]/g,'');" />
+                           oninput="this.value=this.value.replace(/[^0-9]/g,'');" />
             </div>
         }
         else
@@ -62,16 +62,16 @@
                 <label for="CUIT" class="form-label">CUIT</label>
                 <div class="d-flex gap-1">
                     <InputText class="form-control" style="width: 60px"
-                    maxlength="2"
-                    @bind-Value="CuitParte1Sanitized" />
+                               maxlength="2"
+                               @bind-Value="CuitParte1Sanitized" />
 
                     <InputText class="form-control" style="width: 120px"
-                    maxlength="8"
-                    @bind-Value="CuitParte2Sanitized" />
+                               maxlength="8"
+                               @bind-Value="CuitParte2Sanitized" />
 
                     <InputText class="form-control" style="width: 40px"
-                    maxlength="1"
-                    @bind-Value="CuitParte3Sanitized" />
+                               maxlength="1"
+                               @bind-Value="CuitParte3Sanitized" />
 
                 </div>
             </div>
@@ -132,8 +132,6 @@
             </InputSelect>
         </div>
     </div>
-
-
 
     <button type="submit" class="btn btn-primary">Guardar</button>
     <button type="button" class="btn btn-secondary" @onclick="NavigateToClientes">Cancelar</button>
@@ -231,54 +229,6 @@
         }
     }
 
-    private string ProvinciaSeleccionada
-    {
-        get => cliente.Provincia;
-        set
-        {
-            if (cliente.Provincia != value)
-            {
-                cliente.Provincia = value;
-                CargarLocalidades(value);
-            }
-        }
-    }
-
-    private async void CargarLocalidades(string nombreProvincia)
-    {
-        var provinciaSeleccionada = provincias.FirstOrDefault(p => p.Nombre == nombreProvincia);
-        if (provinciaSeleccionada != null)
-        {
-            var localidadesDTO = await LocalidadService.GetLocalidadByProvinciaIdAsync(provinciaSeleccionada.IdProvincia);
-            localidades = localidadesDTO.Select(l => new Localidad
-                {
-                    IdLocalidad = l.IdLocalidad,
-                    Nombre = l.Nombre
-                }).ToList();
-        }
-        else
-        {
-            localidades.Clear();
-        }
-
-        cliente.Localidad = null;
-        StateHasChanged(); // necesario si el método no es async Task
-    }
-
-    private void NavigateToClientes()
-    {
-        NavigationManager.NavigateTo("/clientes");
-    }
-
-
-    private void InicializarEstados()
-    {
-        estadosCliente = Enum.GetValues(typeof(EstadoCliente))
-            .Cast<EstadoCliente>()
-            .Select(e => new KeyValuePair<EstadoCliente, string>(e, e.ToString()))
-            .ToList();
-    }
-
     private async Task SaveCliente()
     {
         var nombre = cliente.Nombre.Trim().ToLower();
@@ -314,6 +264,59 @@
         }
         NavigationManager.NavigateTo("/clientes");
     }
+
+    private void NavigateToClientes()
+    {
+        NavigationManager.NavigateTo("/clientes");
+    }
+
+
+    private void InicializarEstados()
+    {
+        estadosCliente = Enum.GetValues(typeof(EstadoCliente))
+            .Cast<EstadoCliente>()
+            .Select(e => new KeyValuePair<EstadoCliente, string>(e, e.ToString()))
+            .ToList();
+    }
+
+    #region Sección de Provincias y Localidades
+
+    private string ProvinciaSeleccionada
+    {
+        get => cliente.Provincia;
+        set
+        {
+            if (cliente.Provincia != value)
+            {
+                cliente.Provincia = value;
+                CargarLocalidades(value);
+            }
+        }
+    }
+
+    private async void CargarLocalidades(string nombreProvincia)
+    {
+        var provinciaSeleccionada = provincias.FirstOrDefault(p => p.Nombre == nombreProvincia);
+        if (provinciaSeleccionada != null)
+        {
+            var localidadesDTO = await LocalidadService.GetLocalidadByProvinciaIdAsync(provinciaSeleccionada.IdProvincia);
+            localidades = localidadesDTO.Select(l => new Localidad
+                {
+                    IdLocalidad = l.IdLocalidad,
+                    Nombre = l.Nombre
+                }).ToList();
+        }
+        else
+        {
+            localidades.Clear();
+        }
+
+        cliente.Localidad = null;
+        StateHasChanged(); // necesario si el método no es async Task
+    }
+    #endregion
+
+    #region Sección de CUIT y Tipo de Documento
 
     private string _cuitParte1;
     private string _cuitParte2;
@@ -391,8 +394,7 @@
             }
         }
     }
-
-
+    #endregion
 }
 
 <div class="modal fade" id="clienteExisteModal" tabindex="-1" aria-labelledby="clienteExisteModalLabel" aria-hidden="true">

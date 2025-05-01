@@ -4,6 +4,7 @@ using CasaRositaFact.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CasaRositaFact.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250501110144_ArticulosRelacionesTablas")]
+    partial class ArticulosRelacionesTablas
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,6 +36,9 @@ namespace CasaRositaFact.Migrations
                     b.Property<decimal?>("CantidadMinima")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("CategoriaIdCategoria")
+                        .HasColumnType("int");
 
                     b.Property<string>("CodigoProducto")
                         .HasColumnType("nvarchar(max)");
@@ -69,11 +75,22 @@ namespace CasaRositaFact.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("ProveedorIdProveedor")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("RubroIdRubro")
+                        .HasColumnType("int");
+
                     b.Property<decimal?>("StockActual")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int?>("UnidadMedidaIdUnidadMedida")
+                        .HasColumnType("int");
+
                     b.HasKey("IdArticulo");
+
+                    b.HasIndex("CategoriaIdCategoria");
 
                     b.HasIndex("IdCategoria");
 
@@ -82,6 +99,12 @@ namespace CasaRositaFact.Migrations
                     b.HasIndex("IdRubro");
 
                     b.HasIndex("IdUnidadMedida");
+
+                    b.HasIndex("ProveedorIdProveedor");
+
+                    b.HasIndex("RubroIdRubro");
+
+                    b.HasIndex("UnidadMedidaIdUnidadMedida");
 
                     b.ToTable("Articulo");
                 });
@@ -311,25 +334,41 @@ namespace CasaRositaFact.Migrations
 
             modelBuilder.Entity("CasaRositaFact.Models.Articulo", b =>
                 {
-                    b.HasOne("CasaRositaFact.Models.Categoria", "Categoria")
+                    b.HasOne("CasaRositaFact.Models.Categoria", null)
                         .WithMany("Articulos")
+                        .HasForeignKey("CategoriaIdCategoria");
+
+                    b.HasOne("CasaRositaFact.Models.Categoria", "Categoria")
+                        .WithMany()
                         .HasForeignKey("IdCategoria")
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("CasaRositaFact.Models.Proveedor", "Proveedor")
-                        .WithMany("Articulos")
+                        .WithMany()
                         .HasForeignKey("IdProveedor")
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("CasaRositaFact.Models.Rubro", "Rubro")
-                        .WithMany("Articulos")
+                        .WithMany()
                         .HasForeignKey("IdRubro")
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("CasaRositaFact.Models.UnidadMedida", "UnidadMedida")
-                        .WithMany("Articulos")
+                        .WithMany()
                         .HasForeignKey("IdUnidadMedida")
                         .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("CasaRositaFact.Models.Proveedor", null)
+                        .WithMany("Articulos")
+                        .HasForeignKey("ProveedorIdProveedor");
+
+                    b.HasOne("CasaRositaFact.Models.Rubro", null)
+                        .WithMany("Articulos")
+                        .HasForeignKey("RubroIdRubro");
+
+                    b.HasOne("CasaRositaFact.Models.UnidadMedida", null)
+                        .WithMany("Articulos")
+                        .HasForeignKey("UnidadMedidaIdUnidadMedida");
 
                     b.Navigation("Categoria");
 

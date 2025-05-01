@@ -56,6 +56,42 @@ namespace CasaRositaFact.Data
 
             modelBuilder.Entity<Provincia>()
                 .HasKey(p => p.IdProvincia); // Clave primaria en Provincias
+
+            modelBuilder.Entity<Proveedor>()
+                .HasKey(p => p.IdProveedor); // Clave primaria en Proveedores
+
+            modelBuilder.Entity<Rubro>()
+                .HasKey(r => r.IdRubro); // Clave primaria en Rubros
+
+            modelBuilder.Entity<Categoria>()
+                .HasKey(c => c.IdCategoria); // Clave primaria en Categorías
+
+            modelBuilder.Entity<Articulo>()
+                .HasKey(a => a.IdArticulo); // Clave primaria en Artículos
+
+            modelBuilder.Entity<Articulo>()
+                .HasOne(a => a.Categoria) // Relación con Categoría
+                .WithMany(c => c.Articulos) // Relación inversa
+                .HasForeignKey(a => a.IdCategoria) // Clave foránea en Artículo
+                .OnDelete(DeleteBehavior.SetNull); // Comportamiento en caso de eliminación 
+
+            modelBuilder.Entity<Articulo>()
+                .HasOne(a => a.Proveedor) // Relación con Proveedor
+                .WithMany(c => c.Articulos) // Relación inversa
+                .HasForeignKey(a => a.IdProveedor) // Clave foránea en Artículo
+                .OnDelete(DeleteBehavior.SetNull); // Comportamiento en caso de eliminación 
+
+            modelBuilder.Entity<Articulo>()
+                .HasOne(a => a.Rubro) // Relación con Rubro
+                .WithMany(c => c.Articulos) // Relación inversa
+                .HasForeignKey(a => a.IdRubro) // Clave foránea en Artículo
+                .OnDelete(DeleteBehavior.SetNull); // Comportamiento en caso de eliminación 
+
+            modelBuilder.Entity<Articulo>()
+                .HasOne(a => a.UnidadMedida) // Relación con UnidadMedida
+                .WithMany(c => c.Articulos) // Relación inversa
+                .HasForeignKey(a => a.IdUnidadMedida) // Clave foránea en Artículo
+                .OnDelete(DeleteBehavior.SetNull); // Comportamiento en caso de eliminación
         }
 
     }
