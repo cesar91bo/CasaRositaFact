@@ -14,6 +14,14 @@ namespace CasaRositaFact.Data
         public DbSet<TipoDocumento> TiposDocumentos { get; set; } = null!;
         public DbSet<Localidad> Localidades { get; set; } = null!;
         public DbSet<Provincia> Provincias { get; set; } = null!;
+        public DbSet<Proveedor> Proveedores { get; set; } = null!;
+        public DbSet<Rubro> Rubros { get; set; } = null!;
+        public DbSet<Categoria> Categorias { get; set; } = null!;
+        public DbSet<Articulo> Articulos { get; set; } = null!;
+        public DbSet<UnidadMedida> UnidadesMedida { get; set; } = null!;
+        public DbSet<PrecioArticulo> PreciosArticulos { get; set; } = null!;
+        public DbSet<TipoIva> TiposIva { get; set; } = null!;
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Cliente>()
@@ -92,6 +100,24 @@ namespace CasaRositaFact.Data
                 .WithMany(c => c.Articulos) // Relación inversa
                 .HasForeignKey(a => a.IdUnidadMedida) // Clave foránea en Artículo
                 .OnDelete(DeleteBehavior.SetNull); // Comportamiento en caso de eliminación
+
+            modelBuilder.Entity<PrecioArticulo>()
+                .HasKey(p => p.IdPrecioArticulo); // Clave primaria en PreciosArticulos
+
+            modelBuilder.Entity<PrecioArticulo>()
+                .HasOne(p => p.Articulo) // Relación con TipoIva
+                .WithMany(t => t.PreciosArticulos) // Relación inversa
+                .HasForeignKey(p => p.IdArticulo) // Clave foránea en PrecioArticulo
+                .OnDelete(DeleteBehavior.Cascade); // Comportamiento en caso de eliminación
+
+            modelBuilder.Entity<TipoIva>()
+                .HasKey(t => t.Id); // Clave primaria en TiposIva
+
+            modelBuilder.Entity<PrecioArticulo>()
+                .HasOne(p => p.TipoIva)
+                .WithMany() // si no tenés la colección inversa en TipoIva
+                .HasForeignKey(p => p.IdTipoIva)
+                .OnDelete(DeleteBehavior.SetNull);
         }
 
     }

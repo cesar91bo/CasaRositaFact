@@ -30,6 +30,9 @@ builder.Services.AddScoped<IProvinciaRepository, ProvinciaRepository>();
 builder.Services.AddScoped<LocalidadService>();
 builder.Services.AddScoped<ILocalidadRepository, LocalidadRepository>();
 
+builder.Services.AddScoped<ArticuloService>();
+builder.Services.AddScoped<IArticuloRepository, ArticuloRepository>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

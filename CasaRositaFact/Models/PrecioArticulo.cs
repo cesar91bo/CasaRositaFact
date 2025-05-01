@@ -1,0 +1,34 @@
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace CasaRositaFact.Models
+{
+    public class PrecioArticulo
+    {
+        [Key]
+        public int IdPrecioArticulo { get; set; }
+        public int IdArticulo { get; set; }
+        [Precision(18, 2)]
+        public decimal PrecioVenta { get; set; }
+        [Precision(18, 2)]
+        public decimal PrecioCosto { get; set; }
+        [Precision(18, 2)]
+        public decimal PrecioLista { get; set; }
+        [Precision(18, 2)]
+        public decimal PrecioDescuento { get; set; }
+        public int? IdTipoIva { get; set; } //IVA 21%, IVA 10.5%, IVA 27%
+        public DateTime FechaDesde { get; set; } = DateTime.Now;
+        public DateTime? FechaHasta { get; set; }
+        public bool EsPrecioPublico { get; set; } = false;
+        public bool EsPrecioCosto { get; set; } = false;
+        public bool EsPrecioLista { get; set; } = false;
+        public bool EsPrecioDescuento { get; set; } = false;
+
+        [ForeignKey("IdArticulo")]
+        public Articulo? Articulo { get; set; }
+        [ForeignKey(nameof(IdTipoIva))]
+        public TipoIva? TipoIva { get; set; }
+
+    }
+}

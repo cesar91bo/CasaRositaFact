@@ -32,9 +32,12 @@ namespace CasaRositaFact.Data.Repositories
             return await _context.Clientes.ToListAsync();
         }
 
-        public Task<Cliente> GetClienteByIdAsync(int id)
+        public async Task<Cliente> GetClienteByIdAsync(int id)
         {
-            return _context.Clientes.FirstAsync(c => c.IdCliente == id);
+            var cliente = await _context.Clientes.FirstOrDefaultAsync(c => c.IdCliente == id);
+            if (cliente == null)
+                throw new Exception("Cliente no encontrado");
+            return cliente;
         }
 
         public async Task UpdateClienteAsync(Cliente cliente)

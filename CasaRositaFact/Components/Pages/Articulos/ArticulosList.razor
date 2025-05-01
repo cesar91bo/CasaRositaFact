@@ -1,16 +1,52 @@
 ﻿@page "/articulos"
+@using Services
+@using Models
+@inject ArticuloService ArticuloService
+@inject NavigationManager NavigationManager
 
 <h3>Lista de Artículos</h3>
 
 <button type="button" @onclick="CreateNewArticulo" class="btn btn-primary mb-3">Nuevo Artículo</button>
 
+<input type="text" @bind="filtro" @bind:event="oninput" class="form-control mb-3" placeholder="Buscar por nombre" />
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Categoría</th>
+            <th>Rubro</th>
+            <th>Precio</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var articulo in articulosFiltrados)
+        {
+            <tr>
+                <td>@articulo.Nombre</td>
+                <td>@articulo.Categoria</td>
+                <td>@articulo.Rubro</td>
+                <td>@articulo.PreciosArticulos</td>
+                <td>
+                    <a class="btn btn-secondary" href="@($"/articulos/editar/{articulo.IdArticulo}")">Editar</a> |
+                    <button class="btn btn-danger" @onclick="() => DeleteArticulo(articulo.IdArticulo)">Eliminar</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
 @code {
+    private List<Articulo> articulos = new List<Articulo>();
+    private List<Articulo> articulosFiltrados = new List<Articulo>();
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
-
+            articulos = (await ArticuloService.GetAllAsync()).ToList();
+            articulosFiltrados = articulos;
         }
         catch (Exception ex)
         {
@@ -20,6 +56,36 @@
 
     private void CreateNewArticulo()
     {
-        
+        NavigationManager.NavigateTo("/articulos/formArticulo");
+    }
+    private async Task DeleteArticulo(int id)
+    {
+        await ArticuloService.DeleteAsync(id);
+        articulosFiltrados = (await ArticuloService.GetAllAsync()).ToList();
+
+    }
+    private string filtro
+    {
+        get => _filtro;
+        set
+        {
+            _filtro = value;
+            FiltrarArticulos();
+        }
+    }
+    private string _filtro = "";
+
+    private void FiltrarArticulos()
+    {
+        if (_filtro.Length >= 2)
+        {
+            articulosFiltrados = articulos
+                .Where(a => $"{a.Nombre}".Contains(_filtro, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+        else if (string.IsNullOrWhiteSpace(_filtro))
+        {
+            articulosFiltrados = articulos.ToList(); // vuelve a cargar toda la grilla
+        }
     }
 }
