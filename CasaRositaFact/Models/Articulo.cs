@@ -8,7 +8,7 @@ namespace CasaRositaFact.Models
     {
         [Key]
         public int IdArticulo { get; set; }
-        public string Nombre { get; set; } = string.Empty;
+        public required string Nombre { get; set; } = string.Empty;
         public string Descripcion { get; set; } = string.Empty;
         public int? IdCategoria { get; set; } //Electrónica, Ropa, Alimentos
         public int? IdRubro { get; set; } //Ferretería, Librería, Farmacia

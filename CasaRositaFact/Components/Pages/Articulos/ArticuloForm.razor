@@ -1,0 +1,120 @@
+﻿@page "/articulos/formArticulo"
+@page "/articulos/editar/{ArticuloId:int}"
+@using Microsoft.AspNetCore.Components.Forms
+@using Services
+@using Models
+@using static CasaRositaFact.Models.Articulo
+@inject ArticuloService ArticuloService
+@inject PrecioArticuloService PrecioArticuloService
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+
+<h3 class="mb-4 text-info fw-bold border-bottom pb-2">@(ArticuloId == null ? "Nuevo Articulo" : "Editar Articulo")</h3>
+
+<EditForm Model="articulo" OnValidSubmit="SaveArticulo">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <h4 class="mb-4 text-secondary fw-bold border-bottom pb-2">Datos generales</h4>
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="Nombre" class="form-label">Nombre</label>
+            <InputText id="Nombre" class="form-control" @bind-Value="articulo.Nombre" />
+        </div>
+
+        <div class="col-md-6">
+            <label for="CodigoProducto" class="form-label">Código del Producto</label>
+            <InputText id="CodigoProducto" class="form-control" @bind-Value="articulo.CodigoProducto" />
+        </div>
+    </div>
+
+    <div class="mb-5">
+        <label for="Descripcion" class="form-label">Descripción</label>
+        <InputTextArea id="Descripcion" class="form-control" rows="3" @bind-Value="articulo.Descripcion" />
+    </div>
+
+    <h3 class="mb-4 text-secondary fw-bold border-bottom pb-2">Clasificación</h3>
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label class="form-label">Seleccione Categoría</label>
+            <InputSelect @bind-Value="articulo.IdCategoria" class="form-select">
+                @foreach (var cat in Categorias)
+                {
+                    <option value="@cat.IdCategoria">@cat.Nombre</option>
+                }
+            </InputSelect>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Seleccione Rubro</label>
+            <InputSelect @bind-Value="articulo.IdUnidadMedida" class="form-select">
+                @foreach (var um in UnidadesMedida)
+                {
+                    <option value="@um.IdUnidadMedida">@um.Nombre</option>
+                }
+            </InputSelect>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-md-6">
+            <label class="form-label">Seleccione Proveedor</label>
+            <InputSelect @bind-Value="articulo.IdProveedor" class="form-select">
+                @foreach (var proveedor in Proveedores)
+                {
+                    <option value="@proveedor.IdProveedor">@proveedor.Nombre</option>
+                }
+            </InputSelect>
+        </div>
+
+        <div class="col-md-6">
+            <label class="form-label">Seleccione Unidad de Medida</label>
+            <InputSelect @bind-Value="articulo.IdRubro" class="form-select">
+                @foreach (var rub in Rubros)
+                {
+                    <option value="@rub.IdRubro">@rub.Nombre</option>
+                }
+            </InputSelect>
+        </div>
+    </div>
+
+    <h3 class="mb-4 text-secondary fw-bold border-bottom pb-2">Precios</h3>
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="PrecioCosto" class="form-label">Precio de Costo</label>
+            <InputNumber id="PrecioCosto" class="form-control" @bind-Value="precioArticulo.PrecioCosto" />
+        </div>
+
+        <div class="col-md-6">
+            <label for="PrecioVenta" class="form-label">Precio de Venta</label>
+            <InputNumber id="PrecioVenta" class="form-control" @bind-Value="precioArticulo.PrecioVenta" />
+        </div>
+    </div>
+
+
+</EditForm>
+
+@code {
+    [Parameter] public int? ArticuloId { get; set; }
+    private Articulo articulo = new Articulo()
+        {
+            Nombre = ""
+        };
+
+    private PrecioArticulo precioArticulo = new PrecioArticulo()
+        {
+            PrecioCosto = 0,
+            PrecioVenta = 0
+        };
+
+    private List<Categoria> Categorias = new();
+    private List<Rubro> Rubros = new();
+    private List<UnidadMedida> UnidadesMedida = new();
+    private List<Proveedor> Proveedores = new();
+
+    private async Task SaveArticulo()
+    {
+    }
+}

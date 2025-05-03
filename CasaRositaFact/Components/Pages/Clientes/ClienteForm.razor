@@ -12,7 +12,7 @@
 
 @inject NavigationManager NavigationManager
 
-<h3>@(ClienteId == null ? "Nuevo Cliente" : "Editar Cliente")</h3>
+<h3 class="mb-4 text-info fw-bold border-bottom pb-2">@(ClienteId == null ? "Nuevo Cliente" : "Editar Cliente")</h3>
 
 <EditForm Model="cliente" OnValidSubmit="SaveCliente">
     <DataAnnotationsValidator />

@@ -42,10 +42,18 @@ namespace CasaRositaFact.Data.Repositories
             _context.Articulos.Update(articulo);
             return _context.SaveChangesAsync();
         }
-        public Task DeleteAsync(int id)
+        public async Task DeleteAsync(int id)
         {
-           _context.Articulos.Remove(new Articulo { IdArticulo = id });
-            return _context.SaveChangesAsync();
+            var articulo = await _context.Articulos.FindAsync(id);
+            if (articulo != null)
+            {
+                _context.Articulos.Remove(articulo);
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                throw new Exception("Articulo no encontrado");
+            }
         }
         public async Task<IEnumerable<Articulo>> GetByCategoriaIdAsync(int categoriaId)
         {

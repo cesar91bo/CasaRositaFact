@@ -33,6 +33,9 @@ builder.Services.AddScoped<ILocalidadRepository, LocalidadRepository>();
 builder.Services.AddScoped<ArticuloService>();
 builder.Services.AddScoped<IArticuloRepository, ArticuloRepository>();
 
+builder.Services.AddScoped<PrecioArticuloService>();
+builder.Services.AddScoped<IPrecioArticuloRepository, PrecioArticuloRepository>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
