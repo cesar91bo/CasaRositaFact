@@ -20,8 +20,8 @@ namespace CasaRositaFact.Models
         [Precision(4,1)]
         public decimal PorcentajeGanancia { get; set; }
         public int? IdTipoIva { get; set; } //IVA 21%, IVA 10.5%, IVA 27%
-        public DateTime FechaDesde { get; set; } = DateTime.Now;
-        public DateTime? FechaHasta { get; set; }
+        public DateTime FechaIncio { get; set; } = DateTime.Now;
+        public DateTime? FechaUltimaActualizacion { get; set; }
         public bool EsPrecioPublico { get; set; } = false;
         public bool EsPrecioCosto { get; set; } = false;
         public bool EsPrecioLista { get; set; } = false;

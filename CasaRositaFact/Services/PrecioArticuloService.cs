@@ -31,5 +31,13 @@ namespace CasaRositaFact.Services
         {
             return _precioArticuloRepository.DeletePrecioAsync(id);
         }
+        public Task<List<PrecioArticulo>> GetPrecioByArticuloIdAsync(int id)
+        {
+            return _precioArticuloRepository.GetPrecioByArticuloIdAsync(id);
+        }
+        public Task<PrecioArticulo?> GetLastPrecioByArticuloIdAsync(int idArticulo)
+        {
+            return _precioArticuloRepository.GetLastPrecioByArticuloIdAsync(idArticulo);
+        }
     }
 }

@@ -1,0 +1,24 @@
+﻿@using Services
+@using Models
+@inject CategoriaService CategoriaService
+
+<select @bind="SelectedId" class="form-select">
+@*     <option value="">Seleccione una categoría</option> *@
+    @foreach (var categoria in Categorias)
+    {
+        <option value="@categoria.IdCategoria">@categoria.Nombre</option>
+    }
+</select>
+
+@code {
+    [Parameter] public int? SelectedId { get; set; }
+    [Parameter] public EventCallback<int?> SelectedIdChanged { get; set; }
+
+    private List<Categoria> Categorias = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var data = await CategoriaService.GetAllCategoriasAsync();
+        Categorias = data.Where(c => c != null).Cast<Categoria>().ToList();
+    }
+}

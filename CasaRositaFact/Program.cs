@@ -1,6 +1,7 @@
 using CasaRositaFact.Components;
 using CasaRositaFact.Data;
 using CasaRositaFact.Data.Repositories;
+using CasaRositaFact.Models;
 using CasaRositaFact.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -35,6 +36,9 @@ builder.Services.AddScoped<IArticuloRepository, ArticuloRepository>();
 
 builder.Services.AddScoped<PrecioArticuloService>();
 builder.Services.AddScoped<IPrecioArticuloRepository, PrecioArticuloRepository>();
+
+builder.Services.AddScoped<CategoriaService>();
+builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
 
 var app = builder.Build();
 

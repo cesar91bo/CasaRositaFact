@@ -28,7 +28,7 @@ namespace CasaRositaFact.Data.Repositories
                 throw new Exception("Precio no encontrado");
             }
         }
-        public async Task<IEnumerable<PrecioArticulo>> GetAllPreciosAsync()
+        public async Task<IEnumerable<PrecioArticulo?>> GetAllPreciosAsync()
         {
             return await _context.PreciosArticulos.ToListAsync();
         }
@@ -43,5 +43,12 @@ namespace CasaRositaFact.Data.Repositories
             _context.PreciosArticulos.Update(precioArticulo);
             return _context.SaveChangesAsync();
         }
-    }
+        public async Task<PrecioArticulo?> GetLastPrecioByArticuloIdAsync(int idArticulo)
+        {
+            return await _context.PreciosArticulos
+                .Where(p => p.IdArticulo == idArticulo)
+                .OrderByDescending(p => p.FechaIncio)
+                .FirstOrDefaultAsync();
+        }
+        }
 }
