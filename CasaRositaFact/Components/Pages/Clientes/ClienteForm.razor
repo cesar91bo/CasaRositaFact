@@ -311,16 +311,16 @@
             localidades.Clear();
         }
 
-        cliente.Localidad = null;
+        //cliente.Localidad = null;
         StateHasChanged(); // necesario si el método no es async Task
     }
     #endregion
 
     #region Sección de CUIT y Tipo de Documento
 
-    private string _cuitParte1;
-    private string _cuitParte2;
-    private string _cuitParte3;
+    private string _cuitParte1 = "";
+    private string _cuitParte2 = "";
+    private string _cuitParte3 = "";
 
     private string CuitParte1Sanitized
     {

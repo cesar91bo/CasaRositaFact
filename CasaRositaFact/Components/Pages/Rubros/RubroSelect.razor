@@ -1,0 +1,16 @@
+﻿@using Services
+@using Models
+@inject RubroService RubroService
+
+<select @bind="SelectedId" class="form-select">
+    @foreach (var rubro in Rubros)
+    {
+        <option value="@rubro.IdRubro">@rubro.Nombre</option>
+    }
+</select>
+
+@code {
+    [Parameter] public List<Rubro> Rubros { get; set; } = new(); // se pasa desde el padre]
+    [Parameter] public int? SelectedId { get; set; }
+    [Parameter] public EventCallback<int?> SelectedIdChanged { get; set; }
+}

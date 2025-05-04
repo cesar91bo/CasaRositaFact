@@ -8,6 +8,7 @@ namespace CasaRositaFact.Models
     {
         [Key]
         public int IdArticulo { get; set; }
+        [Required(ErrorMessage ="El nombre del artículo es obligatorio")]
         public required string Nombre { get; set; } = string.Empty;
         public string Descripcion { get; set; } = string.Empty;
         public int? IdCategoria { get; set; } //Electrónica, Ropa, Alimentos

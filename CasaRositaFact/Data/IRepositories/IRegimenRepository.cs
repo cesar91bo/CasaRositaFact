@@ -1,5 +1,5 @@
 ﻿using CasaRositaFact.Models;
-namespace CasaRositaFact.Data.Repositories
+namespace CasaRositaFact.Data.IRepositories
 {
     public interface IRegimenRepository
     {

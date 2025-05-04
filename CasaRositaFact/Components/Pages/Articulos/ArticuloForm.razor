@@ -1,13 +1,19 @@
 ﻿@page "/articulos/formArticulo"
 @page "/articulos/editar/{ArticuloId:int}"
 @using CasaRositaFact.Components.Pages.Categorias
+@using CasaRositaFact.Components.Pages.Proveedores
+@using CasaRositaFact.Components.Pages.Rubros
+@using CasaRositaFact.Components.Pages.Unidades_Medidas
 @using Microsoft.AspNetCore.Components.Forms
 @using Services
 @using Models
 @using static CasaRositaFact.Models.Articulo
 @inject ArticuloService ArticuloService
 @inject CategoriaService CategoriaService
+@inject ProveedorService ProveedorService
 @inject PrecioArticuloService PrecioArticuloService
+@inject UnidadMedidaService UnidadMedidaService
+@inject RubroService RubroService
 @inject IJSRuntime JS
 @inject NavigationManager NavigationManager
 
@@ -67,39 +73,24 @@
     <div class="row mb-2">
         <div class="col-md-6">
             <label class="form-label">Seleccione Categoría</label>
-            <CategoriaSelect @bind-SelectedId="articulo.IdCategoria" />
+            <CategoriaSelect Categorias="@categorias" @bind-SelectedId="articulo.IdCategoria" />
         </div>
 
         <div class="col-md-6">
             <label class="form-label">Seleccione Rubro</label>
-            <InputSelect @bind-Value="articulo.IdUnidadMedida" class="form-select">
-                @foreach (var um in unidadesMedida)
-                {
-                    <option value="@um.IdUnidadMedida">@um.Nombre</option>
-                }
-            </InputSelect>
+            <RubroSelect Rubros="@rubros" @bind-SelectedId="articulo.IdRubro" />
         </div>
     </div>
 
     <div class="row mb-4">
         <div class="col-md-6">
             <label class="form-label">Seleccione Proveedor</label>
-            <InputSelect @bind-Value="articulo.IdProveedor" class="form-select">
-                @foreach (var proveedor in proveedores)
-                {
-                    <option value="@proveedor.IdProveedor">@proveedor.Nombre</option>
-                }
-            </InputSelect>
+            <ProveedorSelect Proveedores="@proveedores" @bind-SelectedId="articulo.IdProveedor" />
         </div>
 
         <div class="col-md-6">
             <label class="form-label">Seleccione Unidad de Medida</label>
-            <InputSelect @bind-Value="articulo.IdRubro" class="form-select">
-                @foreach (var rub in rubros)
-                {
-                    <option value="@rub.IdRubro">@rub.Nombre</option>
-                }
-            </InputSelect>
+            <UnidadMedidaSelect UnidadesMedidas="@unidadesMedida" @bind-SelectId="articulo.IdUnidadMedida" />
         </div>
     </div>
 
@@ -132,12 +123,37 @@
             articulo = await ArticuloService.GetByIdAsync(ArticuloId.Value);
             precioArticulo = await PrecioArticuloService.GetLastPrecioByArticuloIdAsync(articulo.IdArticulo) ??
                 new PrecioArticulo() { PrecioCosto = 0, PrecioVenta = 0 };
+
         }
         else
         {
             precioArticulo.FechaUltimaActualizacion = DateTime.Now;
 
         }
+
+        var proveedoresDTO = await ProveedorService.GetAllProveedoresAsync();
+        proveedores = proveedoresDTO
+            .Where(p => p != null)
+            .Select(p => p!) // el ! le dice al compilador que p no es null (porque ya filtraste)
+            .ToList();
+
+        var categoriaDTO = await CategoriaService.GetAllCategoriasAsync();
+        categorias = categoriaDTO
+            .Where(c => c != null)
+            .Select(c => c!)
+            .ToList();
+
+        var rubroDTO = await RubroService.GetAllRubrosAsync();
+        rubros = rubroDTO
+            .Where(r => r != null)
+            .Select(r => r!)
+            .ToList();
+
+        var unidadesMedidaDTO = await UnidadMedidaService.GetAllUnidadMedidaAsync();
+        unidadesMedida = unidadesMedidaDTO
+            .Where(u => u != null)
+            .Select(u => u!)
+            .ToList();
 
     }
 

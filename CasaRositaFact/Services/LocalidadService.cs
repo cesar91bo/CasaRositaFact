@@ -1,4 +1,4 @@
-﻿using CasaRositaFact.Data.Repositories;
+﻿using CasaRositaFact.Data.IRepositories;
 using CasaRositaFact.Models;
 
 namespace CasaRositaFact.Services

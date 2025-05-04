@@ -21,6 +21,7 @@ namespace CasaRositaFact.Data
         public DbSet<UnidadMedida> UnidadesMedida { get; set; } = null!;
         public DbSet<PrecioArticulo> PreciosArticulos { get; set; } = null!;
         public DbSet<TipoIva> TiposIva { get; set; } = null!;
+        public DbSet<Banco> Bancos { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -118,6 +119,15 @@ namespace CasaRositaFact.Data
                 .WithMany() // si no tenés la colección inversa en TipoIva
                 .HasForeignKey(p => p.IdTipoIva)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Banco>()
+                .HasKey(b => b.IdBanco); // Clave primaria en Bancos
+
+            modelBuilder.Entity<Proveedor>()
+                .HasOne(p => p.Banco) // Relación con Banco
+                .WithMany(b => b.Proveedores) // Relación inversa
+                .HasForeignKey(p => p.IdBanco) // Clave foránea en Proveedor
+                .OnDelete(DeleteBehavior.SetNull); // Comportamiento en caso de eliminación
         }
 
     }

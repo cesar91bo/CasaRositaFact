@@ -1,7 +1,7 @@
 using CasaRositaFact.Components;
 using CasaRositaFact.Data;
+using CasaRositaFact.Data.IRepositories;
 using CasaRositaFact.Data.Repositories;
-using CasaRositaFact.Models;
 using CasaRositaFact.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -39,6 +39,15 @@ builder.Services.AddScoped<IPrecioArticuloRepository, PrecioArticuloRepository>(
 
 builder.Services.AddScoped<CategoriaService>();
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
+
+builder.Services.AddScoped<ProveedorService>();
+builder.Services.AddScoped<IProveedorRepository, ProveedorRepository>();
+
+builder.Services.AddScoped<RubroService>();
+builder.Services.AddScoped<IRubroRepository, RubroRepository>();
+
+builder.Services.AddScoped<UnidadMedidaService>();
+builder.Services.AddScoped<IUnidadMedidaRepository, UnidadMedidaRepository>();
 
 var app = builder.Build();
 

@@ -1,0 +1,16 @@
+﻿@using Services
+@using Models
+@inject ProveedorService ProveedorService
+
+<select @bind="SelectedId" class="form-select">
+    @foreach (var proveedor in Proveedores)
+    {
+        <option value="@proveedor.IdProveedor">@proveedor.RazonSocial</option>
+    }
+</select>
+
+@code {
+    [Parameter] public List<Proveedor> Proveedores { get; set; } = new(); // se pasa desde el padre
+    [Parameter] public int? SelectedId { get; set; }
+    [Parameter] public EventCallback<int?> SelectedIdChanged { get; set; }
+}
