@@ -20,7 +20,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Components\Pages\Facturaciones\" />
     <Folder Include="Migrations\" />
   </ItemGroup>
 
