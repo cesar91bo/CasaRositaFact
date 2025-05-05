@@ -15,7 +15,7 @@
         <tr>
             <th class="w-25">Nombre</th> <!-- 25% de ancho -->
             <th class="w-15 text-center">Categoría</th> <!-- 15% -->
-            <th class="w-10 text-center">Rubro</th> <!-- 10% -->
+            <th class="w-10 text-center">Stock</th> <!-- 10% -->
             <th class="w-10 text-center">Precio Costo</th> <!-- Alineado a la derecha -->
             <th class="w-10 text-center">Total con IVA</th>
             <th class="w-10">Actualización</th>
@@ -30,7 +30,7 @@
                     @articulo.Nombre
                 </td>
                 <td class="text-center">@articulo.Categoria?.Nombre</td>
-                <td class="text-center">@articulo.Rubro?.Nombre</td>
+                <td class="text-center">@(articulo.LlevarStock ? articulo.StockActual : "")</td>
                 <td class="text-center">@(precioCosto != 0 ? precioCosto.ToString("C") : "Sin precio")</td>
                 <td class="text-center">@(articulo.PrecioActual?.ToString("C") ?? "Sin precio")</td>
                 <td>@(fechaUActual?.ToString("dd/MM/yyyy") ?? "Sin fecha")</td>

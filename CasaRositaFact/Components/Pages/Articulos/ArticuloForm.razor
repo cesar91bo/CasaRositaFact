@@ -25,17 +25,46 @@
     <ValidationSummary />
 
     <h3 class="mb-3 text-secondary fw-bold border-bottom pb-2">Datos generales</h3>
-    <div class="row mb-2">
-        <div class="col-md-6">
+    <div class="row mb-2 align-items-end">
+        <!-- align-items-end para alinear verticalmente -->
+        <!-- Nombre -->
+        <div class="col-md-4">
             <label for="Nombre" class="form-label">Nombre</label>
             <InputText id="Nombre" class="form-control" @bind-Value="articulo.Nombre" />
         </div>
 
-        <div class="col-md-6">
-            <label for="CodigoProducto" class="form-label">Código del Artículo</label>
+        <!-- Código -->
+        <div class="col-md-4">
+            <label for="CodigoProducto" class="form-label">Código</label>
             <InputText id="CodigoProducto" class="form-control" @bind-Value="articulo.CodigoProducto" />
         </div>
+
+        <!-- Checkbox "Lleva Stock" (alineado con los inputs) -->
+        <div class="col-md-2 d-flex align-items-center">
+            <!-- d-flex para alinear el checkbox -->
+            <div class="form-check form-switch mt-3">
+                <label class="form-check-label" for="LlevarStock">Lleva Stock</label>
+                <InputCheckbox id="LlevarStock"
+                               class="form-check-input"
+                               @bind-Value="LlevarStock" />
+
+            </div>
+        </div>
+
     </div>
+    @if (articulo.LlevarStock)
+    {
+        <div class="row mb-2 align-items-end">
+            <div class="col-md-2">
+                <label for="StockActual" class="form-label">Stock Actual</label>
+                <InputNumber id="StockActual" class="form-control" @bind-Value="articulo.StockActual" />
+            </div>
+            <div class="col-md-2">
+                <label for="CantidadMinima" class="form-label">Stock Mínimo</label>
+                <InputNumber id="CantidadMinima" class="form-control" @bind-Value="articulo.CantidadMinima" />
+            </div>
+        </div>
+    }
 
     <div class="mb-4">
         <label for="Descripcion" class="form-label">Descripción</label>
@@ -49,7 +78,7 @@
             <label for="PrecioCosto" class="form-label">Precio de Costo</label>
             <input type="number" class="form-control"
                    value="@_precioCostoTexto"
-                   @oninput="OnCostoChanged" 
+                   @oninput="OnCostoChanged"
                    step="any" />
         </div>
 
@@ -57,7 +86,7 @@
             <label for="PorcentajeGanancia" class="form-label">Porcentaje de Ganancia</label>
             <input type="number" class="form-control"
                    value="@_porcentajeGananciaTexto"
-                   @oninput="OnGananciaChanged" 
+                   @oninput="OnGananciaChanged"
                    step="any" />
         </div>
     </div>
@@ -131,7 +160,7 @@
         {
             articulo = await ArticuloService.GetByIdAsync(ArticuloId.Value);
             precioArticulo = await PrecioArticuloService.GetLastPrecioByArticuloIdAsync(articulo.IdArticulo) ??
-                new PrecioArticulo() { PrecioCosto = 0, PrecioVentaConIva = 0 , PrecioVentaSinIva = 0};
+                new PrecioArticulo() { PrecioCosto = 0, PrecioVentaConIva = 0, PrecioVentaSinIva = 0 };
 
         }
         else
@@ -167,6 +196,7 @@
             .Select(u => u!)
             .ToList();
 
+        LlevarStock = articulo.LlevarStock;
     }
 
     private async Task SaveArticulo()
@@ -227,7 +257,7 @@
     }
 
     private string? _precioCostoTexto;
-    private string ?_porcentajeGananciaTexto;
+    private string? _porcentajeGananciaTexto;
 
     private void OnCostoChanged(ChangeEventArgs e)
     {
@@ -260,11 +290,11 @@
                 precioArticulo.PrecioVentaConIva = 0;
                 return;
             }
-             const decimal IVA = 0.21m;
+            const decimal IVA = 0.21m;
 
             decimal precioBase = precioArticulo.PrecioCosto * (1 + (precioArticulo.PorcentajeGanancia / 100));
             decimal iva = Math.Round(precioBase * IVA, 2);
-            precioArticulo.PrecioVentaConIva = Math.Round(precioBase + iva,2);
+            precioArticulo.PrecioVentaConIva = Math.Round(precioBase + iva, 2);
 
         }
         catch
@@ -276,6 +306,23 @@
     private void NavigateToArticulos()
     {
         NavigationManager.NavigateTo("/articulos");
+    }
+
+    private bool _llevarStock;
+    public bool LlevarStock
+    {
+        get => _llevarStock;
+        set
+        {
+            _llevarStock = value;
+            articulo.LlevarStock = value;
+   
+            if (!value)
+            {
+                articulo.StockActual = 0;
+                articulo.CantidadMinima = 0;
+            }
+        }
     }
 }
 
