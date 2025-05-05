@@ -18,6 +18,7 @@ namespace CasaRositaFact.Data.Configurations
             modelBuilder.HasOne(p => p.TipoIva)
                 .WithMany()
                 .HasForeignKey(p => p.IdTipoIva)
+                .IsRequired(false) // La relación es opcional
                 .OnDelete(DeleteBehavior.SetNull);
         }
     }

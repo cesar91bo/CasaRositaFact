@@ -10,6 +10,6 @@ namespace CasaRositaFact.Models
         public string Nombre { get; set; } = string.Empty;
         [Precision(18, 2)]
         public decimal Porcentaje { get; set; } = 0.0m;
-        public ICollection<PrecioArticulo> PrecioArticulo { get; set; } = new List<PrecioArticulo>();
+        public ICollection<PrecioArticulo> PreciosArticulos { get; set; } = new List<PrecioArticulo>();
     }
 }

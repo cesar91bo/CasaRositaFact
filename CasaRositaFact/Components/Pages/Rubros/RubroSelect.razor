@@ -2,7 +2,8 @@
 @using Models
 @inject RubroService RubroService
 
-<select @bind="SelectedId" class="form-select">
+<select @bind="SelectedIdInternal" class="form-select">
+    <option value="" selected hidden></option>
     @foreach (var rubro in Rubros)
     {
         <option value="@rubro.IdRubro">@rubro.Nombre</option>
@@ -13,4 +14,25 @@
     [Parameter] public List<Rubro> Rubros { get; set; } = new(); // se pasa desde el padre]
     [Parameter] public int? SelectedId { get; set; }
     [Parameter] public EventCallback<int?> SelectedIdChanged { get; set; }
+
+    private int? SelectedIdInternal
+    {
+        get => SelectedId;
+        set
+        {
+            if (SelectedId != value)
+            {
+                SelectedId = value;
+                SelectedIdChanged.InvokeAsync(value);
+            }
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        if (SelectedId == null)
+        {
+            SelectedIdInternal = null; // Fuerza valor nulo inicial
+        }
+    }
 }

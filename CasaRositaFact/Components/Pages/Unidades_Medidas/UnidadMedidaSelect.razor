@@ -2,15 +2,37 @@
 @using Models
 @inject UnidadMedidaService UnidadMedidaService
 
-<select @bind="SelectId" class="form-select">
+<select @bind="SelectedIdInternal" class="form-select">
     @foreach (var unidadMedida in UnidadesMedidas)
     {
+        <option value="" selected hidden></option>
         <option value="@unidadMedida.IdUnidadMedida">@unidadMedida.Nombre</option>
     })
 </select> 
 
 @code {
     [Parameter] public List<UnidadMedida> UnidadesMedidas { get; set; } = new(); // se pasa desde el padre
-    [Parameter] public int? SelectId { get; set; }
-    [Parameter] public EventCallback<int?> SelectIdChanged { get; set; }
+    [Parameter] public int? SelectedId { get; set; }
+    [Parameter] public EventCallback<int?> SelectedIdChanged { get; set; }
+
+    private int? SelectedIdInternal
+    {
+        get => SelectedId;
+        set
+        {
+            if (SelectedId != value)
+            {
+                SelectedId = value;
+                SelectedIdChanged.InvokeAsync(value);
+            }
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        if (SelectedId == null)
+        {
+            SelectedIdInternal = null; // Fuerza valor nulo inicial
+        }
+    }
 }

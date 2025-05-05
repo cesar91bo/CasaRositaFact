@@ -2,15 +2,39 @@
 @using Models
 @inject CategoriaService CategoriaService
 
-<select @bind="SelectedId" class="form-select">
+<select @bind="SelectedIdInternal" class="form-select">
+    <option value="" selected hidden></option>
     @foreach (var categoria in Categorias)
     {
-        <option value="@categoria.IdCategoria">@categoria.Nombre</option>
+        <option value="@categoria.IdCategoria" selected="@(SelectedId == categoria.IdCategoria)">
+            @categoria.Nombre
+        </option>
     }
 </select>
 
 @code {
-    [Parameter] public List<Categoria> Categorias { get; set; } = new(); // se pasa desde el padre]
+    [Parameter] public List<Categoria> Categorias { get; set; } = new();
     [Parameter] public int? SelectedId { get; set; }
     [Parameter] public EventCallback<int?> SelectedIdChanged { get; set; }
+
+    private int? SelectedIdInternal
+    {
+        get => SelectedId;
+        set
+        {
+            if (SelectedId != value)
+            {
+                SelectedId = value;
+                SelectedIdChanged.InvokeAsync(value);
+            }
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        if (SelectedId == null)
+        {
+            SelectedIdInternal = null; // Fuerza valor nulo inicial
+        }
+    }
 }

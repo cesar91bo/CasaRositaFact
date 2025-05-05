@@ -18,6 +18,7 @@ namespace CasaRositaFact.Data.Repositories
                 .Include(a => a.Rubro)
                 .Include(a => a.UnidadMedida)
                 .Include(a => a.Proveedor)
+                .Include(a => a.PreciosArticulos)
 
                 .ToListAsync();
         }

@@ -47,19 +47,24 @@
     <div class="row mb-2">
         <div class="col-md-6">
             <label for="PrecioCosto" class="form-label">Precio de Costo</label>
-            <InputNumber id="PrecioCosto" class="form-control" @bind-Value="precioArticulo.PrecioCosto" />
+            <InputNumber id="PrecioCosto" class="form-control"
+                         @bind-Value="precioArticulo.PrecioCosto"
+                         @oninput="CalcularPrecioVenta" />
         </div>
 
         <div class="col-md-6">
             <label for="PorcentajeGanancia" class="form-label">Porcentaje de Ganancia</label>
-            <InputNumber id="PorcentajeGanancia" class="form-control" @bind-Value="precioArticulo.PorcentajeGanancia" />
+            <InputNumber id="PorcentajeGanancia" class="form-control"
+                         @bind-Value="precioArticulo.PorcentajeGanancia"
+                         @oninput="CalcularPrecioVenta" />
         </div>
     </div>
 
     <div class="row mb-4">
         <div class="col-md-6">
             <label for="PrecioVenta" class="form-label">Precio de Venta</label>
-            <InputNumber id="PrecioVenta" class="form-control" @bind-Value="precioArticulo.PrecioVenta" />
+            <InputNumber id="PrecioVenta" class="form-control"
+                         @bind-Value="precioArticulo.PrecioVenta" readonly />
         </div>
 
         <div class="col-md-6">
@@ -90,7 +95,7 @@
 
         <div class="col-md-6">
             <label class="form-label">Seleccione Unidad de Medida</label>
-            <UnidadMedidaSelect UnidadesMedidas="@unidadesMedida" @bind-SelectId="articulo.IdUnidadMedida" />
+            <UnidadMedidaSelect UnidadesMedidas="@unidadesMedida" @bind-SelectedId="articulo.IdUnidadMedida" />
         </div>
     </div>
 
@@ -108,7 +113,8 @@
     private PrecioArticulo precioArticulo = new PrecioArticulo()
         {
             PrecioCosto = 0,
-            PrecioVenta = 0
+            PrecioVenta = 0,
+            PorcentajeGanancia = 30.0m
         };
 
     private List<Categoria> categorias = new();
@@ -136,18 +142,18 @@
             .Where(p => p != null)
             .Select(p => p!) // el ! le dice al compilador que p no es null (porque ya filtraste)
             .ToList();
+        StateHasChanged();
 
         var categoriaDTO = await CategoriaService.GetAllCategoriasAsync();
         categorias = categoriaDTO
             .Where(c => c != null)
-            .Select(c => c!)
-            .ToList();
+            .Select(c => c!).ToList();
 
         var rubroDTO = await RubroService.GetAllRubrosAsync();
         rubros = rubroDTO
-            .Where(r => r != null)
-            .Select(r => r!)
-            .ToList();
+            .Where(c => c != null)
+            .Select(c => c!).ToList();
+
 
         var unidadesMedidaDTO = await UnidadMedidaService.GetAllUnidadMedidaAsync();
         unidadesMedida = unidadesMedidaDTO
@@ -173,15 +179,65 @@
             return;
         }
 
+        // Calcular el precio de venta si no se ha proporcionado
+        if (precioArticulo.PrecioVenta == 0 && precioArticulo.PrecioCosto > 0 && precioArticulo.PorcentajeGanancia > 0)
+        {
+            precioArticulo.PrecioVenta = precioArticulo.PrecioCosto * (1 + (precioArticulo.PorcentajeGanancia / 100));
+        }
+
         if (articulo.IdArticulo == 0)
         {
             await ArticuloService.AddAsync(articulo);
+
+            // Asignar el ID del artículo al precio
+            precioArticulo.IdArticulo = articulo.IdArticulo;
+
+            // Guardar el precio del artículo
+            await PrecioArticuloService.AddPrecioAsync(precioArticulo);
         }
         else
         {
+            articulo.FechaUltimoIngreso = DateTime.Now;
             await ArticuloService.UpdateAsync(articulo);
+
+
+            // Verificar si ya existe un precio para este artículo
+            var precioExistente = await PrecioArticuloService.GetLastPrecioByArticuloIdAsync(articulo.IdArticulo);
+
+            if (precioExistente != null)
+            {
+                // Actualizar el precio existente
+                precioArticulo.IdPrecioArticulo = precioExistente.IdPrecioArticulo;
+                await PrecioArticuloService.UpdatePrecioAsync(precioArticulo);
+            }
+            else
+            {
+                // Crear un nuevo precio
+                precioArticulo.IdArticulo = articulo.IdArticulo;
+                await PrecioArticuloService.AddPrecioAsync(precioArticulo);
+            }
         }
         NavigationManager.NavigateTo("/articulos");
+    }
+
+    private void CalcularPrecioVenta()
+    {
+        try
+        {
+            if (precioArticulo.PrecioCosto <= 0 || precioArticulo.PorcentajeGanancia <= 0)
+            {
+                precioArticulo.PrecioVenta = 0;
+                return;
+            }
+
+            precioArticulo.PrecioVenta = Math.Round(
+                precioArticulo.PrecioCosto * (1 + (precioArticulo.PorcentajeGanancia / 100)),
+                2);
+        }
+        catch
+        {
+            precioArticulo.PrecioVenta = 0;
+        }
     }
 
     private void NavigateToArticulos()

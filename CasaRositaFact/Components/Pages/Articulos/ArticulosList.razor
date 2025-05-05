@@ -11,26 +11,34 @@
 <input type="text" @bind="filtro" @bind:event="oninput" class="form-control mb-3" placeholder="Buscar por nombre" />
 
 <table class="table">
-    <thead>
+    <thead class="table-light">
         <tr>
-            <th>Nombre</th>
-            <th>Categoría</th>
-            <th>Rubro</th>
-            <th>Precio de Venta</th>
-            <th>Acciones</th>
+            <th class="w-25">Nombre</th> <!-- 25% de ancho -->
+            <th class="w-15 text-center">Categoría</th> <!-- 15% -->
+            <th class="w-10 text-center">Rubro</th> <!-- 10% -->
+            <th class="w-10 text-center">Precio Costo</th> <!-- Alineado a la derecha -->
+            <th class="w-10 text-center">Precio Venta</th>
+            <th class="w-10">Actualización</th>
+            <th class="w-20 text-center">Acciones</th> <!-- 20% y centrado -->
         </tr>
     </thead>
     <tbody>
         @foreach (var articulo in articulosFiltrados)
         {
             <tr>
-                <td>@articulo.Nombre</td>
-                <td>@articulo.Categoria?.Nombre</td>
-                <td>@articulo.Rubro</td>
-                <td>@(articulo.PrecioActual?.ToString("C") ?? "Sin precio")</td>
-                <td>
-                    <a class="btn btn-secondary" href="@($"/articulos/editar/{articulo.IdArticulo}")">Editar</a> |
-                    <button class="btn btn-danger" @onclick="() => DeleteArticulo(articulo.IdArticulo)">Eliminar</button>
+                <td class="text-truncate" style="max-width: 200px;" title="@articulo.Nombre">
+                    @articulo.Nombre
+                </td>
+                <td class="text-center">@articulo.Categoria?.Nombre</td>
+                <td class="text-center">@articulo.Rubro?.Nombre</td>
+                <td class="text-center">@(precioCosto != 0 ? precioCosto.ToString("C") : "Sin precio")</td>
+                <td class="text-center">@(articulo.PrecioActual?.ToString("C") ?? "Sin precio")</td>
+                <td>@(fechaUActual?.ToString("dd/MM/yyyy") ?? "Sin fecha")</td>
+                <td class="text-center">
+                    <div class="btn-group" role="group">
+                        <a class="btn btn-secondary" href="@($"/articulos/editar/{articulo.IdArticulo}")"> <i class="bi bi-pencil"></i> Editar</a> |
+                        <button class="btn btn-danger" @onclick="() => DeleteArticulo(articulo.IdArticulo)"> <i class="bi bi-trash"></i> Eliminar</button>
+                    </div>
                 </td>
             </tr>
         }
@@ -40,6 +48,8 @@
 @code {
     private List<Articulo> articulos = new List<Articulo>();
     private List<Articulo> articulosFiltrados = new List<Articulo>();
+    private decimal precioCosto = 0;
+    private DateTime? fechaUActual;
 
     protected override async Task OnInitializedAsync()
     {
@@ -94,12 +104,21 @@
     {
         foreach (var articulo in listaArticulos)
         {
+            if (articulo.PreciosArticulos == null || !articulo.PreciosArticulos.Any())
+            {
+                articulo.PrecioActual = null;
+                continue;
+            }
+
+            // Obtener el precio más reciente según la lógica de fechas
             var precioActual = articulo.PreciosArticulos
-                .FirstOrDefault(p =>
-                    p.FechaIncio <= DateTime.Today &&
-                    (p.FechaUltimaActualizacion == null || p.FechaUltimaActualizacion >= DateTime.Today));
+                .Where(p => p.FechaIncio <= DateTime.Now) // Precios vigentes
+                .OrderByDescending(p => p.FechaUltimaActualizacion ?? p.FechaIncio)
+                .FirstOrDefault();
 
             articulo.PrecioActual = precioActual?.PrecioVenta;
+            precioCosto = precioActual?.PrecioCosto ?? 0;
+            fechaUActual = precioActual?.FechaUltimaActualizacion;
         }
     }
 }

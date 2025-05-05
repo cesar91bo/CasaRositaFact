@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CasaRositaFact.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250501111320_LimpiarFKDuplicadas")]
-    partial class LimpiarFKDuplicadas
+    [Migration("20250505015127_NewMigration")]
+    partial class NewMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -86,7 +86,24 @@ namespace CasaRositaFact.Migrations
 
                     b.HasIndex("IdUnidadMedida");
 
-                    b.ToTable("Articulo");
+                    b.ToTable("Articulos");
+                });
+
+            modelBuilder.Entity("CasaRositaFact.Models.Banco", b =>
+                {
+                    b.Property<int>("IdBanco")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdBanco"));
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("IdBanco");
+
+                    b.ToTable("Bancos");
                 });
 
             modelBuilder.Entity("CasaRositaFact.Models.Categoria", b =>
@@ -103,7 +120,7 @@ namespace CasaRositaFact.Migrations
 
                     b.HasKey("IdCategoria");
 
-                    b.ToTable("Categoria");
+                    b.ToTable("Categorias");
                 });
 
             modelBuilder.Entity("CasaRositaFact.Models.Cliente", b =>
@@ -191,10 +208,7 @@ namespace CasaRositaFact.Migrations
             modelBuilder.Entity("CasaRositaFact.Models.Localidad", b =>
                 {
                     b.Property<int>("IdLocalidad")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdLocalidad"));
 
                     b.Property<int>("IdProvincia")
                         .HasColumnType("int");
@@ -210,6 +224,73 @@ namespace CasaRositaFact.Migrations
                     b.ToTable("Localidades");
                 });
 
+            modelBuilder.Entity("CasaRositaFact.Models.PrecioArticulo", b =>
+                {
+                    b.Property<int>("IdPrecioArticulo")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdPrecioArticulo"));
+
+                    b.Property<bool>("EsPrecioCosto")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("EsPrecioDescuento")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("EsPrecioLista")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("EsPrecioPublico")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("FechaIncio")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("FechaUltimaActualizacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("IdArticulo")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("IdTipoIva")
+                        .HasColumnType("int")
+                        .HasColumnName("IdTipoIva");
+
+                    b.Property<decimal>("PorcentajeGanancia")
+                        .HasPrecision(4, 1)
+                        .HasColumnType("decimal(4,1)");
+
+                    b.Property<decimal>("PrecioCosto")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("PrecioDescuento")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("PrecioLista")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("PrecioVenta")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("TipoIvaIdTipoIva")
+                        .HasColumnType("int");
+
+                    b.HasKey("IdPrecioArticulo");
+
+                    b.HasIndex("IdArticulo");
+
+                    b.HasIndex("IdTipoIva");
+
+                    b.HasIndex("TipoIvaIdTipoIva");
+
+                    b.ToTable("PreciosArticulos");
+                });
+
             modelBuilder.Entity("CasaRositaFact.Models.Proveedor", b =>
                 {
                     b.Property<int>("IdProveedor")
@@ -218,13 +299,48 @@ namespace CasaRositaFact.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdProveedor"));
 
-                    b.Property<string>("Nombre")
+                    b.Property<string>("CBU")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CUIT")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CorreoElectronico")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Direccion")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Estado")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("FechaBaja")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaRegistro")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("IdBanco")
+                        .HasColumnType("int");
+
+                    b.Property<string>("NombreContacto")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Observaciones")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RazonSocial")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Telefono")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("IdProveedor");
 
-                    b.ToTable("Proveedor");
+                    b.HasIndex("IdBanco");
+
+                    b.ToTable("Proveedores");
                 });
 
             modelBuilder.Entity("CasaRositaFact.Models.Provincia", b =>
@@ -275,7 +391,7 @@ namespace CasaRositaFact.Migrations
 
                     b.HasKey("IdRubro");
 
-                    b.ToTable("Rubro");
+                    b.ToTable("Rubros");
                 });
 
             modelBuilder.Entity("CasaRositaFact.Models.TipoDocumento", b =>
@@ -295,6 +411,27 @@ namespace CasaRositaFact.Migrations
                     b.ToTable("TiposDocumentos");
                 });
 
+            modelBuilder.Entity("CasaRositaFact.Models.TipoIva", b =>
+                {
+                    b.Property<int>("IdTipoIva")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdTipoIva"));
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Porcentaje")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("IdTipoIva");
+
+                    b.ToTable("TiposIva");
+                });
+
             modelBuilder.Entity("CasaRositaFact.Models.UnidadMedida", b =>
                 {
                     b.Property<int>("IdUnidadMedida")
@@ -309,7 +446,7 @@ namespace CasaRositaFact.Migrations
 
                     b.HasKey("IdUnidadMedida");
 
-                    b.ToTable("UnidadMedida");
+                    b.ToTable("UnidadesMedida");
                 });
 
             modelBuilder.Entity("CasaRositaFact.Models.Articulo", b =>
@@ -377,6 +514,48 @@ namespace CasaRositaFact.Migrations
                     b.Navigation("Provincia");
                 });
 
+            modelBuilder.Entity("CasaRositaFact.Models.PrecioArticulo", b =>
+                {
+                    b.HasOne("CasaRositaFact.Models.Articulo", "Articulo")
+                        .WithMany("PreciosArticulos")
+                        .HasForeignKey("IdArticulo")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CasaRositaFact.Models.TipoIva", "TipoIva")
+                        .WithMany()
+                        .HasForeignKey("IdTipoIva")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("CasaRositaFact.Models.TipoIva", null)
+                        .WithMany("PreciosArticulos")
+                        .HasForeignKey("TipoIvaIdTipoIva");
+
+                    b.Navigation("Articulo");
+
+                    b.Navigation("TipoIva");
+                });
+
+            modelBuilder.Entity("CasaRositaFact.Models.Proveedor", b =>
+                {
+                    b.HasOne("CasaRositaFact.Models.Banco", "Banco")
+                        .WithMany("Proveedores")
+                        .HasForeignKey("IdBanco")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Banco");
+                });
+
+            modelBuilder.Entity("CasaRositaFact.Models.Articulo", b =>
+                {
+                    b.Navigation("PreciosArticulos");
+                });
+
+            modelBuilder.Entity("CasaRositaFact.Models.Banco", b =>
+                {
+                    b.Navigation("Proveedores");
+                });
+
             modelBuilder.Entity("CasaRositaFact.Models.Categoria", b =>
                 {
                     b.Navigation("Articulos");
@@ -400,6 +579,11 @@ namespace CasaRositaFact.Migrations
             modelBuilder.Entity("CasaRositaFact.Models.TipoDocumento", b =>
                 {
                     b.Navigation("Clientes");
+                });
+
+            modelBuilder.Entity("CasaRositaFact.Models.TipoIva", b =>
+                {
+                    b.Navigation("PreciosArticulos");
                 });
 
             modelBuilder.Entity("CasaRositaFact.Models.UnidadMedida", b =>
