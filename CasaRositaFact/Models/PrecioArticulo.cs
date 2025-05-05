@@ -10,7 +10,9 @@ namespace CasaRositaFact.Models
         public int IdPrecioArticulo { get; set; }
         public int IdArticulo { get; set; }
         [Precision(18, 2)]
-        public required decimal PrecioVenta { get; set; }
+        public required decimal PrecioVentaSinIva { get; set; }
+        [Precision(18, 2)]
+        public required decimal PrecioVentaConIva { get; set; }
         [Precision(18, 2)]
         public required decimal PrecioCosto { get; set; }
         [Precision(18, 2)]

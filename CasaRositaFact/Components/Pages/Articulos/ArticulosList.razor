@@ -17,7 +17,7 @@
             <th class="w-15 text-center">Categoría</th> <!-- 15% -->
             <th class="w-10 text-center">Rubro</th> <!-- 10% -->
             <th class="w-10 text-center">Precio Costo</th> <!-- Alineado a la derecha -->
-            <th class="w-10 text-center">Precio Venta</th>
+            <th class="w-10 text-center">Total con IVA</th>
             <th class="w-10">Actualización</th>
             <th class="w-20 text-center">Acciones</th> <!-- 20% y centrado -->
         </tr>
@@ -116,7 +116,7 @@
                 .OrderByDescending(p => p.FechaUltimaActualizacion ?? p.FechaIncio)
                 .FirstOrDefault();
 
-            articulo.PrecioActual = precioActual?.PrecioVenta;
+            articulo.PrecioActual = precioActual?.PrecioVentaConIva;
             precioCosto = precioActual?.PrecioCosto ?? 0;
             fechaUActual = precioActual?.FechaUltimaActualizacion;
         }

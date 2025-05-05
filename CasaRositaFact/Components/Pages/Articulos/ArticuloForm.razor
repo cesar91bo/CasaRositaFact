@@ -47,24 +47,26 @@
     <div class="row mb-2">
         <div class="col-md-6">
             <label for="PrecioCosto" class="form-label">Precio de Costo</label>
-            <InputNumber id="PrecioCosto" class="form-control"
-                         @bind-Value="precioArticulo.PrecioCosto"
-                         @oninput="CalcularPrecioVenta" />
+            <input type="number" class="form-control"
+                   value="@_precioCostoTexto"
+                   @oninput="OnCostoChanged" 
+                   step="any" />
         </div>
 
         <div class="col-md-6">
             <label for="PorcentajeGanancia" class="form-label">Porcentaje de Ganancia</label>
-            <InputNumber id="PorcentajeGanancia" class="form-control"
-                         @bind-Value="precioArticulo.PorcentajeGanancia"
-                         @oninput="CalcularPrecioVenta" />
+            <input type="number" class="form-control"
+                   value="@_porcentajeGananciaTexto"
+                   @oninput="OnGananciaChanged" 
+                   step="any" />
         </div>
     </div>
 
     <div class="row mb-4">
         <div class="col-md-6">
-            <label for="PrecioVenta" class="form-label">Precio de Venta</label>
+            <label for="PrecioVenta" class="form-label">Total con IVA</label>
             <InputNumber id="PrecioVenta" class="form-control"
-                         @bind-Value="precioArticulo.PrecioVenta" readonly />
+                         @bind-Value="precioArticulo.PrecioVentaConIva" readonly />
         </div>
 
         <div class="col-md-6">
@@ -113,8 +115,9 @@
     private PrecioArticulo precioArticulo = new PrecioArticulo()
         {
             PrecioCosto = 0,
-            PrecioVenta = 0,
-            PorcentajeGanancia = 30.0m
+            PrecioVentaConIva = 0,
+            PorcentajeGanancia = 30.0m,
+            PrecioVentaSinIva = 0
         };
 
     private List<Categoria> categorias = new();
@@ -128,7 +131,7 @@
         {
             articulo = await ArticuloService.GetByIdAsync(ArticuloId.Value);
             precioArticulo = await PrecioArticuloService.GetLastPrecioByArticuloIdAsync(articulo.IdArticulo) ??
-                new PrecioArticulo() { PrecioCosto = 0, PrecioVenta = 0 };
+                new PrecioArticulo() { PrecioCosto = 0, PrecioVentaConIva = 0 , PrecioVentaSinIva = 0};
 
         }
         else
@@ -136,6 +139,9 @@
             precioArticulo.FechaUltimaActualizacion = DateTime.Now;
 
         }
+
+        _porcentajeGananciaTexto = precioArticulo.PorcentajeGanancia.ToString("0.##");
+        _precioCostoTexto = precioArticulo.PrecioCosto.ToString("0.##");
 
         var proveedoresDTO = await ProveedorService.GetAllProveedoresAsync();
         proveedores = proveedoresDTO
@@ -180,9 +186,9 @@
         }
 
         // Calcular el precio de venta si no se ha proporcionado
-        if (precioArticulo.PrecioVenta == 0 && precioArticulo.PrecioCosto > 0 && precioArticulo.PorcentajeGanancia > 0)
+        if (precioArticulo.PrecioVentaConIva == 0 && precioArticulo.PrecioCosto > 0 && precioArticulo.PorcentajeGanancia > 0)
         {
-            precioArticulo.PrecioVenta = precioArticulo.PrecioCosto * (1 + (precioArticulo.PorcentajeGanancia / 100));
+            precioArticulo.PrecioVentaConIva = precioArticulo.PrecioCosto * (1 + (precioArticulo.PorcentajeGanancia / 100));
         }
 
         if (articulo.IdArticulo == 0)
@@ -220,23 +226,50 @@
         NavigationManager.NavigateTo("/articulos");
     }
 
+    private string? _precioCostoTexto;
+    private string ?_porcentajeGananciaTexto;
+
+    private void OnCostoChanged(ChangeEventArgs e)
+    {
+        _precioCostoTexto = e.Value?.ToString() ?? "0";
+
+        if (decimal.TryParse(_precioCostoTexto, out var costo))
+        {
+            precioArticulo.PrecioCosto = costo;
+            CalcularPrecioVenta();
+        }
+    }
+
+    private void OnGananciaChanged(ChangeEventArgs e)
+    {
+        _porcentajeGananciaTexto = e.Value?.ToString() ?? "0";
+
+        if (decimal.TryParse(_porcentajeGananciaTexto, out var ganancia))
+        {
+            precioArticulo.PorcentajeGanancia = ganancia;
+            CalcularPrecioVenta();
+        }
+    }
+
     private void CalcularPrecioVenta()
     {
         try
         {
             if (precioArticulo.PrecioCosto <= 0 || precioArticulo.PorcentajeGanancia <= 0)
             {
-                precioArticulo.PrecioVenta = 0;
+                precioArticulo.PrecioVentaConIva = 0;
                 return;
             }
+             const decimal IVA = 0.21m;
 
-            precioArticulo.PrecioVenta = Math.Round(
-                precioArticulo.PrecioCosto * (1 + (precioArticulo.PorcentajeGanancia / 100)),
-                2);
+            decimal precioBase = precioArticulo.PrecioCosto * (1 + (precioArticulo.PorcentajeGanancia / 100));
+            decimal iva = Math.Round(precioBase * IVA, 2);
+            precioArticulo.PrecioVentaConIva = Math.Round(precioBase + iva,2);
+
         }
         catch
         {
-            precioArticulo.PrecioVenta = 0;
+            precioArticulo.PrecioVentaConIva = 0;
         }
     }
 
