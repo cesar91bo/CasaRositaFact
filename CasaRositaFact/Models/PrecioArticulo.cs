@@ -29,7 +29,8 @@ namespace CasaRositaFact.Models
 
         [ForeignKey("IdArticulo")]
         public Articulo? Articulo { get; set; }
-        [ForeignKey(nameof(IdTipoIva))]
+
+        [ForeignKey("IdTipoIva")]
         public TipoIva? TipoIva { get; set; }
 
     }

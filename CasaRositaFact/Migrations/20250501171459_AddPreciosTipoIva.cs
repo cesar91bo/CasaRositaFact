@@ -143,8 +143,7 @@ namespace CasaRositaFact.Migrations
                     EsPrecioPublico = table.Column<bool>(type: "bit", nullable: false),
                     EsPrecioCosto = table.Column<bool>(type: "bit", nullable: false),
                     EsPrecioLista = table.Column<bool>(type: "bit", nullable: false),
-                    EsPrecioDescuento = table.Column<bool>(type: "bit", nullable: false),
-                    TipoIvaId = table.Column<int>(type: "int", nullable: true)
+                    EsPrecioDescuento = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -161,11 +160,6 @@ namespace CasaRositaFact.Migrations
                         principalTable: "TiposIva",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.SetNull);
-                    table.ForeignKey(
-                        name: "FK_PreciosArticulos_TiposIva_TipoIvaId",
-                        column: x => x.TipoIvaId,
-                        principalTable: "TiposIva",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
@@ -177,11 +171,6 @@ namespace CasaRositaFact.Migrations
                 name: "IX_PreciosArticulos_IdTipoIva",
                 table: "PreciosArticulos",
                 column: "IdTipoIva");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PreciosArticulos_TipoIvaId",
-                table: "PreciosArticulos",
-                column: "TipoIvaId");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Articulos_Categorias_IdCategoria",

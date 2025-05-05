@@ -3,7 +3,6 @@
 @inject CategoriaService CategoriaService
 
 <select @bind="SelectedId" class="form-select">
-@*     <option value="">Seleccione una categoría</option> *@
     @foreach (var categoria in Categorias)
     {
         <option value="@categoria.IdCategoria">@categoria.Nombre</option>

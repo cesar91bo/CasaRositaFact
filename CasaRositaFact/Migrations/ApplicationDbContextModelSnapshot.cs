@@ -276,8 +276,6 @@ namespace CasaRositaFact.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int?>("TipoIvaId")
-                        .HasColumnType("int");
 
                     b.HasKey("IdPrecioArticulo");
 
@@ -285,7 +283,6 @@ namespace CasaRositaFact.Migrations
 
                     b.HasIndex("IdTipoIva");
 
-                    b.HasIndex("TipoIvaId");
 
                     b.ToTable("PreciosArticulos");
                 });
@@ -525,10 +522,6 @@ namespace CasaRositaFact.Migrations
                         .WithMany()
                         .HasForeignKey("IdTipoIva")
                         .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("CasaRositaFact.Models.TipoIva", null)
-                        .WithMany("PreciosArticulos")
-                        .HasForeignKey("TipoIvaId");
 
                     b.Navigation("Articulo");
 

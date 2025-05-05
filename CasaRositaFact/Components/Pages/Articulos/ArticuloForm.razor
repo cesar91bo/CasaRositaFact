@@ -59,7 +59,7 @@
     <div class="row mb-4">
         <div class="col-md-6">
             <label for="PrecioVenta" class="form-label">Precio de Venta</label>
-            <InputNumber id="PrecioVenta" class="form-control" @bind-Value="precioArticulo.PrecioVenta" disabled />
+            <InputNumber id="PrecioVenta" class="form-control" @bind-Value="precioArticulo.PrecioVenta" />
         </div>
 
         <div class="col-md-6">
@@ -159,6 +159,29 @@
 
     private async Task SaveArticulo()
     {
+
+        var nombre = articulo.Nombre.Trim().ToLower();
+
+        var articulosExistentes = await ArticuloService.GetAllAsync();
+        var yaExiste = articulosExistentes.Any(c =>
+            c.Nombre.Trim().ToLower() == nombre);
+
+        if (yaExiste && articulo.IdArticulo == 0)
+        {
+            // Mostrar un mensaje de error o advertencia al usuario
+            await JS.InvokeVoidAsync("mostrarModalArticuloExiste");
+            return;
+        }
+
+        if (articulo.IdArticulo == 0)
+        {
+            await ArticuloService.AddAsync(articulo);
+        }
+        else
+        {
+            await ArticuloService.UpdateAsync(articulo);
+        }
+        NavigationManager.NavigateTo("/articulos");
     }
 
     private void NavigateToArticulos()
@@ -166,3 +189,26 @@
         NavigationManager.NavigateTo("/articulos");
     }
 }
+
+<div class="modal fade" id="articuloExisteModal" tabindex="-1" aria-labelledby="articuloExisteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="articuloExisteModalLabel">Atención</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                Ya existe un artículo con ese nombre.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function mostrarModalArticuloExiste() {
+        var myModal = new bootstrap.Modal(document.getElementById('articuloExisteModal'));
+        myModal.show();
+    }
+</script>

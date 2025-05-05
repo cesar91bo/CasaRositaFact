@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CasaRositaFact.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250503185253_CampoFechaUltimaActualizacion")]
-    partial class CampoFechaUltimaActualizacion
+    [Migration("20250504214817_SincronizaConBase")]
+    partial class SincronizaConBase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -87,6 +87,23 @@ namespace CasaRositaFact.Migrations
                     b.HasIndex("IdUnidadMedida");
 
                     b.ToTable("Articulos");
+                });
+
+            modelBuilder.Entity("CasaRositaFact.Models.Banco", b =>
+                {
+                    b.Property<int>("IdBanco")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdBanco"));
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("IdBanco");
+
+                    b.ToTable("Bancos");
                 });
 
             modelBuilder.Entity("CasaRositaFact.Models.Categoria", b =>
@@ -279,11 +296,46 @@ namespace CasaRositaFact.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdProveedor"));
 
-                    b.Property<string>("Nombre")
+                    b.Property<string>("CBU")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CUIT")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CorreoElectronico")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Direccion")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Estado")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("FechaBaja")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("FechaRegistro")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("IdBanco")
+                        .HasColumnType("int");
+
+                    b.Property<string>("NombreContacto")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Observaciones")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RazonSocial")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Telefono")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("IdProveedor");
+
+                    b.HasIndex("IdBanco");
 
                     b.ToTable("Proveedores");
                 });
@@ -477,9 +529,24 @@ namespace CasaRositaFact.Migrations
                     b.Navigation("TipoIva");
                 });
 
+            modelBuilder.Entity("CasaRositaFact.Models.Proveedor", b =>
+                {
+                    b.HasOne("CasaRositaFact.Models.Banco", "Banco")
+                        .WithMany("Proveedores")
+                        .HasForeignKey("IdBanco")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Banco");
+                });
+
             modelBuilder.Entity("CasaRositaFact.Models.Articulo", b =>
                 {
                     b.Navigation("PreciosArticulos");
+                });
+
+            modelBuilder.Entity("CasaRositaFact.Models.Banco", b =>
+                {
+                    b.Navigation("Proveedores");
                 });
 
             modelBuilder.Entity("CasaRositaFact.Models.Categoria", b =>

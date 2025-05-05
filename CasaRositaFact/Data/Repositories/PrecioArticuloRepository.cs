@@ -31,7 +31,10 @@ namespace CasaRositaFact.Data.Repositories
         }
         public async Task<IEnumerable<PrecioArticulo?>> GetAllPreciosAsync()
         {
-            return await _context.PreciosArticulos.ToListAsync();
+            return await _context.PreciosArticulos
+                .Include(p => p.Articulo)
+                .Include(p => p.TipoIva)
+                .ToListAsync();
         }
         public Task<List<PrecioArticulo>> GetPrecioByArticuloIdAsync(int idArticulo)
         {

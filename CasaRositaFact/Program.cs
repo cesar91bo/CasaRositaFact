@@ -1,9 +1,8 @@
 using CasaRositaFact.Components;
 using CasaRositaFact.Data;
-using CasaRositaFact.Data.IRepositories;
-using CasaRositaFact.Data.Repositories;
-using CasaRositaFact.Services;
+using CasaRositaFact.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,35 +18,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddScoped<ClienteService>();
-builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
-
-builder.Services.AddScoped<RegimenService>();
-builder.Services.AddScoped<IRegimenRepository, RegimenRepository>();
-
-builder.Services.AddScoped<ProvinciaService>();
-builder.Services.AddScoped<IProvinciaRepository, ProvinciaRepository>();
-
-builder.Services.AddScoped<LocalidadService>();
-builder.Services.AddScoped<ILocalidadRepository, LocalidadRepository>();
-
-builder.Services.AddScoped<ArticuloService>();
-builder.Services.AddScoped<IArticuloRepository, ArticuloRepository>();
-
-builder.Services.AddScoped<PrecioArticuloService>();
-builder.Services.AddScoped<IPrecioArticuloRepository, PrecioArticuloRepository>();
-
-builder.Services.AddScoped<CategoriaService>();
-builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
-
-builder.Services.AddScoped<ProveedorService>();
-builder.Services.AddScoped<IProveedorRepository, ProveedorRepository>();
-
-builder.Services.AddScoped<RubroService>();
-builder.Services.AddScoped<IRubroRepository, RubroRepository>();
-
-builder.Services.AddScoped<UnidadMedidaService>();
-builder.Services.AddScoped<IUnidadMedidaRepository, UnidadMedidaRepository>();
+builder.Services.AddProjectServices();
 
 var app = builder.Build();
 

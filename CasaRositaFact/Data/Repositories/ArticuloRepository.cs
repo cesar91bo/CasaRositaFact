@@ -13,7 +13,13 @@ namespace CasaRositaFact.Data.Repositories
         }
         public async Task<IEnumerable<Articulo>> GetAllAsync()
         {
-            return await _context.Articulos.ToListAsync();
+            return await _context.Articulos
+                .Include(a => a.Categoria)
+                .Include(a => a.Rubro)
+                .Include(a => a.UnidadMedida)
+                .Include(a => a.Proveedor)
+
+                .ToListAsync();
         }
         public async Task<Articulo> GetByIdAsync(int id)
         {
@@ -22,11 +28,10 @@ namespace CasaRositaFact.Data.Repositories
                 .Include(a => a.Rubro)
                 .Include(a => a.UnidadMedida)
                 .Include(a => a.Proveedor)
-                .Include(a => a.PreciosArticulos)
                 .FirstOrDefaultAsync(a => a.IdArticulo == id);
             if (articulo != null)
             {
-                return  articulo;
+                return articulo;
             }
             else
             {

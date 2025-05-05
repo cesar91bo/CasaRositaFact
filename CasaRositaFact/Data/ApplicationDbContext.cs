@@ -1,4 +1,5 @@
-﻿using CasaRositaFact.Models;
+﻿using CasaRositaFact.Data.Configurations;
+using CasaRositaFact.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace CasaRositaFact.Data
@@ -25,109 +26,30 @@ namespace CasaRositaFact.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Cliente>()
-                .HasKey(c => c.IdCliente);
-
-            modelBuilder.Entity<Cliente>()
-                .Property(c => c.Nombre)
-                .IsRequired()
-                .HasMaxLength(100);
-            modelBuilder.Entity<Cliente>()
-                .Property(c => c.Apellido)
-                .IsRequired()
-                .HasMaxLength(100);
-
-            // Relación con el régimen impositivo
-            modelBuilder.Entity<Cliente>()
-                .HasOne(c => c.RegimenImpositivo) // Relación de Cliente con RegimenImpositivo
-                .WithMany()  // Si el régimen tiene una lista de clientes, puedes usar .WithMany(r => r.Clientes)
-                .HasForeignKey(c => c.IdRegimenImpositivo) // Clave foránea en Cliente
-                .OnDelete(DeleteBehavior.Cascade); // Comportamiento en caso de eliminar un régimen (opcional)
-
-            // Relación con el TipoDocumento
-            modelBuilder.Entity<Cliente>()
-                .HasOne(c => c.TipoDocumento) // Relación con TipoDocumento
-                .WithMany() // Si TipoDocumento tiene una lista de Clientes, puedes usar .WithMany(t => t.Clientes)
-                .HasForeignKey(c => c.IdTipoDocumento) // Clave foránea en Cliente
-                .OnDelete(DeleteBehavior.Cascade); // Comportamiento en caso de eliminación (puedes cambiarlo según lo necesites)
+            modelBuilder.ApplyConfiguration(new ClienteConfiguration()); // Aplicar configuración de Cliente
+            modelBuilder.ApplyConfiguration(new ArticuloConfiguration()); // Aplicar configuración de Articulo
+            modelBuilder.ApplyConfiguration(new PrecioArticuloConfiguration()); // Aplicar configuración de PrecioArticulo
+            modelBuilder.ApplyConfiguration(new ProveedorConfiguration()); // Aplicar configuración de Proveedor
 
             // Configuración de RegimenesImpositivos
-            modelBuilder.Entity<RegimenImpositivo>()
-                .HasKey(r => r.IdRegimenImpositivo); // Clave primaria en RegimenesImpositivos
+            modelBuilder.Entity<RegimenImpositivo>().HasKey(r => r.IdRegimenImpositivo); // Clave primaria en RegimenesImpositivos
 
             // Configuración de TiposDocumentos
-            modelBuilder.Entity<TipoDocumento>()
-                .HasKey(t => t.IdTipoDocumento); // Clave primaria en TiposDocumentos
+            modelBuilder.Entity<TipoDocumento>().HasKey(t => t.IdTipoDocumento); // Clave primaria en TiposDocumentos
 
             // Configuración de Localidades
-            modelBuilder.Entity<TipoDocumento>()
-                .HasKey(t => t.IdTipoDocumento); // Clave primaria en TiposDocumentos
+            modelBuilder.Entity<Localidad>().HasKey(t => t.IdLocalidad); // Clave primaria en Localidad
 
-            modelBuilder.Entity<Provincia>()
-                .HasKey(p => p.IdProvincia); // Clave primaria en Provincias
+            modelBuilder.Entity<Provincia>().HasKey(p => p.IdProvincia); // Clave primaria en Provincias
 
-            modelBuilder.Entity<Proveedor>()
-                .HasKey(p => p.IdProveedor); // Clave primaria en Proveedores
+            modelBuilder.Entity<Rubro>().HasKey(r => r.IdRubro); // Clave primaria en Rubros
 
-            modelBuilder.Entity<Rubro>()
-                .HasKey(r => r.IdRubro); // Clave primaria en Rubros
+            modelBuilder.Entity<Categoria>().HasKey(c => c.IdCategoria); // Clave primaria en Categorías
 
-            modelBuilder.Entity<Categoria>()
-                .HasKey(c => c.IdCategoria); // Clave primaria en Categorías
+            modelBuilder.Entity<TipoIva>().HasKey(t => t.IdTipoIva); // Clave primaria en TiposIva
 
-            modelBuilder.Entity<Articulo>()
-                .HasKey(a => a.IdArticulo); // Clave primaria en Artículos
-
-            modelBuilder.Entity<Articulo>()
-                .HasOne(a => a.Categoria) // Relación con Categoría
-                .WithMany(c => c.Articulos) // Relación inversa
-                .HasForeignKey(a => a.IdCategoria) // Clave foránea en Artículo
-                .OnDelete(DeleteBehavior.SetNull); // Comportamiento en caso de eliminación 
-
-            modelBuilder.Entity<Articulo>()
-                .HasOne(a => a.Proveedor) // Relación con Proveedor
-                .WithMany(c => c.Articulos) // Relación inversa
-                .HasForeignKey(a => a.IdProveedor) // Clave foránea en Artículo
-                .OnDelete(DeleteBehavior.SetNull); // Comportamiento en caso de eliminación 
-
-            modelBuilder.Entity<Articulo>()
-                .HasOne(a => a.Rubro) // Relación con Rubro
-                .WithMany(c => c.Articulos) // Relación inversa
-                .HasForeignKey(a => a.IdRubro) // Clave foránea en Artículo
-                .OnDelete(DeleteBehavior.SetNull); // Comportamiento en caso de eliminación 
-
-            modelBuilder.Entity<Articulo>()
-                .HasOne(a => a.UnidadMedida) // Relación con UnidadMedida
-                .WithMany(c => c.Articulos) // Relación inversa
-                .HasForeignKey(a => a.IdUnidadMedida) // Clave foránea en Artículo
-                .OnDelete(DeleteBehavior.SetNull); // Comportamiento en caso de eliminación
-
-            modelBuilder.Entity<PrecioArticulo>()
-                .HasKey(p => p.IdPrecioArticulo); // Clave primaria en PreciosArticulos
-
-            modelBuilder.Entity<PrecioArticulo>()
-                .HasOne(p => p.Articulo) // Relación con TipoIva
-                .WithMany(t => t.PreciosArticulos) // Relación inversa
-                .HasForeignKey(p => p.IdArticulo) // Clave foránea en PrecioArticulo
-                .OnDelete(DeleteBehavior.Cascade); // Comportamiento en caso de eliminación
-
-            modelBuilder.Entity<TipoIva>()
-                .HasKey(t => t.Id); // Clave primaria en TiposIva
-
-            modelBuilder.Entity<PrecioArticulo>()
-                .HasOne(p => p.TipoIva)
-                .WithMany() // si no tenés la colección inversa en TipoIva
-                .HasForeignKey(p => p.IdTipoIva)
-                .OnDelete(DeleteBehavior.SetNull);
-
-            modelBuilder.Entity<Banco>()
-                .HasKey(b => b.IdBanco); // Clave primaria en Bancos
-
-            modelBuilder.Entity<Proveedor>()
-                .HasOne(p => p.Banco) // Relación con Banco
-                .WithMany(b => b.Proveedores) // Relación inversa
-                .HasForeignKey(p => p.IdBanco) // Clave foránea en Proveedor
-                .OnDelete(DeleteBehavior.SetNull); // Comportamiento en caso de eliminación
+            modelBuilder.Entity<Banco>().HasKey(b => b.IdBanco); // Clave primaria en Bancos
+ 
         }
 
     }

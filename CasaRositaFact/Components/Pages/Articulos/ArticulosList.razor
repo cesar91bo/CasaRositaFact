@@ -25,9 +25,9 @@
         {
             <tr>
                 <td>@articulo.Nombre</td>
-                <td>@articulo.Categoria</td>
+                <td>@articulo.Categoria?.Nombre</td>
                 <td>@articulo.Rubro</td>
-                <td>@articulo.PreciosArticulos</td>
+                <td>@(articulo.PrecioActual?.ToString("C") ?? "Sin precio")</td>
                 <td>
                     <a class="btn btn-secondary" href="@($"/articulos/editar/{articulo.IdArticulo}")">Editar</a> |
                     <button class="btn btn-danger" @onclick="() => DeleteArticulo(articulo.IdArticulo)">Eliminar</button>
@@ -46,6 +46,7 @@
         try
         {
             articulos = (await ArticuloService.GetAllAsync()).ToList();
+            SetPrecioActual(articulos);
             articulosFiltrados = articulos;
         }
         catch (Exception ex)
@@ -86,6 +87,19 @@
         else if (string.IsNullOrWhiteSpace(_filtro))
         {
             articulosFiltrados = articulos.ToList(); // vuelve a cargar toda la grilla
+        }
+    }
+
+    private void SetPrecioActual(List<Articulo> listaArticulos)
+    {
+        foreach (var articulo in listaArticulos)
+        {
+            var precioActual = articulo.PreciosArticulos
+                .FirstOrDefault(p =>
+                    p.FechaIncio <= DateTime.Today &&
+                    (p.FechaUltimaActualizacion == null || p.FechaUltimaActualizacion >= DateTime.Today));
+
+            articulo.PrecioActual = precioActual?.PrecioVenta;
         }
     }
 }

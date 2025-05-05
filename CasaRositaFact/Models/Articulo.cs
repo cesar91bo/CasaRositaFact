@@ -25,6 +25,9 @@ namespace CasaRositaFact.Models
         public DateTime FechaRegistro { get; set; } = DateTime.Now;
         public int? IdProveedor { get; set; } //Proveedor del artículo
 
+        [NotMapped]
+        public decimal? PrecioActual { get; set; }
+
         [ForeignKey("IdCategoria")]
         public Categoria? Categoria { get; set; }
         [ForeignKey("IdRubro")]
