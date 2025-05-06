@@ -38,6 +38,9 @@ namespace CasaRositaFact.Infrastructure
             services.AddScoped<UnidadMedidaService>();
             services.AddScoped<IUnidadMedidaRepository, UnidadMedidaRepository>();
 
+            services.AddScoped<BancoService>();
+            services.AddScoped<IBancoRepository, BancoRepository>();
+
             return services;
         }
     }

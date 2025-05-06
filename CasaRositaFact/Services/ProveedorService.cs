@@ -10,11 +10,11 @@ namespace CasaRositaFact.Services
         {
             _proveedorRepository = proveedorRepository;
         }
-        public Task<IEnumerable<Proveedor?>> GetAllProveedoresAsync()
+        public Task<IEnumerable<Proveedor>> GetAllProveedoresAsync()
         {
             return _proveedorRepository.GetAllProveedoresAsync();
         }
-        public async Task<Proveedor?> GetProveedorByIdAsync(int id)
+        public async Task<Proveedor> GetProveedorByIdAsync(int id)
         {
             return await _proveedorRepository.GetProveedorByIdAsync(id);
         }

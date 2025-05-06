@@ -1,9 +1,98 @@
 ﻿@page "/proveedores"
+@using Services
+@using Models
+@inject ProveedorService ProveedorService
+@inject NavigationManager NavigationManager
 
 <div class="bg-light p-4">
-<h2 class="text-dark fw-bold  mb-2">Lista de Proveedores</h2>
+    <h2 class="text-dark fw-bold  mb-2">Lista de Proveedores</h2>
 </div>
 
-@code {
+<button type="button" @onclick="CreateNewProveedor" class="btn btn-primary mb-3">Nuevo Proveedor</button>
 
+<input type="text" @bind="filtro" @bind:event="oninput" class="form-control mb-3" placeholder="Buscar por Razón Social o Nombre de Contacto" />
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Razón Social</th>
+            <th>Nombre Contacto</th>
+            <th>CBU</th>
+            <th>Banco</th>
+            <th>Teléfono</th>
+            <th>CUIT</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var proveedor in proveedoresFiltrados)
+        {
+            <tr>
+                <td>@proveedor.RazonSocial</td>
+                <td>@proveedor.NombreContacto</td>
+                <td>@proveedor.CBU</td>
+                <td>@proveedor.Banco?.Nombre</td>
+                <td>@proveedor.Telefono</td>
+                <td>@proveedor.CUIT</td>
+                <td>
+                    <a class="btn btn-secondary" href="@($"/proveedores/editar/{proveedor.IdProveedor}")">Editar</a> |
+                    <button class="btn btn-danger" @onclick="() => DeleteProveedor(proveedor.IdProveedor)">Eliminar</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<Proveedor> proveedores = new List<Proveedor>();
+    private List<Proveedor> proveedoresFiltrados = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            proveedores = (await ProveedorService.GetAllProveedoresAsync()).ToList();
+            proveedoresFiltrados = proveedores;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al inicializar el componente: {ex.Message}");
+        }
+    }
+
+    private void CreateNewProveedor()
+    {
+        NavigationManager.NavigateTo("/proveedores/formproveedor");
+    }
+
+    private string filtro
+    {
+        get => _filtro;
+        set
+        {
+            _filtro = value;
+            FiltrarClientes();
+        }
+    }
+    private string _filtro = "";
+
+    private void FiltrarClientes()
+    {
+        if (_filtro.Length >= 2)
+        {
+            proveedoresFiltrados = proveedores
+                .Where(c => $"{c.RazonSocial} {c.NombreContacto}".Contains(_filtro, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+        else if (string.IsNullOrWhiteSpace(_filtro))
+        {
+            proveedoresFiltrados = proveedores.ToList();
+        }
+    }
+
+    private async Task DeleteProveedor(int id)
+    {
+        await ProveedorService.DeleteProveedorAsync(id);
+        proveedoresFiltrados = (await ProveedorService.GetAllProveedoresAsync()).ToList(); // Actualizar la lista
+    }
 }

@@ -1,0 +1,220 @@
+﻿@page "/proveedores/formproveedor"
+@page "/proveedores/editar/{ProveedorId:int}"
+@using Microsoft.AspNetCore.Components.Forms
+@using Services
+@using Models
+@using static CasaRositaFact.Models.Proveedor
+@using CasaRositaFact.Components.Pages.Banco
+@inject ProveedorService ProveedorService
+@inject BancoService BancoService
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+
+<h3 class="mb-4 text-info fw-bold border-bottom pb-2">@(ProveedorId == null ? "Nuevo Proveedor" : "Editar Proveedor")</h3>
+
+<EditForm Model="proveedor" OnValidSubmit="SaveProveedor">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="RazonSocial" class="form-label">Razón Social</label>
+            <InputText id="RazonSocial" class="form-control" @bind-Value="proveedor.RazonSocial" />
+        </div>
+        <div class="col-md-6">
+            <label for="CUIT" class="form-label">CUIT</label>
+            <div class="d-flex gap-1">
+                <InputText class="form-control" style="width: 60px"
+                           maxlength="2"
+                           @bind-Value="CuitParte1Sanitized" />
+
+                <InputText class="form-control" style="width: 120px"
+                           maxlength="8"
+                           @bind-Value="CuitParte2Sanitized" />
+
+                <InputText class="form-control" style="width: 40px"
+                           maxlength="1"
+                           @bind-Value="CuitParte3Sanitized" />
+
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label class="form-label">Seleccione el Banco</label>
+            <BancoSelect Bancos="@bancos" @bind-SelectedId="proveedor.IdBanco" />
+        </div>
+        <div class="col-md-6">
+            <label for="CBU" class="form-label">CBU</label>
+            <InputText id="CBU" class="form-control" @bind-Value="proveedor.CBU" />
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="Telefono" class="form-label">Teléfono</label>
+            <InputText id="Telefono" class="form-control" @bind-Value="proveedor.Telefono" />
+        </div>
+        <div class="col-md-6">
+            <label for="Direccion" class="form-label">Dirección</label>
+            <InputText id="Direccion" class="form-control" @bind-Value="proveedor.Direccion" />
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="NombreContacto" class="form-label">Nombre de Contacto</label>
+            <InputText id="NombreContacto" class="form-control" @bind-Value="proveedor.NombreContacto" />
+        </div>
+        <div class="col-md-6">
+            <label for="CorreoElectronico" class="form-label">Correo Elctrónico</label>
+            <InputText id="CorreoElectronico" class="form-control" @bind-Value="proveedor.CorreoElectronico" />
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="Observaciones" class="form-label">Observaciones</label>
+            <InputTextArea id="Observaciones" class="form-control" @bind-Value="proveedor.Observaciones" />
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Guardar</button>
+    <button type="button" class="btn btn-secondary" @onclick="NavigateToProveedores">Cancelar</button>
+</EditForm>
+
+@code {
+    [Parameter] public int? ProveedorId { get; set; }
+    private Proveedor proveedor = new Proveedor()
+        {
+            RazonSocial = ""
+        };
+    private List<Banco> bancos = new List<Banco>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (ProveedorId.HasValue)
+        {
+            proveedor = await ProveedorService.GetProveedorByIdAsync(ProveedorId.Value);
+        }
+
+        var bancoDTO = await BancoService.GetAllBancosAsync();
+        bancos = bancoDTO.Select(p => new Banco
+            {
+                IdBanco = p.IdBanco,
+                Nombre = p.Nombre
+            }).ToList();
+    }
+
+    private async Task SaveProveedor()
+    {
+        var nombre = proveedor.RazonSocial.Trim().ToLower();
+
+
+        var proveedoresExistentes = await ProveedorService.GetAllProveedoresAsync();
+        var yaExiste = proveedoresExistentes.Any(c =>
+            c.RazonSocial.Trim().ToLower() == nombre);
+
+        if (yaExiste && proveedor.IdProveedor == 0)
+        {
+            // Mostrar un mensaje de error o advertencia al usuario
+            await JS.InvokeVoidAsync("mostrarModalProveedorExiste");
+            return;
+        }
+        proveedor.CUIT = CuitCompleto;
+
+        if (proveedor.IdProveedor == 0)
+        {
+            await ProveedorService.AddProveedorAsync(proveedor);
+        }
+        else
+        {
+            await ProveedorService.UpdateProveedorAsync(proveedor);
+        }
+        NavigationManager.NavigateTo("/proveedores");
+    }
+
+    private void NavigateToProveedores()
+    {
+        NavigationManager.NavigateTo("/proveedores");
+    }
+
+    #region Sección de CUIT y Tipo de Documento
+
+    private string _cuitParte1 = "";
+    private string _cuitParte2 = "";
+    private string _cuitParte3 = "";
+
+    private string CuitParte1Sanitized
+    {
+        get => _cuitParte1;
+        set
+        {
+            _cuitParte1 = new string(value.Where(char.IsDigit).ToArray());
+            ActualizarCUIT();
+        }
+    }
+
+    private string CuitParte2Sanitized
+    {
+        get => _cuitParte2;
+        set
+        {
+            _cuitParte2 = new string(value.Where(char.IsDigit).ToArray());
+            ActualizarCUIT();
+        }
+    }
+
+    private string CuitParte3Sanitized
+    {
+        get => _cuitParte3;
+        set
+        {
+            _cuitParte3 = new string(value.Where(char.IsDigit).ToArray());
+            ActualizarCUIT();
+        }
+    }
+
+    private string CuitCompleto => $"{_cuitParte1}{_cuitParte2}{_cuitParte3}";
+
+    private void ActualizarCUIT()
+    {
+        proveedor.CUIT = CuitCompleto;
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (!string.IsNullOrWhiteSpace(proveedor.CUIT) && proveedor.CUIT.Length == 11)
+        {
+            _cuitParte1 = proveedor.CUIT.Substring(0, 2);
+            _cuitParte2 = proveedor.CUIT.Substring(2, 8);
+            _cuitParte3 = proveedor.CUIT.Substring(10, 1);
+        }
+    }
+    #endregion
+}
+
+<div class="modal fade" id="proveedorExisteModal" tabindex="-1" aria-labelledby="proveedorExisteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="proveedorExisteModalLabel">Atención</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                Ya existe un proveedor con la misma razón social.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function mostrarModalProveedorExiste() {
+        var myModal = new bootstrap.Modal(document.getElementById('proveedorExisteModal'));
+        myModal.show();
+    }
+</script>

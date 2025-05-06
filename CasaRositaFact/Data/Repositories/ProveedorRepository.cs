@@ -26,11 +26,11 @@ namespace CasaRositaFact.Data.Repositories
             }
             return Task.CompletedTask;
         }
-        public async Task<IEnumerable<Proveedor?>> GetAllProveedoresAsync()
+        public async Task<IEnumerable<Proveedor>> GetAllProveedoresAsync()
         {
             return await _context.Proveedores.ToListAsync();
         }
-        public async Task<Proveedor?> GetProveedorByIdAsync(int id)
+        public async Task<Proveedor> GetProveedorByIdAsync(int id)
         {
             var proveedor = await _context.Proveedores
                 .Include(p => p.Banco)
