@@ -4,7 +4,7 @@
 
 <select @bind="SelectedIdInternal" class="form-select">
     <option value="" selected hidden></option>
-    @foreach (var categoria in Categorias)
+    @foreach (var categoria in Categorias ?? Enumerable.Empty<Categoria>())
     {
         <option value="@categoria.IdCategoria" selected="@(SelectedId == categoria.IdCategoria)">
             @categoria.Nombre

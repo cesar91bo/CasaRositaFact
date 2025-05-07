@@ -4,7 +4,7 @@
 
 <select @bind="SelectedIdInternal" class="form-select">
     <option value="" selected hidden></option>
-    @foreach (var rubro in Rubros)
+    @foreach (var rubro in Rubros ?? Enumerable.Empty<Rubro>())
     {
         <option value="@rubro.IdRubro">@rubro.Nombre</option>
     }

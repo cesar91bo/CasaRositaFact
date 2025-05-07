@@ -1,16 +1,50 @@
 ﻿@page "/articulos"
+@using CasaRositaFact.Components.Pages.Categorias
+@using CasaRositaFact.Components.Pages.Proveedores
+@using CasaRositaFact.Components.Pages.Rubros
 @using Services
 @using Models
 @inject ArticuloService ArticuloService
 @inject NavigationManager NavigationManager
+@inject CategoriaService CategoriaService
+@inject ProveedorService ProveedorService
+@inject RubroService RubroService
 
 <div class="bg-light p-4">
-<h2 class="text-dark fw-bold  mb-2">Lista de Artículos</h2>
+    <h2 class="text-dark fw-bold  mb-2">Lista de Artículos</h2>
 </div>
 
 <button type="button" @onclick="CreateNewArticulo" class="btn btn-primary mb-3">Nuevo Artículo</button>
 
 <input type="text" @bind="filtro" @bind:event="oninput" class="form-control mb-3" placeholder="Buscar por nombre" />
+
+<div class="form-check mb-3">
+    <input class="form-check-input" type="checkbox" id="chkOtrosFiltros" @bind="usarOtrosFiltros" />
+    <label class="form-check-label" for="chkOtrosFiltros">
+        Filtrar por otros criterios
+    </label>
+</div>
+
+@if (usarOtrosFiltros)
+{
+    <button class="btn btn-secondary mb-2" @onclick="() => ToggleFiltro(false)">Desactivar filtros</button>
+    <div class="row mb-2">
+        <div class="col-md-6">
+            <label class="form-label">Seleccione Categoría</label>
+            <CategoriaSelect Categorias="categorias" SelectedId="categoriaSeleccionada" SelectedIdChanged="OnCategoriaChanged" />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Seleccione Proveedor</label>
+            <ProveedorSelect Proveedores="proveedores" SelectedId="proveedorSeleccionado" SelectedIdChanged="OnProveedorChanged" />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Seleccione Rubro</label>
+            <RubroSelect Rubros="rubros" SelectedId="rubroSeleccionado" SelectedIdChanged="OnRubroChanged" />
+        </div>
+    </div>
+
+}
+
 
 <table class="table">
     <thead class="table-light">
@@ -38,8 +72,8 @@
                         var precioActual = ObtenerPrecioVigente(articulo);
                     }
                     @(precioActual?.PrecioCosto > 0
-                        ? precioActual?.PrecioCosto.ToString("C")
-                        : "Sin precio")
+                                ? precioActual?.PrecioCosto.ToString("C")
+                                : "Sin precio")
                 </td>
                 <td class="text-center">@(articulo.PrecioActual?.ToString("C") ?? "Sin precio")</td>
                 <td>@(fechaUActual?.ToString("dd/MM/yyyy") ?? "Sin fecha")</td>
@@ -58,11 +92,15 @@
     private List<Articulo> articulos = new List<Articulo>();
     private List<Articulo> articulosFiltrados = new List<Articulo>();
     private DateTime? fechaUActual;
+    private bool usarOtrosFiltros = false;
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
+            categorias = (await CategoriaService.GetAllCategoriasAsync()).ToList();
+            proveedores = (await ProveedorService.GetAllProveedoresAsync()).ToList();
+            rubros = (await RubroService.GetAllRubrosAsync()).ToList();
             articulos = (await ArticuloService.GetAllAsync()).ToList();
             SetPrecioActual(articulos);
             articulosFiltrados = articulos;
@@ -94,19 +132,77 @@
     }
     private string _filtro = "";
 
+    private int? categoriaSeleccionada;
+    private int? rubroSeleccionado;
+    private int? proveedorSeleccionado;
+
+    // Listas de opciones
+    private List<Categoria?> categorias = new();
+    private List<Rubro?> rubros = new();
+    private List<Proveedor> proveedores = new();
+
     private void FiltrarArticulos()
     {
-        if (_filtro.Length >= 2)
+        var query = articulos.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(filtro) && filtro.Length >= 2)
         {
-            articulosFiltrados = articulos
-                .Where(a => $"{a.Nombre}".Contains(_filtro, StringComparison.OrdinalIgnoreCase))
-                .ToList();
+            query = query.Where(a => a.Nombre.Contains(filtro, StringComparison.OrdinalIgnoreCase));
         }
-        else if (string.IsNullOrWhiteSpace(_filtro))
+
+        if (usarOtrosFiltros)
         {
-            articulosFiltrados = articulos.ToList(); // vuelve a cargar toda la grilla
+            if (categoriaSeleccionada.HasValue)
+            {
+                query = query.Where(a => a.IdCategoria == categoriaSeleccionada.Value);
+            }
+
+            if (proveedorSeleccionado.HasValue)
+            {
+                query = query.Where(p => p.IdProveedor == proveedorSeleccionado.Value);
+            }
+
+            if (rubroSeleccionado.HasValue)
+            {
+                query = query.Where(p => p.IdRubro == rubroSeleccionado.Value);
+            }
+        }
+
+        articulosFiltrados = query.ToList();
+    }
+
+    private void OnCategoriaChanged(int? nuevaCategoria)
+    {
+        categoriaSeleccionada = nuevaCategoria;
+        FiltrarArticulos();
+    }
+
+    private void OnProveedorChanged(int? nuevoProveedor)
+    {
+        proveedorSeleccionado = nuevoProveedor;
+        FiltrarArticulos();
+    }
+
+    private void OnRubroChanged(int? nuevoRubro)
+    {
+        rubroSeleccionado = nuevoRubro;
+        FiltrarArticulos();
+    }
+
+    private void ToggleFiltro(bool value)
+    {
+        usarOtrosFiltros = value;
+
+        if (!usarOtrosFiltros)
+        {
+            categoriaSeleccionada = null;
+            proveedorSeleccionado = null;
+            rubroSeleccionado = null;
+
+            FiltrarArticulos();
         }
     }
+
 
     private void SetPrecioActual(List<Articulo> listaArticulos)
     {

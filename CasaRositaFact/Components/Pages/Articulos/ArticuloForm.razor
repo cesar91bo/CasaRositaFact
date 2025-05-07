@@ -177,7 +177,6 @@
             .Where(p => p != null)
             .Select(p => p!) // el ! le dice al compilador que p no es null (porque ya filtraste)
             .ToList();
-        StateHasChanged();
 
         var categoriaDTO = await CategoriaService.GetAllCategoriasAsync();
         categorias = categoriaDTO

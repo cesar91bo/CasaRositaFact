@@ -12,6 +12,7 @@ namespace CasaRositaFact.Models
         public string? CUIT { get; set; }
         public string? Direccion { get; set; }
         public string? Telefono { get; set; }
+        [EmailAddress(ErrorMessage = "Debe ingresar un correo electrónico válido.")]
         public string? CorreoElectronico { get; set; }
         public string? NombreContacto { get; set; }
         public int? IdBanco { get; set; } //Banco del proveedor

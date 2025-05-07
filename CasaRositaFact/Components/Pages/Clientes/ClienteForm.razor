@@ -113,7 +113,8 @@
 
         <div class="col-md-6">
             <label for="Telefono" class="form-label">Teléfono</label>
-            <InputText id="Telefono" class="form-control" @bind-Value="cliente.Telefono" />
+            <InputText id="Telefono" class="form-control" @bind-Value="cliente.Telefono"
+                       oninput="this.value = this.value.replace(/[^0-9()+\-]/g, ' ') "/>
         </div>
     </div>
     <div class="row mb-3">
