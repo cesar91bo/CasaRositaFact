@@ -23,6 +23,8 @@ namespace CasaRositaFact.Data
         public DbSet<PrecioArticulo> PreciosArticulos { get; set; } = null!;
         public DbSet<TipoIva> TiposIva { get; set; } = null!;
         public DbSet<Banco> Bancos { get; set; } = null!;
+        public DbSet<Parametro> Parametros { get; set; } = null!;
+        public DbSet<Empresa> Empresas { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -49,7 +51,16 @@ namespace CasaRositaFact.Data
             modelBuilder.Entity<TipoIva>().HasKey(t => t.IdTipoIva); // Clave primaria en TiposIva
 
             modelBuilder.Entity<Banco>().HasKey(b => b.IdBanco); // Clave primaria en Bancos
- 
+
+            modelBuilder.Entity<UnidadMedida>().HasKey(u => u.IdUnidadMedida); // Clave primaria en UnidadesMedida
+
+            modelBuilder.Entity<Empresa>().HasKey(e => e.IdEmpresa); // Clave primaria en Empresas
+
+            modelBuilder.Entity<Empresa>()
+                .HasOne(e => e.Parametro)
+                .WithOne(p => p.Empresa)
+                .HasForeignKey<Parametro>(p => p.IdEmpresa)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
     }

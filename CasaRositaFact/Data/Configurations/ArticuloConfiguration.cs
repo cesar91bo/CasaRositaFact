@@ -10,11 +10,6 @@ namespace CasaRositaFact.Data.Configurations
         {
             modelBuilder.HasKey(a => a.IdArticulo);
 
-            modelBuilder.HasOne(a => a.Categoria)
-                .WithMany(a => a.Articulos)
-                .HasForeignKey(a => a.IdCategoria)
-                .OnDelete(DeleteBehavior.Cascade);
-
             modelBuilder.HasOne(a => a.Categoria) // Relación con Categoría
                 .WithMany(c => c.Articulos) // Relación inversa
                 .HasForeignKey(a => a.IdCategoria) // Clave foránea en Artículo

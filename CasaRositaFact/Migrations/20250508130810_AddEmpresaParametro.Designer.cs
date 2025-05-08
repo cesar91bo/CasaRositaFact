@@ -4,6 +4,7 @@ using CasaRositaFact.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CasaRositaFact.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250508130810_AddEmpresaParametro")]
+    partial class AddEmpresaParametro
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -225,9 +228,6 @@ namespace CasaRositaFact.Migrations
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("FechaExpiracionCertificado")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("IIIBB")
                         .HasColumnType("nvarchar(max)");
 
@@ -275,8 +275,11 @@ namespace CasaRositaFact.Migrations
 
             modelBuilder.Entity("CasaRositaFact.Models.Parametro", b =>
                 {
-                    b.Property<int>("IdEmpresa")
+                    b.Property<int>("IdParametro")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdParametro"));
 
                     b.Property<int?>("CantidadMaxItemFactura")
                         .HasColumnType("int");
@@ -291,7 +294,7 @@ namespace CasaRositaFact.Migrations
                         .HasPrecision(4, 1)
                         .HasColumnType("decimal(4,1)");
 
-                    b.HasKey("IdEmpresa");
+                    b.HasKey("IdParametro");
 
                     b.ToTable("Parametros");
                 });
@@ -590,17 +593,6 @@ namespace CasaRositaFact.Migrations
                     b.Navigation("Provincia");
                 });
 
-            modelBuilder.Entity("CasaRositaFact.Models.Parametro", b =>
-                {
-                    b.HasOne("CasaRositaFact.Models.Empresa", "Empresa")
-                        .WithOne("Parametro")
-                        .HasForeignKey("CasaRositaFact.Models.Parametro", "IdEmpresa")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Empresa");
-                });
-
             modelBuilder.Entity("CasaRositaFact.Models.PrecioArticulo", b =>
                 {
                     b.HasOne("CasaRositaFact.Models.Articulo", "Articulo")
@@ -646,12 +638,6 @@ namespace CasaRositaFact.Migrations
             modelBuilder.Entity("CasaRositaFact.Models.Categoria", b =>
                 {
                     b.Navigation("Articulos");
-                });
-
-            modelBuilder.Entity("CasaRositaFact.Models.Empresa", b =>
-                {
-                    b.Navigation("Parametro")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("CasaRositaFact.Models.Proveedor", b =>
