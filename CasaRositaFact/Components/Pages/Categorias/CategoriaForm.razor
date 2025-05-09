@@ -1,0 +1,123 @@
+﻿@page "/categoriaform"
+@using CasaRositaFact.Models
+@using CasaRositaFact.Services
+@inject CategoriaService CategoriaService
+
+<h3 class="mb-4 text-secondary fw-bold border-bottom pb-2"> Categorías
+    <i class="bi bi-info-circle text-primary ms-2 align-middle"
+       style="font-size: 0.9rem;"
+       role="button"
+       data-bs-toggle="tooltip"
+       title="Una categoría es una subclasificación específica dentro de un rubro, que agrupa productos o servicios con características similares. Por ejemplo: en el rubro 'Indumentaria', las categorías pueden ser 'Ropa Deportiva', 'Ropa Infantil' o 'Accesorios'. ">
+    </i>
+</h3>
+@if (!string.IsNullOrEmpty(mensajeAlerta))
+{
+    <div class="alert alert-@tipoAlerta alert-dismissible fade show mb-2" role="alert">
+        @mensajeAlerta
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+<div class="mb-4">
+    <EditForm Model="@categoria" OnValidSubmit="GuardarCategoria">
+        <DataAnnotationsValidator />
+        <InputText @bind-Value="categoria.Nombre" class="form-control mb-3" placeholder="Nombre del categoria" />
+        <ValidationMessage For="@(() => categoria.Nombre)" class="mb-3" />
+
+        <button class="btn btn-primary" type="submit">Guardar</button>
+    </EditForm>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+
+        <table class="table table-hover table-sm mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="w-25 text-center">Nro. categoria</th>
+                    <th class="w-50 text-center">Nombre</th>
+                    <th class="w-25 text-center">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var categoria in categorias)
+                {
+                    <tr>
+                        <td class="text-center">@categoria.IdCategoria</td>
+                        <td class="text-center text-truncate" style="max-width: 200px;" title="@categoria.Nombre">
+                            @categoria.Nombre
+                        </td>
+                        <td class="text-center">
+                            <button class="btn btn-secondary btn-sm" @onclick="() => Editarcategoria(categoria.IdCategoria)">
+                                <i class="bi bi-trash"></i> Editar
+                            </button> |
+                            <button class="btn btn-danger btn-sm" @onclick="() => Deletecategoria(categoria.IdCategoria)">
+                                <i class="bi bi-trash"></i> Eliminar
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+@code {
+    private Categoria categoria = new Categoria();
+    private List<Categoria> categorias = new List<Categoria>();
+
+    private string mensajeAlerta = string.Empty;
+    private string tipoAlerta = string.Empty;
+    protected override async Task OnInitializedAsync()
+    {
+        categorias = (await CategoriaService.GetAllCategoriasAsync()).ToList();
+    }
+    private async Task GuardarCategoria()
+    {
+        // Validar si ya existe uno con el mismo nombre (ignorando mayúsculas y espacios)
+        if (categoria.IdCategoria == 0)
+        {
+            var existe = categorias.Any(r =>
+                string.Equals(r.Nombre?.Trim(), categoria.Nombre?.Trim(), StringComparison.OrdinalIgnoreCase));
+
+            if (existe)
+            {
+                mensajeAlerta = "Ya existe un categoria con ese nombre.";
+                tipoAlerta = "danger"; // Puedes usar 'info', 'success', 'warning', 'danger' según el tipo
+                StateHasChanged();
+                return;
+            }
+            else
+            {
+                mensajeAlerta = "";
+                tipoAlerta = "";
+            }
+
+            await CategoriaService.AddCategoriaAsync(categoria);
+        }
+        else
+        {
+            await CategoriaService.UpdateCategoriaAsync(categoria);
+        }
+
+        categorias = (await CategoriaService.GetAllCategoriasAsync()).ToList();
+        categoria = new Categoria();
+        StateHasChanged();
+    }
+
+
+    private async Task Deletecategoria(int id)
+    {
+        await CategoriaService.DeleteCategoriaAsync(id);
+        categorias = (await CategoriaService.GetAllCategoriasAsync()).ToList();
+        categoria = new Categoria();
+        StateHasChanged();
+    }
+
+    private async Task Editarcategoria(int id)
+    {
+        categoria = (await CategoriaService.GetCategoriaByIdAsync(id)) ?? new Categoria();
+
+    }
+}

@@ -6,6 +6,7 @@ namespace CasaRositaFact.Models
     {
         [Key]
         public int IdCategoria { get; set; }
+        [Required(ErrorMessage = "El nombre de la categoría es obligatorio")]
         public string Nombre { get; set; } = string.Empty;
 
         public ICollection<Articulo> Articulos { get; set; } = new List<Articulo>();

@@ -7,7 +7,7 @@ namespace CasaRositaFact.Services
     {
         public readonly ICategoriaRepository _categoriaRepository;
         public CategoriaService(ICategoriaRepository categoriaRepository) { _categoriaRepository = categoriaRepository; }
-        public Task<IEnumerable<Categoria?>> GetAllCategoriasAsync()
+        public Task<IEnumerable<Categoria>> GetAllCategoriasAsync()
         {
             return _categoriaRepository.GetAllCategoriasAsync();
         }
