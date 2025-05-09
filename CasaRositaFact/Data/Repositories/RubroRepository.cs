@@ -28,7 +28,7 @@ namespace CasaRositaFact.Data.Repositories
             return _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<Rubro?>> GetAllRubrosAsync()
+        public async Task<IEnumerable<Rubro>> GetAllRubrosAsync()
         {
             return await _context.Rubros.ToListAsync();
         }

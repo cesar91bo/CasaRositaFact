@@ -1,9 +1,82 @@
 ﻿@page "/parametros"
+@using CasaRositaFact.Components.Pages.Rubros
+
+
+<PageTitle>Parámetros del Sistema</PageTitle>
 
 <div class="bg-light p-4">
-    <h2 class="text-dark fw-bold  mb-2">Parámetros</h2>
+    <h2 class="text-dark fw-bold  mb-2">Parámetros del Sistema</h2>
 </div>
 
-@code {
+<!-- Tabs para navegar -->
+<ul class="nav nav-tabs mb-4">
+    <li class="nav-item">
+        <a class="nav-link @(activeTab == 0 ? "active custom-active" : "")" @onclick="@(() => CambiarTab(0))">Rubros</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(activeTab == 1 ? "active custom-active" : "")" @onclick="@(() => CambiarTab(1))">Categorías</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(activeTab == 2 ? "active custom-active" : "")" @onclick="@(() => CambiarTab(2))">Unidades</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(activeTab == 3 ? "active custom-active" : "")" @onclick="@(() => CambiarTab(3))">Ganancia</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(activeTab == 4 ? "active custom-active" : "")" @onclick="@(() => CambiarTab(4))">Empresa</a>
+    </li>
+</ul>
 
+
+<!-- Contenido de pestañas -->
+@if (activeTab == 0)
+{
+    <RubroForm />
 }
+else if (activeTab == 1)
+{
+    <CategoriasComponent />
+}
+else if (activeTab == 2)
+{
+    <UnidadesMedidaComponent />
+}
+else if (activeTab == 3)
+{
+    <PorcentajeGananciaComponent />
+}
+else if (activeTab == 4)
+{
+    <DatosEmpresaComponent />
+}
+
+@code {
+    int activeTab = 0;
+
+    void CambiarTab(int tabIndex)
+    {
+        activeTab = tabIndex;
+    }
+}
+
+<style>
+    /* Cambiar color de fondo al seleccionar */
+    .nav-tabs .nav-item .nav-link.custom-active {
+        background-color: #007bff; /* Azul (puedes cambiar a otro color) */
+        color: white; /* Cambiar color de texto cuando está activo */
+        border-radius: 5px; /* Bordes redondeados */
+    }
+
+    /* Estilo para el hover en los elementos no seleccionados */
+    .nav-tabs .nav-item .nav-link:hover {
+        background-color: #f1f1f1; /* Color claro para el hover */
+        color: #007bff; /* Color de texto para hover */
+    }
+
+    /* Estilo general para las pestañas no activas */
+    .nav-tabs .nav-item .nav-link {
+        color: #555555; /* Color de texto por defecto */
+        border: 1px solid #ddd; /* Borde gris claro */
+        border-radius: 5px; /* Bordes redondeados */
+    }
+</style>

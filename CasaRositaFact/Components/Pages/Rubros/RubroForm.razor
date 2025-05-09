@@ -1,0 +1,123 @@
+﻿@page "/rubroform"
+@using CasaRositaFact.Models
+@using CasaRositaFact.Services
+@inject RubroService RubroService
+
+<h3 class="mb-4 text-secondary fw-bold border-bottom pb-2">Rubros
+    <i class="bi bi-info-circle text-primary ms-2 align-middle"
+    style="font-size: 0.9rem;"
+    role="button"
+    data-bs-toggle="tooltip"
+    title="Un rubro representa un grupo general de productos o servicios. Por ejemplo: 'Indumentaria', 'Mercería', 'Decoración', 'Textiles', etc.">
+    </i>
+</h3>
+@if (!string.IsNullOrEmpty(mensajeAlerta))
+{
+    <div class="alert alert-@tipoAlerta alert-dismissible fade show mb-2" role="alert">
+        @mensajeAlerta
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+<div class="mb-4">
+    <EditForm Model="@rubro" OnValidSubmit="GuardarRubro">
+        <DataAnnotationsValidator />
+        <InputText @bind-Value="rubro.Nombre" class="form-control mb-3" placeholder="Nombre del Rubro" />
+        <ValidationMessage For="@(() => rubro.Nombre)" class="mb-3"/>
+
+        <button class="btn btn-primary" type="submit">Guardar</button>
+    </EditForm>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+
+        <table class="table table-hover table-sm mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="w-25 text-center">Nro. Rubro</th>
+                    <th class="w-50 text-center">Nombre</th>
+                    <th class="w-25 text-center">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var rubro in rubros)
+                {
+                    <tr>
+                        <td class="text-center">@rubro.IdRubro</td>
+                        <td class="text-center text-truncate" style="max-width: 200px;" title="@rubro.Nombre">
+                            @rubro.Nombre
+                        </td>
+                        <td class="text-center">
+                            <button class="btn btn-secondary btn-sm" @onclick="() => EditarRubro(rubro.IdRubro)">
+                                <i class="bi bi-trash"></i> Editar
+                            </button> |
+                            <button class="btn btn-danger btn-sm" @onclick="() => DeleteRubro(rubro.IdRubro)">
+                                <i class="bi bi-trash"></i> Eliminar
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+@code {
+    private Rubro rubro = new Rubro();
+    private List<Rubro> rubros = new List<Rubro>();
+
+    private string mensajeAlerta = string.Empty;
+    private string tipoAlerta = string.Empty;
+    protected override async Task OnInitializedAsync()
+    {
+        rubros = (await RubroService.GetAllRubrosAsync()).ToList();
+    }
+    private async Task GuardarRubro()
+    {
+        // Validar si ya existe uno con el mismo nombre (ignorando mayúsculas y espacios)
+        if (rubro.IdRubro == 0)
+        {
+            var existe = rubros.Any(r =>
+                string.Equals(r.Nombre?.Trim(), rubro.Nombre?.Trim(), StringComparison.OrdinalIgnoreCase));
+
+            if (existe)
+            {
+                mensajeAlerta = "Ya existe un rubro con ese nombre.";
+                tipoAlerta = "danger"; // Puedes usar 'info', 'success', 'warning', 'danger' según el tipo
+                StateHasChanged();
+                return;
+            }
+            else
+            {
+                mensajeAlerta = "";
+                tipoAlerta = "";
+            }
+
+            await RubroService.AddRubroAsync(rubro);
+        }
+        else
+        {
+            await RubroService.UpdateRubroAsync(rubro);
+        }
+
+        rubros = (await RubroService.GetAllRubrosAsync()).ToList();
+        rubro = new Rubro();
+        StateHasChanged();
+    }
+
+
+    private async Task DeleteRubro(int id)
+    {
+        await RubroService.DeleteRubroAsync(id);
+        rubros = (await RubroService.GetAllRubrosAsync()).ToList();
+        rubro = new Rubro();
+        StateHasChanged();
+    }
+
+    private async Task EditarRubro(int id)
+    {
+        rubro = (await RubroService.GetRubroByIdAsync(id)) ?? new Rubro();
+
+    }
+}

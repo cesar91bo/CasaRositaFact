@@ -18,7 +18,7 @@ namespace CasaRositaFact.Services
         {
             return _rubroRepository.DeleteRubroAsync(id);
         }
-        public Task<IEnumerable<Rubro?>> GetAllRubrosAsync()
+        public Task<IEnumerable<Rubro>> GetAllRubrosAsync()
         {
             return _rubroRepository.GetAllRubrosAsync();
         }
