@@ -11,7 +11,6 @@ namespace CasaRositaFact.Models
         public Empresa Empresa { get; set; } = null!;
         [Precision(4, 1)]
         public decimal PorcentajeGanancia { get; set; }
-        public DateTime? FechaVtoFactura { get; set; }
         public int? CantidadMaxItemFactura { get; set; }
         public string? ImpresoraPredeterminada { get; set; }
     }

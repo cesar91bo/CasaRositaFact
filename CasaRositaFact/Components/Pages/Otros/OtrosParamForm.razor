@@ -1,6 +1,87 @@
 ﻿@page "/otrosparamform"
-<h3>OtrosParamForm</h3>
+@using CasaRositaFact.Services
+@using Microsoft.AspNetCore.Components.Forms
+@using Models
+@inject ParametroService ParametroService
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+
+<h3 class="mb-4 text-secondary fw-bold border-bottom pb-2">Otras Configuraciones</h3>
+
+@if (!string.IsNullOrEmpty(mensajeAlerta))
+{
+    <div class="alert @tipoAlerta alert-dismissible fade show" role="alert">
+        @mensajeAlerta
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<EditForm Model="parametro" OnValidSubmit="GuardarParametro">
+<DataAnnotationsValidator />
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="ImpresoraPredeterminada" class="form-label">Nombre de la Impresora</label>
+            <InputText @bind-Value="parametro.ImpresoraPredeterminada" class="form-control mb-3" />
+        </div>
+
+        <div class="col-md-6">
+            <label for="PorcentajeGanancia" class="form-label">Porcentaje de Ganancias</label>
+            <InputNumber id="PorcentajeGanancia" class="form-control" @bind-Value="parametro.PorcentajeGanancia"/>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+
+        <div class="col-md-6">
+            <label for="CantidadMaxItemFactura" class="form-label">Cant. Máxima de Item de Facturas</label>
+            <InputNumber id="CantidadMaxItemFactura" class="form-control" @bind-Value="parametro.CantidadMaxItemFactura" />
+        </div>
+    </div>
+
+    <button class=" btn btn-primary" type="submit">Guardar</button>
+
+</EditForm>
 
 @code {
+    private Parametro parametro = new Parametro();
 
+    private string mensajeAlerta = string.Empty;
+    private string tipoAlerta = string.Empty;
+    protected override async Task OnInitializedAsync()
+    {
+        parametro = (await ParametroService.GetAllParametrosAsync()).FirstOrDefault() ?? new Parametro();
+    }
+
+    private async Task GuardarParametro()
+    {
+        if (parametro.IdEmpresa == 0)
+        {
+            await ParametroService.AddParametroAsync(parametro);
+            mensajeAlerta = "Parámetros creados correctamente.";
+        }
+        else
+        {
+            await ParametroService.UpdateParametroAsync(parametro);
+            mensajeAlerta = "Parámetros actualizados correctamente.";
+        }
+
+        tipoAlerta = "alert-success";
+        parametro = (await ParametroService.GetAllParametrosAsync()).FirstOrDefault() ?? new Parametro();
+        StateHasChanged();
+
+        // Esperar 3 segundos y luego limpiar el mensaje
+        await Task.Delay(3000);
+        mensajeAlerta = string.Empty;
+        tipoAlerta = string.Empty;
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public void OcultarAlerta()
+    {
+        mensajeAlerta = string.Empty;
+        tipoAlerta = string.Empty;
+        StateHasChanged();
+    }
 }
