@@ -7,6 +7,7 @@ namespace CasaRositaFact.Models
     {
         [Key]
         public int IdUnidadMedida { get; set; }
+        [Required(ErrorMessage = "El nombre de unidad de medida es obligatorio")]
         public string Nombre { get; set; } = string.Empty;
 
         // Relación con Articulo

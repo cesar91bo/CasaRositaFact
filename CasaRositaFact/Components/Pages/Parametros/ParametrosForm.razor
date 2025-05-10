@@ -1,6 +1,9 @@
 ﻿@page "/parametros"
 @using CasaRositaFact.Components.Pages.Categorias
+@using CasaRositaFact.Components.Pages.Empresa
+@using CasaRositaFact.Components.Pages.Otros
 @using CasaRositaFact.Components.Pages.Rubros
+@using CasaRositaFact.Components.Pages.Unidades_Medidas
 
 
 <PageTitle>Parámetros del Sistema</PageTitle>
@@ -21,10 +24,10 @@
         <a class="nav-link @(activeTab == 2 ? "active custom-active" : "")" @onclick="@(() => CambiarTab(2))">Unidades</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link @(activeTab == 3 ? "active custom-active" : "")" @onclick="@(() => CambiarTab(3))">Ganancia</a>
+        <a class="nav-link @(activeTab == 3 ? "active custom-active" : "")" @onclick="@(() => CambiarTab(3))">Empresa</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link @(activeTab == 4 ? "active custom-active" : "")" @onclick="@(() => CambiarTab(4))">Empresa</a>
+        <a class="nav-link @(activeTab == 4 ? "active custom-active" : "")" @onclick="@(() => CambiarTab(4))">Otros</a>
     </li>
 </ul>
 
@@ -40,15 +43,15 @@ else if (activeTab == 1)
 }
 else if (activeTab == 2)
 {
-    <UnidadesMedidaComponent />
+    <UnidadesMedidaForm />
 }
 else if (activeTab == 3)
 {
-    <PorcentajeGananciaComponent />
+    <DatosEmpresaForm />
 }
 else if (activeTab == 4)
 {
-    <DatosEmpresaComponent />
+    <OtrosParamForm />
 }
 
 @code {
@@ -63,21 +66,22 @@ else if (activeTab == 4)
 <style>
     /* Cambiar color de fondo al seleccionar */
     .nav-tabs .nav-item .nav-link.custom-active {
-        background-color: #007bff; /* Azul (puedes cambiar a otro color) */
-        color: white; /* Cambiar color de texto cuando está activo */
-        border-radius: 5px; /* Bordes redondeados */
+        background-color: #007bff;
+        color: white;
+        border-radius: 5px;
     }
 
     /* Estilo para el hover en los elementos no seleccionados */
     .nav-tabs .nav-item .nav-link:hover {
-        background-color: #f1f1f1; /* Color claro para el hover */
-        color: #007bff; /* Color de texto para hover */
+        background-color: #f1f1f1;
+        color: #007bff;
     }
 
     /* Estilo general para las pestañas no activas */
     .nav-tabs .nav-item .nav-link {
-        color: #555555; /* Color de texto por defecto */
-        border: 1px solid #ddd; /* Borde gris claro */
-        border-radius: 5px; /* Bordes redondeados */
+        color: #555555;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        cursor: pointer; /* 👈 AÑADÍ ESTO */
     }
 </style>

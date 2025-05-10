@@ -1,0 +1,125 @@
+﻿@page "/unidadmedidaform"
+@using CasaRositaFact.Models
+@using CasaRositaFact.Services
+@inject UnidadMedidaService UnidadMedidaService
+
+<h3 class="mb-4 text-secondary fw-bold border-bottom pb-2">
+    Unidad de Medidas
+    <i class="bi bi-info-circle text-primary ms-2 align-middle"
+       style="font-size: 0.9rem;"
+       role="button"
+       data-bs-toggle="tooltip"
+       title="Una unidad de medida es la referencia estándar que se utiliza para cuantificar productos. Por ejemplo: 'Litros', 'Kilogramos', 'Metros' o 'Unidades'">
+    </i>
+</h3>
+@if (!string.IsNullOrEmpty(mensajeAlerta))
+{
+    <div class="alert alert-@tipoAlerta alert-dismissible fade show mb-2" role="alert">
+        @mensajeAlerta
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+<div class="mb-4">
+    <EditForm Model="@umedida" OnValidSubmit="GuardarUMedida">
+        <DataAnnotationsValidator />
+        <InputText @bind-Value="umedida.Nombre" class="form-control mb-3" placeholder="Nombre de la Unidad de Medida" />
+        <ValidationMessage For="@(() => umedida.Nombre)" class="mb-3" />
+
+        <button class="btn btn-primary" type="submit">Guardar</button>
+    </EditForm>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+
+        <table class="table table-hover table-sm mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="w-25 text-center">Nro. Unidad de Medida</th>
+                    <th class="w-50 text-center">Nombre</th>
+                    <th class="w-25 text-center">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var umedida in umedidas)
+                {
+                    <tr>
+                        <td class="text-center">@umedida.IdUnidadMedida</td>
+                        <td class="text-center text-truncate" style="max-width: 200px;" title="@umedida.Nombre">
+                            @umedida.Nombre
+                        </td>
+                        <td class="text-center">
+                            <button class="btn btn-secondary btn-sm" @onclick="() => EditarUMedida(umedida.IdUnidadMedida)">
+                                <i class="bi bi-trash"></i> Editar
+                            </button> |
+                            <button class="btn btn-danger btn-sm" @onclick="() => DeleteUMedida(umedida.IdUnidadMedida)">
+                                <i class="bi bi-trash"></i> Eliminar
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+@code {
+    private UnidadMedida umedida = new UnidadMedida();
+    private List<UnidadMedida> umedidas = new List<UnidadMedida>();
+
+    private string mensajeAlerta = string.Empty;
+    private string tipoAlerta = string.Empty;
+    protected override async Task OnInitializedAsync()
+    {
+        umedidas = (await UnidadMedidaService.GetAllUnidadMedidaAsync()).ToList();
+    }
+    private async Task GuardarUMedida()
+    {
+        // Validar si ya existe uno con el mismo nombre (ignorando mayúsculas y espacios)
+        if (umedida.IdUnidadMedida == 0)
+        {
+            var existe = umedidas.Any(r =>
+                string.Equals(r.Nombre?.Trim(), umedida.Nombre?.Trim(), StringComparison.OrdinalIgnoreCase));
+
+            if (existe)
+            {
+                mensajeAlerta = "Ya existe una unidad de medida con ese nombre.";
+                tipoAlerta = "danger"; // Puedes usar 'info', 'success', 'warning', 'danger' según el tipo
+                StateHasChanged();
+                return;
+            }
+            else
+            {
+                mensajeAlerta = "";
+                tipoAlerta = "";
+            }
+
+            await UnidadMedidaService.AddUnidadMedidaAsync(umedida);
+        }
+        else
+        {
+            await UnidadMedidaService.UpdateUnidadMedidaAsync(umedida);
+        }
+
+        umedidas = (await UnidadMedidaService.GetAllUnidadMedidaAsync()).ToList();
+        umedida = new UnidadMedida();
+        StateHasChanged();
+    }
+
+
+    private async Task DeleteUMedida(int id)
+    {
+        await UnidadMedidaService.DeleteUnidadMedidaAsync(id);
+        umedidas = (await UnidadMedidaService.GetAllUnidadMedidaAsync()).ToList();
+        umedida = new UnidadMedida();
+        StateHasChanged();
+    }
+
+    private async Task EditarUMedida(int id)
+    {
+        umedida = (await UnidadMedidaService.GetUnidadMedidaByIdAsync(id)) ?? new UnidadMedida();
+
+    }
+}
+
