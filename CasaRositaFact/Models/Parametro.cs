@@ -8,7 +8,7 @@ namespace CasaRositaFact.Models
     {
         [Key, ForeignKey("Empresa")]
         public int IdEmpresa { get; set; }
-        public Empresa Empresa { get; set; } = new Empresa();
+        public Empresa Empresa { get; set; } = null!;
         [Precision(4, 1)]
         public decimal PorcentajeGanancia { get; set; }
         public DateTime? FechaVtoFactura { get; set; }

@@ -1,5 +1,198 @@
-﻿<h3>DatosEmpresaForm</h3>
+﻿@page "/datosempresaform"
+@using CasaRositaFact.Services
+@using Microsoft.AspNetCore.Components.Forms
+@using Models
+@inject EmpresaService EmpresaService
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
+
+<h3 class="mb-4 text-secondary fw-bold border-bottom pb-2">Empresa</h3>
+
+@if (!string.IsNullOrEmpty(mensajeAlerta))
+{
+    <div class="alert @tipoAlerta alert-dismissible fade show" role="alert">
+        @mensajeAlerta
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+
+<EditForm Model="empresa" OnValidSubmit="GuardarEmpresa">
+    <DataAnnotationsValidator />
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="NombreFantasia" class="form-label">Nombre de Fantasia</label>
+            <InputText @bind-Value="empresa.NombreFantasia" class="form-control mb-3" />
+        </div>
+
+        <div class="col-md-6">
+            <label for="RazonSocial" class="form-label">Razón Social</label>
+            <InputText id="RazonSocial" class="form-control" @bind-Value="empresa.RazonSocial" />
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label for="CUIT" class="form-label">CUIT</label>
+            <div class="d-flex gap-1">
+                <InputText class="form-control" style="width: 20%"
+                           maxlength="2"
+                           @bind-Value="CuitParte1Sanitized" />
+
+                <InputText class="form-control" style="width: 60%"
+                           maxlength="8"
+                           @bind-Value="CuitParte2Sanitized" />
+
+                <InputText class="form-control" style="width: 20%"
+                           maxlength="1"
+                           @bind-Value="CuitParte3Sanitized" />
+
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <label for="Domicilio" class="form-label">Dirección</label>
+            <InputText @bind-Value="empresa.Domicilio" class="form-control mb-3" />
+        </div>
+
+        <div class="col-md-4">
+            <label for="CodigoPostal" class="form-label">Código Postal</label>
+            <InputNumber id="CodigoPostal" class="form-control" @bind-Value="empresa.CodigoPostal" />
+        </div>
+
+    </div>
+
+    <div class="row mb-3">        
+
+        <div class="col-md-4">
+            <label for="Telefono" class="form-label">Teléfono</label>
+            <InputText id="Telefono" class="form-control" @bind-Value="empresa.Telefono"
+                       oninput="this.value = this.value.replace(/[^0-9()+\-]/g, ' ') " />
+        </div>
+
+        <div class="col-md-4">
+            <label for="IIBB" class="form-label">IIBB</label>
+            <InputText id="IIBB" class="form-control" @bind-Value="empresa.IIBB" />
+        </div>
+
+        <div class="col-md-4">
+            <label for="InicioActividad" class="form-label">Inicio de Actividad</label>
+            <InputDate @bind-Value="empresa.InicioActividad" class="form-control mb-3" />
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="SerieCertificado" class="form-label">Certificado</label>
+            <InputText @bind-Value="empresa.SerieCertificado" class="form-control mb-3" />
+        </div>
+
+        <div class="col-md-6">
+            <label for="FechaExpiracionCertificado" class="form-label">Fecha de Expiración</label>
+            <InputDate id="FechaExpiracionCertificado" class="form-control" @bind-Value="empresa.FechaExpiracionCertificado" />
+        </div>
+    </div>
+
+    <button class=" btn btn-primary" type="submit">Guardar</button>
+</EditForm>
+
 
 @code {
+    private Empresa empresa = new Empresa();
+
+    private string mensajeAlerta = string.Empty;
+    private string tipoAlerta = string.Empty;
+    protected override async Task OnInitializedAsync()
+    {
+        empresa = (await EmpresaService.GetAllAsync()).FirstOrDefault() ?? new Empresa();
+    }
+    private async Task GuardarEmpresa()
+    {
+        if (empresa.IdEmpresa == 0)
+        {
+            await EmpresaService.AddAsync(empresa);
+            mensajeAlerta = "Empresa creada correctamente.";
+        }
+        else
+        {
+            await EmpresaService.UpdateAsync(empresa);
+            mensajeAlerta = "Empresa actualizada correctamente.";
+        }
+
+        tipoAlerta = "alert-success";
+        empresa = (await EmpresaService.GetAllAsync()).FirstOrDefault() ?? new Empresa();
+        StateHasChanged();
+
+        // Esperar 3 segundos y luego limpiar el mensaje
+        await Task.Delay(3000);
+        mensajeAlerta = string.Empty;
+        tipoAlerta = string.Empty;
+        StateHasChanged();
+    }
+
+
+    [JSInvokable]
+    public void OcultarAlerta()
+    {
+        mensajeAlerta = string.Empty;
+        tipoAlerta = string.Empty;
+        StateHasChanged();
+    }
+
+
+    #region Sección de CUIT
+
+    private string _cuitParte1 = "";
+    private string _cuitParte2 = "";
+    private string _cuitParte3 = "";
+
+    private string CuitParte1Sanitized
+    {
+        get => _cuitParte1;
+        set
+        {
+            _cuitParte1 = new string(value.Where(char.IsDigit).ToArray());
+            ActualizarCUIT();
+        }
+    }
+
+    private string CuitParte2Sanitized
+    {
+        get => _cuitParte2;
+        set
+        {
+            _cuitParte2 = new string(value.Where(char.IsDigit).ToArray());
+            ActualizarCUIT();
+        }
+    }
+
+    private string CuitParte3Sanitized
+    {
+        get => _cuitParte3;
+        set
+        {
+            _cuitParte3 = new string(value.Where(char.IsDigit).ToArray());
+            ActualizarCUIT();
+        }
+    }
+
+    private string CuitCompleto => $"{_cuitParte1}{_cuitParte2}{_cuitParte3}";
+
+    private void ActualizarCUIT()
+    {
+        empresa.Cuit = CuitCompleto;
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (!string.IsNullOrWhiteSpace(empresa.Cuit) && empresa.Cuit.Length == 11)
+        {
+            _cuitParte1 = empresa.Cuit.Substring(0, 2);
+            _cuitParte2 = empresa.Cuit.Substring(2, 8);
+            _cuitParte3 = empresa.Cuit.Substring(10, 1);
+        }
+    }
+    #endregion
 
 }

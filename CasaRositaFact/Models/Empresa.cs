@@ -13,7 +13,7 @@ namespace CasaRositaFact.Models
         public DateTime? InicioActividad { get; set; }
         public string? Telefono { get; set; }
         public string? Email { get; set; }
-        public string? IIIBB { get; set; }
+        public string? IIBB { get; set; }
         public string? CondicionIva { get; set; } //IVA Responsable Inscripto, IVA Responsable No Inscripto, IVA Exento, IVA No Alcanzado
         public int? CodigoPostal { get; set; }
         public string? RutaCertificado { get; set; }

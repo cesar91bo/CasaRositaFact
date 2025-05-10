@@ -36,8 +36,8 @@
                     @cliente.Estado
                 </td>
                 <td>
-                    <a class="btn btn-secondary" href="@($"/clientes/editar/{cliente.IdCliente}")">Editar</a> |
-                    <button class="btn btn-danger" @onclick="() => DeleteCliente(cliente.IdCliente)">Eliminar</button>
+                    <a class="btn btn-secondary" href="@($"/clientes/editar/{cliente.IdCliente}")"><i class="bi bi-pencil"></i>Editar</a> |
+                    <button class="btn btn-danger" @onclick="() => DeleteCliente(cliente.IdCliente)"><i class="bi bi-trash"></i>Eliminar</button>
                 </td>
             </tr>
         }

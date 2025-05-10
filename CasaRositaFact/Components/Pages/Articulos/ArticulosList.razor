@@ -72,16 +72,14 @@
                         var precioActual = ObtenerPrecioVigente(articulo);
                     }
                     @(precioActual?.PrecioCosto > 0
-                                ? precioActual?.PrecioCosto.ToString("C")
-                                : "Sin precio")
+                        ? precioActual?.PrecioCosto.ToString("C")
+                        : "Sin precio")
                 </td>
                 <td class="text-center">@(articulo.PrecioActual?.ToString("C") ?? "Sin precio")</td>
                 <td>@(fechaUActual?.ToString("dd/MM/yyyy") ?? "Sin fecha")</td>
-                <td class="text-center">
-                    <div class="btn-group" role="group">
-                        <a class="btn btn-secondary" href="@($"/articulos/editar/{articulo.IdArticulo}")"> <i class="bi bi-pencil"></i> Editar</a> |
-                        <button class="btn btn-danger" @onclick="() => DeleteArticulo(articulo.IdArticulo)"> <i class="bi bi-trash"></i> Eliminar</button>
-                    </div>
+                <td>
+                    <a class="btn btn-secondary" href="@($"/articulos/editar/{articulo.IdArticulo}")"> <i class="bi bi-pencil"></i> Editar</a> |
+                    <button class="btn btn-danger" @onclick="() => DeleteArticulo(articulo.IdArticulo)"> <i class="bi bi-trash"></i> Eliminar</button>
                 </td>
             </tr>
         }
@@ -93,6 +91,17 @@
     private List<Articulo> articulosFiltrados = new List<Articulo>();
     private DateTime? fechaUActual;
     private bool usarOtrosFiltros = false;
+
+    private string _filtro = "";
+
+    private int? categoriaSeleccionada;
+    private int? rubroSeleccionado;
+    private int? proveedorSeleccionado;
+
+    // Listas de opciones
+    private List<Categoria> categorias = new();
+    private List<Rubro> rubros = new();
+    private List<Proveedor> proveedores = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -130,16 +139,6 @@
             FiltrarArticulos();
         }
     }
-    private string _filtro = "";
-
-    private int? categoriaSeleccionada;
-    private int? rubroSeleccionado;
-    private int? proveedorSeleccionado;
-
-    // Listas de opciones
-    private List<Categoria?> categorias = new();
-    private List<Rubro> rubros = new();
-    private List<Proveedor> proveedores = new();
 
     private void FiltrarArticulos()
     {
