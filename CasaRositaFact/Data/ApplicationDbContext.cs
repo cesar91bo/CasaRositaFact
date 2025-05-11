@@ -25,6 +25,15 @@ namespace CasaRositaFact.Data
         public DbSet<Banco> Bancos { get; set; } = null!;
         public DbSet<Parametro> Parametros { get; set; } = null!;
         public DbSet<Empresa> Empresas { get; set; } = null!;
+        public DbSet<LetraFactura> LetrasFacturas { get; set; } = null!;
+        public DbSet<Factura> Facturas { get; set; } = null!;
+        public DbSet<FacturaDetalle> FacturaDetalles { get; set; } = null!;
+        public DbSet<FormaPago> FormasPago { get; set; } = null!;
+        public DbSet<TipoDocumentoFiscal> TiposDocumentosFiscales { get; set; } = null!;
+        public DbSet<ConceptoFactura> ConceptosFacturas { get; set; } = null!;
+        public DbSet<Sucursal> Sucursales { get; set; } = null!;
+        public DbSet<Usuario> Usuarios { get; set; } = null!;
+        public DbSet<TipoUsuario> TiposUsuarios { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -32,6 +41,7 @@ namespace CasaRositaFact.Data
             modelBuilder.ApplyConfiguration(new ArticuloConfiguration()); // Aplicar configuración de Articulo
             modelBuilder.ApplyConfiguration(new PrecioArticuloConfiguration()); // Aplicar configuración de PrecioArticulo
             modelBuilder.ApplyConfiguration(new ProveedorConfiguration()); // Aplicar configuración de Proveedor
+            modelBuilder.ApplyConfiguration(new FacturaConfiguration()); // Aplicar configuración de Factura
 
             // Configuración de RegimenesImpositivos
             modelBuilder.Entity<RegimenImpositivo>().HasKey(r => r.IdRegimenImpositivo); // Clave primaria en RegimenesImpositivos

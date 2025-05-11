@@ -13,6 +13,7 @@
 @inject ProveedorService ProveedorService
 @inject PrecioArticuloService PrecioArticuloService
 @inject UnidadMedidaService UnidadMedidaService
+@inject ParametroService ParametroService
 @inject RubroService RubroService
 @inject IJSRuntime JS
 @inject NavigationManager NavigationManager
@@ -145,7 +146,7 @@
         {
             PrecioCosto = 0,
             PrecioVentaConIva = 0,
-            PorcentajeGanancia = 30.0m,
+            PorcentajeGanancia =0.00m,
             PrecioVentaSinIva = 0
         };
 
@@ -154,19 +155,20 @@
     private List<UnidadMedida> unidadesMedida = new();
     private List<Proveedor> proveedores = new();
 
+
     protected override async Task OnInitializedAsync()
     {
         if (ArticuloId.HasValue)
         {
             articulo = await ArticuloService.GetByIdAsync(ArticuloId.Value);
             precioArticulo = await PrecioArticuloService.GetLastPrecioByArticuloIdAsync(articulo.IdArticulo) ??
-                new PrecioArticulo() { PrecioCosto = 0, PrecioVentaConIva = 0, PrecioVentaSinIva = 0 };
+                new PrecioArticulo() { PrecioCosto = 0, PrecioVentaConIva = 0, PrecioVentaSinIva = 0, PorcentajeGanancia = await ParametroService.GetPorcentajeGanancia() };
 
         }
         else
         {
             precioArticulo.FechaUltimaActualizacion = DateTime.Now;
-
+            precioArticulo.PorcentajeGanancia = await ParametroService.GetPorcentajeGanancia();
         }
 
         _porcentajeGananciaTexto = precioArticulo.PorcentajeGanancia.ToString("0.##");

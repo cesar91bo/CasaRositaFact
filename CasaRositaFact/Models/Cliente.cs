@@ -31,5 +31,7 @@ namespace CasaRositaFact.Models
         public RegimenImpositivo RegimenImpositivo { get; set; } = null!;
         public TipoDocumento TipoDocumento { get; set; } = null!;
 
+        public ICollection<Factura> Facturas { get; set; } = new List<Factura>();
+
     }
 }

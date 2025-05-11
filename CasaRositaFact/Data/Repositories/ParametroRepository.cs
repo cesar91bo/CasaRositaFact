@@ -30,17 +30,21 @@ namespace CasaRositaFact.Data.Repositories
         {
             return await _context.Parametros.ToListAsync();
         }
-        public Task<Parametro?> GetParametroByIdAsync(int id)
+        public async Task<Parametro?> GetParametroByIdAsync(int id)
         {
-            var parametro = _context.Parametros.FirstOrDefaultAsync(p => p.IdEmpresa == id);
-            if (parametro == null)
-                throw new Exception("Parametro no encontrado");
-            return parametro;
+            return await _context.Parametros.FirstOrDefaultAsync(p => p.IdEmpresa == id);
         }
+
         public Task UpdateParametroAsync(Parametro parametro)
         {
             _context.Parametros.Update(parametro);
             return _context.SaveChangesAsync();
         }
+        public async Task<decimal> GetPorcentajeGanancia()
+        {
+            var parametro = await _context.Parametros.FirstOrDefaultAsync();
+            return parametro?.PorcentajeGanancia ?? 0;
+        }
+
     }
 }

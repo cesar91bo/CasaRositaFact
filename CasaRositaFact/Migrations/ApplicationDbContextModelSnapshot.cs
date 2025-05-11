@@ -83,7 +83,7 @@ namespace CasaRositaFact.Migrations
 
                     b.HasIndex("IdUnidadMedida");
 
-                    b.ToTable("Articulos");
+                    b.ToTable("Articulos", (string)null);
                 });
 
             modelBuilder.Entity("CasaRositaFact.Models.Banco", b =>
@@ -100,7 +100,7 @@ namespace CasaRositaFact.Migrations
 
                     b.HasKey("IdBanco");
 
-                    b.ToTable("Bancos");
+                    b.ToTable("Bancos", (string)null);
                 });
 
             modelBuilder.Entity("CasaRositaFact.Models.Categoria", b =>
@@ -117,7 +117,7 @@ namespace CasaRositaFact.Migrations
 
                     b.HasKey("IdCategoria");
 
-                    b.ToTable("Categorias");
+                    b.ToTable("Categorias", (string)null);
                 });
 
             modelBuilder.Entity("CasaRositaFact.Models.Cliente", b =>
@@ -199,7 +199,7 @@ namespace CasaRositaFact.Migrations
 
                     b.HasIndex("TipoDocumentoIdTipoDocumento");
 
-                    b.ToTable("Clientes");
+                    b.ToTable("Clientes", (string)null);
                 });
 
             modelBuilder.Entity("CasaRositaFact.Models.Empresa", b =>
@@ -251,7 +251,7 @@ namespace CasaRositaFact.Migrations
 
                     b.HasKey("IdEmpresa");
 
-                    b.ToTable("Empresas");
+                    b.ToTable("Empresas", (string)null);
                 });
 
             modelBuilder.Entity("CasaRositaFact.Models.Localidad", b =>
@@ -270,7 +270,7 @@ namespace CasaRositaFact.Migrations
 
                     b.HasIndex("IdProvincia");
 
-                    b.ToTable("Localidades");
+                    b.ToTable("Localidades", (string)null);
                 });
 
             modelBuilder.Entity("CasaRositaFact.Models.Parametro", b =>
@@ -290,7 +290,7 @@ namespace CasaRositaFact.Migrations
 
                     b.HasKey("IdEmpresa");
 
-                    b.ToTable("Parametros");
+                    b.ToTable("Parametros", (string)null);
                 });
 
             modelBuilder.Entity("CasaRositaFact.Models.PrecioArticulo", b =>
@@ -361,7 +361,7 @@ namespace CasaRositaFact.Migrations
 
                     b.HasIndex("TipoIvaIdTipoIva");
 
-                    b.ToTable("PreciosArticulos");
+                    b.ToTable("PreciosArticulos", (string)null);
                 });
 
             modelBuilder.Entity("CasaRositaFact.Models.Proveedor", b =>
@@ -413,7 +413,7 @@ namespace CasaRositaFact.Migrations
 
                     b.HasIndex("IdBanco");
 
-                    b.ToTable("Proveedores");
+                    b.ToTable("Proveedores", (string)null);
                 });
 
             modelBuilder.Entity("CasaRositaFact.Models.Provincia", b =>
@@ -430,7 +430,7 @@ namespace CasaRositaFact.Migrations
 
                     b.HasKey("IdProvincia");
 
-                    b.ToTable("Provincias");
+                    b.ToTable("Provincias", (string)null);
                 });
 
             modelBuilder.Entity("CasaRositaFact.Models.RegimenImpositivo", b =>
@@ -447,7 +447,7 @@ namespace CasaRositaFact.Migrations
 
                     b.HasKey("IdRegimenImpositivo");
 
-                    b.ToTable("RegimenesImpositivos");
+                    b.ToTable("RegimenesImpositivos", (string)null);
                 });
 
             modelBuilder.Entity("CasaRositaFact.Models.Rubro", b =>
@@ -464,7 +464,7 @@ namespace CasaRositaFact.Migrations
 
                     b.HasKey("IdRubro");
 
-                    b.ToTable("Rubros");
+                    b.ToTable("Rubros", (string)null);
                 });
 
             modelBuilder.Entity("CasaRositaFact.Models.TipoDocumento", b =>
@@ -481,7 +481,7 @@ namespace CasaRositaFact.Migrations
 
                     b.HasKey("IdTipoDocumento");
 
-                    b.ToTable("TiposDocumentos");
+                    b.ToTable("TiposDocumentos", (string)null);
                 });
 
             modelBuilder.Entity("CasaRositaFact.Models.TipoIva", b =>
@@ -502,7 +502,7 @@ namespace CasaRositaFact.Migrations
 
                     b.HasKey("IdTipoIva");
 
-                    b.ToTable("TiposIva");
+                    b.ToTable("TiposIva", (string)null);
                 });
 
             modelBuilder.Entity("CasaRositaFact.Models.UnidadMedida", b =>
@@ -519,7 +519,7 @@ namespace CasaRositaFact.Migrations
 
                     b.HasKey("IdUnidadMedida");
 
-                    b.ToTable("UnidadesMedida");
+                    b.ToTable("UnidadesMedida", (string)null);
                 });
 
             modelBuilder.Entity("CasaRositaFact.Models.Articulo", b =>

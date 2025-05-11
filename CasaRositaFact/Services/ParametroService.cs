@@ -16,7 +16,7 @@ namespace CasaRositaFact.Services
             return _parametroRepository.GetAllParametrosAsync();
         }
 
-        public Task<Parametro> GetParametroByIdAsync(int id)
+        public Task<Parametro?> GetParametroByIdAsync(int id)
         {
             return _parametroRepository.GetParametroByIdAsync(id);
         }
@@ -34,6 +34,11 @@ namespace CasaRositaFact.Services
         public Task DeleteParametroAsync(int id)
         {
             return _parametroRepository.DeleteParametroAsync(id);
+        }
+
+        public Task<decimal> GetPorcentajeGanancia()
+        {
+            return _parametroRepository.GetPorcentajeGanancia();
         }
     }
 }
