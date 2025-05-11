@@ -10,6 +10,5 @@ namespace CasaRositaFact.Models
         public required string Nombre { get; set; } = string.Empty;
         public string? Descripcion { get; set; }
         public ICollection<Usuario> Usuarios { get; set; } = new List<Usuario>();
-        public ICollection<Factura> Facturas { get; set; } = new List<Factura>();
     }
 }

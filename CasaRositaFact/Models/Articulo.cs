@@ -38,5 +38,6 @@ namespace CasaRositaFact.Models
         public Proveedor? Proveedor { get; set; }
 
         public ICollection<PrecioArticulo> PreciosArticulos { get; set; } = new List<PrecioArticulo>();
+        public ICollection<FacturaDetalle> FacturaDetalles { get; set; } = new List<FacturaDetalle>();
     }
 }

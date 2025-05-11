@@ -18,7 +18,7 @@ namespace CasaRositaFact.Models
         public decimal PrecioUnitario { get; set; }
         public int? IdTipoIva { get; set; } //Tipo de IVA del artículo
         [Precision(18, 2)]
-        public decimal? TotalAriculo { get; set; }
+        public decimal? TotalArticulo { get; set; }
         public bool? DesdeRemito { get; set; } = false; //Indica si el detalle se generó desde un remito
         public int? IdRemito { get; set; } //Id del remito desde el cual se generó el detalle
         public DateTime FechaRegistro { get; set; } = DateTime.Now;

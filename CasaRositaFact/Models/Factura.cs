@@ -66,9 +66,9 @@ namespace CasaRositaFact.Models
         [ForeignKey("IdCliente")]
         public Cliente? Cliente { get; set; }
         [ForeignKey("IdUsuario")]
-        public Usuario? Usuario { get; set; }
+        public Usuario? UsuarioGenerador { get; set; }
         [ForeignKey("IdUsuarioAnulacion")]
-        public Usuario? UsuarioAnulacion { get; set; }
+        public Usuario? UsuarioAnulador { get; set; }
         [ForeignKey("IdConceptoFactura")]
         public ConceptoFactura? ConceptoFactura { get; set; }
         [ForeignKey("IdEmpresa")]

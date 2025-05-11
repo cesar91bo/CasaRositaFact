@@ -16,14 +16,14 @@ namespace CasaRositaFact.Models
         public DateTime? FechaBaja { get; set; }
         public int? IdSucursal { get; set; } //Sucursal a la que pertenece el usuario
 
-        public ICollection<Factura> Facturas { get; set; } = new List<Factura>();
 
         [ForeignKey("IdTipoUsuario")]
         public TipoUsuario? TiposUsuarios { get; set; }
         [ForeignKey("IdSucursal")]
         public Sucursal? Sucursal { get; set; } //Sucursal a la que pertenece el usuario
+        public ICollection<Factura> FacturasGeneradas { get; set; } = new List<Factura>();
         public ICollection<Factura> FacturasAnuladas { get; set; } = new List<Factura>();
-        public ICollection<Factura> Facturas { get; set; } = new List<Factura>();
+
 
     }
 }

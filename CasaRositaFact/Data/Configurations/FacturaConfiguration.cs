@@ -13,47 +13,49 @@ namespace CasaRositaFact.Data.Configurations
             modelBuilder.HasOne(a => a.TipoDocumentoFiscal) // Relación con Tipos Documentos Fiscales
                 .WithMany(c => c.Facturas) // Relación inversa
                 .HasForeignKey(a => a.IdTipoDocumentoFiscal) // Clave foránea en Factura
-                .OnDelete(DeleteBehavior.SetNull); // Comportamiento en caso de eliminación 
+                .OnDelete(DeleteBehavior.Restrict); // Comportamiento en caso de eliminación 
 
             modelBuilder.HasOne(a => a.LetraFactura)
                 .WithMany(c => c.Facturas)
                 .HasForeignKey(a => a.IdLetraFactura)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.HasOne(a => a.FormaPago)
                 .WithMany(c => c.Facturas)
                 .HasForeignKey(a => a.IdFormaPago)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.HasOne(a => a.Cliente)
                 .WithMany(c => c.Facturas)
                 .HasForeignKey(a => a.IdCliente)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.HasOne(f => f.Usuario)
-                .WithMany()
+            modelBuilder.HasOne(f => f.UsuarioGenerador)
+                .WithMany(u => u.FacturasGeneradas)
                 .HasForeignKey(f => f.IdUsuario)
-                .OnDelete(DeleteBehavior.SetNull);
+                .HasPrincipalKey(u => u.IdUsuario)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.HasOne(f => f.UsuarioAnulacion)
-                .WithMany()
+            modelBuilder.HasOne(f => f.UsuarioAnulador)
+                .WithMany(u => u.FacturasAnuladas)
                 .HasForeignKey(f => f.IdUsuarioAnulacion)
-                .OnDelete(DeleteBehavior.SetNull);
+                .HasPrincipalKey(u => u.IdUsuario)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.HasOne(f => f.Empresa)
                 .WithMany()
                 .HasForeignKey(f => f.IdEmpresa)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.HasOne(f => f.Sucursal)
                 .WithMany(s => s.Facturas)
                 .HasForeignKey(f => f.IdSucursal)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.HasOne(f => f.ConceptoFactura)
                 .WithMany(cf => cf.Facturas)
                 .HasForeignKey(f => f.IdConceptoFactura)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
 
         }
     }

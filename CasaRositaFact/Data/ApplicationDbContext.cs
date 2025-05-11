@@ -42,6 +42,7 @@ namespace CasaRositaFact.Data
             modelBuilder.ApplyConfiguration(new PrecioArticuloConfiguration()); // Aplicar configuración de PrecioArticulo
             modelBuilder.ApplyConfiguration(new ProveedorConfiguration()); // Aplicar configuración de Proveedor
             modelBuilder.ApplyConfiguration(new FacturaConfiguration()); // Aplicar configuración de Factura
+            modelBuilder.ApplyConfiguration(new EmpresaConfiguration()); // Aplicar configuración de Empresa
 
             // Configuración de RegimenesImpositivos
             modelBuilder.Entity<RegimenImpositivo>().HasKey(r => r.IdRegimenImpositivo); // Clave primaria en RegimenesImpositivos
@@ -64,13 +65,14 @@ namespace CasaRositaFact.Data
 
             modelBuilder.Entity<UnidadMedida>().HasKey(u => u.IdUnidadMedida); // Clave primaria en UnidadesMedida
 
-            modelBuilder.Entity<Empresa>().HasKey(e => e.IdEmpresa); // Clave primaria en Empresas
+            modelBuilder.Entity<LetraFactura>().HasKey(l => l.IdLetraFactura); // Clave primaria en LetrasFacturas
+            modelBuilder.Entity<FormaPago>().HasKey(f => f.IdFormaPago); // Clave primaria en FormasPago
+            modelBuilder.Entity<TipoDocumentoFiscal>().HasKey(t => t.IdTipoDocumentoFiscal); // Clave primaria en TiposDocumentosFiscales
+            modelBuilder.Entity<ConceptoFactura>().HasKey(c => c.IdConceptoFactura); // Clave primaria en ConceptosFacturas
+            modelBuilder.Entity<Sucursal>().HasKey(s => s.IdSucursal); // Clave primaria en Sucursales
+            modelBuilder.Entity<Usuario>().HasKey(u => u.IdUsuario); // Clave primaria en Usuarios
+            modelBuilder.Entity<TipoUsuario>().HasKey(t => t.IdTipoUsuario); // Clave primaria en TiposUsuarios
 
-            modelBuilder.Entity<Empresa>()
-                .HasOne(e => e.Parametro)
-                .WithOne(p => p.Empresa)
-                .HasForeignKey<Parametro>(p => p.IdEmpresa)
-                .OnDelete(DeleteBehavior.Cascade);
         }
 
     }
