@@ -1,5 +1,12 @@
-﻿@page "/facturacion"
-<h3>FacturasList</h3>
+﻿@page "/facturacion/listado"
+@using Services
+@using Models
+@inject FacturaService FacturaService
+@inject NavigationManager NavigationManager
+
+<div class="bg-light p-4">
+    <h2 class="text-dark fw-bold  mb-2">Lista de Facturas</h2>
+</div>
 
 @code {
 

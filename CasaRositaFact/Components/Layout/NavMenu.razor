@@ -29,10 +29,22 @@
         </div>
 
         <div class="nav-item px-3">
-            <NavLink class="nav-link d-flex align-items-center" href="facturacion">
-                <span class="bi bi-cart-fill fs-4 me-3" aria-hidden="true" style="line-height: 1.2;"></span> Facturación
-            </NavLink>
+            <a class="nav-link d-flex align-items-center" data-bs-toggle="collapse" href="#submenuFacturacion" role="button" aria-expanded="false" aria-controls="submenuFacturacion">
+                <span class="bi bi-cart-fill fs-4 me-3" style="line-height: 1.2;"></span> Facturación
+                <span class="ms-auto bi bi-chevron-down" style="line-height: 1.6;"></span>
+            </a>
+            <div class="collapse" id="submenuFacturacion">
+                <nav class="nav flex-column ms-4">
+                    <NavLink class="nav-link d-flex align-items-center" href="facturacion/nueva">
+                        <span class="bi bi-plus-circle" style="line-height: 1.6;"></span> Nueva Factura
+                    </NavLink>
+                    <NavLink class="nav-link d-flex align-items-center" href="facturacion/listado">
+                        <span class="bi bi-list-ul" style="line-height: 1.6;"></span> Listado de Facturas
+                    </NavLink>
+                </nav>
+            </div>
         </div>
+
 
         <div class="nav-item px-3">
             <NavLink class="nav-link d-flex align-items-center" href="proveedores">

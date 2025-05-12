@@ -47,6 +47,12 @@ namespace CasaRositaFact.Infrastructure
             services.AddScoped<ParametroService>();
             services.AddScoped<IParametroRepository, ParametroRepository>();
 
+            services.AddScoped<FacturaService>();
+            services.AddScoped<IFacturaRepository, FacturaRepository>();
+
+            services.AddScoped<FacturaDetalleService>();
+            services.AddScoped<IFacturaDetalleRepository, FacturaDetalleRepository>();
+
             return services;
         }
     }
