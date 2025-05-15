@@ -75,5 +75,25 @@ namespace CasaRositaFact.Data.Repositories
             }
         }
 
+        public async Task<IEnumerable<TipoDocumentoFiscal>> GetAllTipoDocumentoFiscalAsync()
+        {
+            return await _context.TiposDocumentosFiscales.ToListAsync();
+        }
+
+        public async Task<TipoDocumentoFiscal> GetTipoDocumentoFiscalByIdAsync(int id)
+        {
+            var tipoDocumentoFiscal = await _context.TiposDocumentosFiscales
+                .Include(tdf => tdf.Facturas)
+                .FirstOrDefaultAsync(tdf => tdf.IdTipoDocumentoFiscal == id);
+            if (tipoDocumentoFiscal != null)
+            {
+                return tipoDocumentoFiscal;
+            }
+            else
+            {
+                throw new Exception("Tipo de documento fiscal no encontrado");
+            }
+        }
+
     }
 }

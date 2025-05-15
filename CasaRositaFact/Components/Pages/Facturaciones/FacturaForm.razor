@@ -1,5 +1,6 @@
 ﻿@page "/facturas/formFactura"
 @page "/facturas/editar/{FacturaId:int}"
+@using CasaRositaFact.Components.Pages.Auxiliares
 @using CasaRositaFact.Components.Pages.Facturaciones
 @using Services
 @using Models
@@ -10,94 +11,71 @@
 
 <h3 class="mb-2 text-info fw-bold border-bottom pb-2">@(FacturaId == null ? "Nueva Factura" : "Editar Factura")</h3>
 
-<EditForm Model="factura" OnValidSubmit="SaveFactura">
+<EditForm Model="factura" OnValidSubmit="GuardarFactura">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
-    <h3 class="mb-3 text-secondary fw-bold border-bottom pb-2">Datos generales</h3>
-    <div class="row mb-2">
-        @*  <div class="col-md-3">
-            <label class="form-label">Tipo Doc. Fiscal</label>
-            <TipoDocumentoSelect Tipos="@tiposDocumento" @bind-SelectedId="factura.IdTipoDocumentoFiscal" />
-        </div> *@
+    <h3 class="mb-3 text-secondary fw-bold border-bottom pb-2">Cabecera de Factura</h3>
 
-        @* <div class="col-md-2">
-            <label class="form-label">Letra</label>
-            <LetraFacturaSelect Letras="@letrasFactura" @bind-SelectedId="factura.IdLetraFactura" />
-        </div> *@
-
-        <div class="col-md-2">
-            <label class="form-label">Boca de Venta</label>
-            <InputText class="form-control" @bind-Value="factura.BVFactura" />
-        </div>
-
+    <div class="row mb-2 align-items-end">
+        <!-- Fecha -->
         <div class="col-md-3">
-            <label class="form-label">Número Comprobante</label>
-            <InputText class="form-control" @bind-Value="factura.NroCompFactura" />
+            <label for="FechaEmision" class="form-label">Fecha de Emisión</label>
+            <InputDate id="FechaEmision" class="form-control" @bind-Value="factura.FechaEmision" />
         </div>
 
-        <div class="col-md-2">
-            <label class="form-label">Fecha Emisión</label>
-            <InputDate class="form-control" @bind-Value="factura.FechaEmision" />
+        <!-- Checkbox "No mover Stock" -->
+        <div class="col-md-3 d-flex align-items-center">
+            <div class="form-check form-switch mt-3">
+                <InputCheckbox id="NoMoverStock"
+                               class="form-check-input"
+                               @bind-Value="factura.MoverStock" />
+                <label class="form-check-label" for="NoMoverStock">No mover Stock</label>
+            </div>
         </div>
     </div>
 
-    <div class="row mb-3">
-        @* <div class="col-md-4">
-            <label class="form-label">Cliente</label>
-            <ClienteSelect Clientes="@clientes" @bind-SelectedId="factura.IdCliente" />
-        </div> *@
-
-        @* <div class="col-md-4">
-            <label class="form-label">Forma de Pago</label>
-            <FormaPagoSelect FormasPago="@formasPago" @bind-SelectedId="factura.IdFormaPago" />
+    <div class="row mb-2 align-items-end">
+        <!-- Cliente -->
+        <div class="col-md-6">
+            <label for="Cliente" class="form-label">Cliente</label>
+            <InputText id="Cliente" class="form-control" @bind-Value="ClienteNombre" />
         </div>
 
+        <!-- Tipo y Número Factura -->
+        <div class="col-md-3">
+            <label for="TipoFactura" class="form-label">Tipo Factura</label>
+            <InputSelect id="TipoFactura" class="form-select" @bind-Value="factura.LetraFactura">
+                <option value="A">Tipo A</option>
+                <option value="B">Tipo B</option>
+                <option value="C">Tipo C</option>
+            </InputSelect>
+        </div>
+
+        <div class="col-md-3">
+            <label for="NroFactura" class="form-label">Número</label>
+            <InputNumber id="NroFactura" class="form-control" @bind-Value="factura.NroCompFactura" />
+        </div>
+    </div>
+
+    <div class="row mb-2">
+        <!-- Forma de Pago -->
         <div class="col-md-4">
-            <label class="form-label">Concepto</label>
-            <ConceptoFacturaSelect Conceptos="@conceptosFactura" @bind-SelectedId="factura.IdConceptoFactura" />
-        </div> *@
+            <label for="FormaPago" class="form-label">Forma de Pago</label>
+            <InputSelect id="FormaPago" class="form-select" @bind-Value="factura.FormaPago">
+                <option value="Contado">Contado</option>
+                <option value="Credito">Crédito</option>
+                <option value="Transferencia">Transferencia</option>
+            </InputSelect>
+        </div>
+
     </div>
 
-    <h3 class="mb-3 text-secondary fw-bold border-bottom pb-2">Totales</h3>
-    <div class="row mb-2">
-        <div class="col-md-3">
-            <label class="form-label">Subtotal 10.5%</label>
-            <InputNumber class="form-control" @bind-Value="factura.SubTotal105" step="any" />
-        </div>
-        <div class="col-md-3">
-            <label class="form-label">Subtotal 21%</label>
-            <InputNumber class="form-control" @bind-Value="factura.SubTotal21" step="any" />
-        </div>
-        <div class="col-md-3">
-            <label class="form-label">Descuento (%)</label>
-            <InputNumber class="form-control" @bind-Value="factura.Descuento" step="any" />
-        </div>
-        <div class="col-md-3">
-            <label class="form-label">Total</label>
-            <InputNumber class="form-control" @bind-Value="factura.Total" step="any" readonly />
-        </div>
+    <!-- Detalle -->
+    <div class="mb-4">
+        <label for="Detalle" class="form-label">Detalle Adicional</label>
+        <InputTextArea id="Detalle" class="form-control" rows="2" @bind-Value="factura.Observaciones" />
     </div>
-
-    <div class="mb-3">
-        <label class="form-label">Observaciones</label>
-        <InputTextArea class="form-control" rows="3" @bind-Value="factura.Observaciones" />
-    </div>
-
-    <div class="row mb-4">
-        <div class="col-md-3 form-check form-switch mt-2">
-            <label class="form-check-label">¿Impresa?</label>
-            <InputCheckbox class="form-check-input" @bind-Value="factura.Impresa" />
-        </div>
-
-        <div class="col-md-3 form-check form-switch mt-2">
-            <label class="form-check-label">¿Mover Stock?</label>
-            <InputCheckbox class="form-check-input" @bind-Value="factura.MoverStock" />
-        </div>
-    </div>
-
-    <button type="submit" class="btn btn-primary">Guardar</button>
-    <button type="button" class="btn btn-secondary" @onclick="NavigateToFacturas">Cancelar</button>
 </EditForm>
 
 
@@ -106,27 +84,47 @@
 
 
     private Factura factura = new Factura
-    {
+        {
             IdLetraFactura = 1,
             IdTipoDocumentoFiscal = 1,
-    };
+        };
 
-    private List<TipoDocumentoFiscal> tiposDocumento = new List<TipoDocumentoFiscal>();
+    private List<TipoDocumentoFiscal> tiposDocumentosFiscales = new List<TipoDocumentoFiscal>();
     private List<LetraFactura> letrasFactura = new List<LetraFactura>();
     private List<Cliente> clientes = new List<Cliente>();
     private List<FormaPago> formasPago = new List<FormaPago>();
     private List<ConceptoFactura> conceptosFactura = new List<ConceptoFactura>();
     private List<Articulo> articulos = new List<Articulo>();
 
-    private async Task SaveFactura()
+    protected override void OnInitialized()
     {
-        
+        if (factura.FechaEmision == default) // o == DateTime.MinValue
+        {
+            factura.FechaEmision = DateTime.Today;
+        }
+    }
+
+    private async Task GuardarFactura()
+    {
+
 
     }
 
     private void NavigateToFacturas()
     {
         NavigationManager.NavigateTo("/facturas");
+    }
+
+    private string ClienteNombre
+    {
+        get => factura.Cliente?.Nombre ?? "Consumidor Final";
+        set
+        {
+            if (factura.Cliente != null)
+            {
+                factura.Cliente.Nombre = value;
+            }
+        }
     }
 
 }

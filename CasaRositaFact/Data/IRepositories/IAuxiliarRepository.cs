@@ -7,6 +7,9 @@ namespace CasaRositaFact.Data.IRepositories
         Task<IEnumerable<TipoDocumento>> GetAllTipoDocumentoAsync();
         Task<TipoDocumento> GetTipoDocumentoByIdAsync(int id);
 
+        Task<IEnumerable<TipoDocumentoFiscal>> GetAllTipoDocumentoFiscalAsync();
+        Task<TipoDocumentoFiscal> GetTipoDocumentoFiscalByIdAsync(int id);
+
         Task<IEnumerable<LetraFactura>> GetAllLetraFacturaAsync();
         Task<LetraFactura> GetLetraFacturaByIdAsync(int id);
 

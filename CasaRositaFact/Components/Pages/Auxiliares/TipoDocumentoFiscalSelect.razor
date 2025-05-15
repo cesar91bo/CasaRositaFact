@@ -1,0 +1,30 @@
+﻿@using Services
+@using Models
+@inject AuxiliarService AuxiliarService
+
+<select @bind="SelectedIdInternal" class="form-select">
+    <option value="">Seleccione una opción</option>
+    @foreach (var tipo in TiposDocumentosFiscales)
+    {
+        <option value="@tipo.IdTipoDocumentoFiscal">@tipo.Nombre</option>
+    }
+</select>
+
+@code {
+    [Parameter] public List<TipoDocumentoFiscal> TiposDocumentosFiscales { get; set; } = new();
+    [Parameter] public int? SelectedId { get; set; }
+    [Parameter] public EventCallback<int?> SelectedIdChanged { get; set; }
+
+    private int? SelectedIdInternal
+    {
+        get => SelectedId;
+        set
+        {
+            if (SelectedId != value)
+            {
+                SelectedId = value;
+                SelectedIdChanged.InvokeAsync(value);
+            }
+        }
+    }
+}
