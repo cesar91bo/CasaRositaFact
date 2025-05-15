@@ -42,6 +42,11 @@ namespace CasaRositaFact.Services
         {
             return _facturaRepository.GetFacturasByRangoFechasAsync(fechaInicio, fechaFin);
         }
+
+        public async Task<bool> AnularFacturaAsync(int idFactura, int idUsuario)
+        {
+            return await _facturaRepository.AnularFacturaAsync(idFactura, idUsuario);
+        }
     }
 
 }

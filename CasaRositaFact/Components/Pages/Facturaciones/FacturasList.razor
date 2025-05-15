@@ -1,13 +1,78 @@
 ﻿@page "/facturacion/listado"
+@using CasaRositaFact.Components.Pages.Facturaciones
 @using Services
 @using Models
 @inject FacturaService FacturaService
 @inject NavigationManager NavigationManager
+@inject FacturaService FacturaService
 
 <div class="bg-light p-4">
     <h2 class="text-dark fw-bold  mb-2">Lista de Facturas</h2>
 </div>
 
-@code {
+<button type="button" @onclick="CreateNewFactura" class="btn btn-primary mb-3">Nueva Factura</button>
 
+<table class="table">
+    <thead class="table-light">
+        <tr>
+            <th class="w-10 text-center">Tipo</th>               <!-- Tipo de documento (Factura, Ticket, etc.) -->
+            <th class="w-15 text-center">N° Comprobante</th>     <!-- BVFactura + NroCompFactura -->
+            <th class="w-20">Cliente</th>                        <!-- Nombre del cliente -->
+            <th class="w-10 text-center">Fecha</th>              <!-- Fecha de emisión -->
+            <th class="w-10 text-end">Importe Total</th>         <!-- Total -->
+            <th class="w-10 text-center">Forma de Pago</th>      <!-- Contado, Crédito, etc. -->
+            <th class="w-10 text-center">Estado</th>             <!-- Impresa / Anulada -->
+            <th class="w-15 text-center">Acciones</th>           <!-- Ver / Editar / Anular -->
+        </tr>
+
+    </thead>
+    <tbody>
+        @foreach (var factura in facturasFiltrados)
+        {
+            <tr>
+                <td class="text-truncate" style="max-width: 200px;" title="@factura.TipoDocumentoFiscal">
+                    @factura.TipoDocumentoFiscal
+                </td>
+                <td class="text-center">@factura.NroCompFactura</td>
+                <td class="text-center">@(factura.Cliente)</td>
+                <td class="text-center">@(factura.FechaEmision.ToString("dd/MM/yyyy"))</td>
+                <td class="text-center">@(factura.Total.ToString("C"))</td>
+                <td class="text-center">@(factura.FormaPago)</td>
+                <td class="text-center">@(factura.Impresa)</td>
+                <td>
+                    <a class="btn btn-secondary" href="@($"/facturas/editar/{factura.IdFactura}")"> <i class="bi bi-pencil"></i> Editar</a> |
+                    <button class="btn btn-danger" @onclick="() => AnularFactura(factura.IdFactura)"> <i class="bi bi-trash"></i> Anular</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<Factura> facturas = new List<Factura>();
+    private List<Factura> facturasFiltrados = new List<Factura>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            facturas = (await FacturaService.GetAllFacturasAsync()).ToList();
+            facturasFiltrados = facturas;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al inicializar el componente: {ex.Message}");
+        }
+    }
+
+    private void CreateNewFactura()
+    {
+        NavigationManager.NavigateTo("/facturas/formFactura");
+    }
+
+    private async Task AnularFactura(int idFactura)
+    {
+        await FacturaService.AnularFacturaAsync(idFactura, 1);
+        facturasFiltrados = (await FacturaService.GetAllFacturasAsync()).ToList();
+    }
 }

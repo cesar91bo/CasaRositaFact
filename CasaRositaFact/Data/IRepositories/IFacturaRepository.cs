@@ -12,6 +12,6 @@ namespace CasaRositaFact.Data.IRepositories
         Task<IEnumerable<Factura>> GetFacturasByClienteIdAsync(int clienteId);
         Task<IEnumerable<Factura>> GetFacturasByFechaAsync(DateTime fecha);
         Task<IEnumerable<Factura>> GetFacturasByRangoFechasAsync(DateTime fechaInicio, DateTime fechaFin);
-
+        Task <bool>AnularFacturaAsync(int idFactura, int idUsuario);
     }
 }

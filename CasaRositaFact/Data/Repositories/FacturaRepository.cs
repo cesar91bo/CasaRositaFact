@@ -57,5 +57,19 @@ namespace CasaRositaFact.Data.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task<bool> AnularFacturaAsync(int idFactura, int idUsuario)
+        {
+            var factura = await _context.Facturas.FindAsync(idFactura);
+            if (factura != null)
+            {
+                factura.Anulada = true;
+                factura.FechaAnulacion = DateTime.Now;
+                factura.IdUsuarioAnulacion = idUsuario;
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            return false;
+        }
     }
 }
