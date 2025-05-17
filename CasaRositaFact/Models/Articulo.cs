@@ -36,6 +36,7 @@ namespace CasaRositaFact.Models
         public UnidadMedida? UnidadMedida { get; set; }
         [ForeignKey("IdProveedor")]
         public Proveedor? Proveedor { get; set; }
+        public string ImagenPath { get; set; } = string.Empty;
 
         public ICollection<PrecioArticulo> PreciosArticulos { get; set; } = new List<PrecioArticulo>();
         public ICollection<FacturaDetalle> FacturaDetalles { get; set; } = new List<FacturaDetalle>();
