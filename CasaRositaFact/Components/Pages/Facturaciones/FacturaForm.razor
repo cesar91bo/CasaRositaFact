@@ -17,6 +17,45 @@
 
     <h3 class="mb-3 text-secondary fw-bold border-bottom pb-2">Cabecera de Factura</h3>
 
+    <!-- Búsqueda de Cliente -->
+    <div class="row mb-3 align-items-end">
+        <!-- Input ID Cliente -->
+        <div class="col-md-2">
+            <label for="IdCliente" class="form-label">ID Cliente</label>
+            <InputNumber id="IdCliente" class="form-control" @bind-Value="IdCliente" />
+        </div>
+
+        <!-- Botón Buscar -->
+        <div class="col-md-1">
+            <label class="form-label d-block">&nbsp;</label>
+            <button type="button" class="btn btn-outline-primary w-100" @onclick="BuscarCliente">
+                <i class="bi bi-search"></i> <!-- Bootstrap Icons: lupa -->
+            </button>
+        </div>
+
+        <!-- Botón Listado Clientes -->
+        <div class="col-md-1">
+            <label class="form-label d-block">&nbsp;</label>
+            <button type="button" class="btn btn-outline-secondary w-100" @onclick="NavigateToClientes">
+                <i class="bi bi-people"></i>
+            </button>
+        </div>
+
+        <!-- Botón Cliente por defecto -->
+        <div class="col-md-1">
+            <label class="form-label d-block">&nbsp;</label>
+            <button type="button" class="btn btn-outline-success w-100" @onclick="CargarClientePorDefecto">
+                <i class="bi bi-person-check"></i>
+            </button>
+        </div>
+
+        <!-- Nombre del Cliente -->
+        <div class="col-md-5">
+            <label class="form-label">Cliente</label>
+            <div class="form-control bg-light">@clienteNombre</div>
+        </div>
+    </div>
+
     <div class="row mb-2 align-items-end">
         <!-- Fecha -->
         <div class="col-md-3">
@@ -96,11 +135,18 @@
     private List<ConceptoFactura> conceptosFactura = new List<ConceptoFactura>();
     private List<Articulo> articulos = new List<Articulo>();
 
+    private int? IdCliente;
+    private string clienteNombre = string.Empty;
+
     protected override void OnInitialized()
     {
         if (factura.FechaEmision == default) // o == DateTime.MinValue
         {
             factura.FechaEmision = DateTime.Today;
+        }
+        if (factura.Cliente == null)
+        {
+            CargarClientePorDefecto();
         }
     }
 
@@ -115,6 +161,11 @@
         NavigationManager.NavigateTo("/facturas");
     }
 
+    private void NavigateToClientes()
+    {
+        NavigationManager.NavigateTo("/clientes");
+    }
+
     private string ClienteNombre
     {
         get => factura.Cliente?.Nombre ?? "Consumidor Final";
@@ -126,5 +177,32 @@
             }
         }
     }
+    private async Task BuscarCliente()
+    {
+        if (IdCliente is null)
+            return;
 
+        // Simulamos cargar el cliente desde un servicio
+        factura.Cliente = new Cliente
+            {
+                IdCliente = IdCliente.Value,
+                Nombre = $"Cliente #{IdCliente} - Nombre simulado",
+                Apellido = "",
+                IdRegimenImpositivo = 1,
+                IdTipoDocumento = 1
+            };
+    }
+
+    private void CargarClientePorDefecto()
+    {
+        IdCliente = 1;
+        factura.Cliente = new Cliente
+            {
+                IdCliente = 1,
+                Nombre = "Consumidor Final",
+                Apellido = "",
+                IdRegimenImpositivo = 1,
+                IdTipoDocumento = 1
+            };
+    }
 }
