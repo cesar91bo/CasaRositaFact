@@ -9,5 +9,6 @@ namespace CasaRositaFact.Data.IRepositories
         Task AddClienteAsync(Cliente cliente);
         Task UpdateClienteAsync(Cliente cliente);
         Task DeleteClienteAsync(int id);
+        Task<Cliente> GetClientePorDefecto();
     }
 }

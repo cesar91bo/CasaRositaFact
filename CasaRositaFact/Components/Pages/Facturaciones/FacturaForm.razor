@@ -5,6 +5,7 @@
 @using Services
 @using Models
 @using static CasaRositaFact.Models.Factura
+@inject ClienteService ClienteService
 @inject FacturaService FacturaService
 @inject IJSRuntime JS
 @inject NavigationManager NavigationManager
@@ -22,7 +23,7 @@
         <!-- Input ID Cliente -->
         <div class="col-md-2">
             <label for="IdCliente" class="form-label">ID Cliente</label>
-            <InputNumber id="IdCliente" class="form-control" @bind-Value="IdCliente" />
+            <InputNumber id="IdCliente" class="form-control" @bind-Value="cliente.IdCliente" />
         </div>
 
         <!-- Botón Buscar -->
@@ -52,7 +53,7 @@
         <!-- Nombre del Cliente -->
         <div class="col-md-5">
             <label class="form-label">Cliente</label>
-            <div class="form-control bg-light">@clienteNombre</div>
+            <input id="Cliente" class="form-control" value="@cliente.NombreCompleto" readonly />
         </div>
     </div>
 
@@ -67,19 +68,14 @@
         <div class="col-md-3 d-flex align-items-center">
             <div class="form-check form-switch mt-3">
                 <InputCheckbox id="NoMoverStock"
-                               class="form-check-input"
-                               @bind-Value="factura.MoverStock" />
+                class="form-check-input"
+                @bind-Value="factura.MoverStock" />
                 <label class="form-check-label" for="NoMoverStock">No mover Stock</label>
             </div>
         </div>
     </div>
 
     <div class="row mb-2 align-items-end">
-        <!-- Cliente -->
-        <div class="col-md-6">
-            <label for="Cliente" class="form-label">Cliente</label>
-            <InputText id="Cliente" class="form-control" @bind-Value="ClienteNombre" />
-        </div>
 
         <!-- Tipo y Número Factura -->
         <div class="col-md-3">
@@ -93,7 +89,7 @@
 
         <div class="col-md-3">
             <label for="NroFactura" class="form-label">Número</label>
-            <InputNumber id="NroFactura" class="form-control" @bind-Value="factura.NroCompFactura" />
+            <InputText id="NroFactura" class="form-control" @bind-Value="factura.NroCompFactura" />
         </div>
     </div>
 
@@ -130,7 +126,7 @@
 
     private List<TipoDocumentoFiscal> tiposDocumentosFiscales = new List<TipoDocumentoFiscal>();
     private List<LetraFactura> letrasFactura = new List<LetraFactura>();
-    private List<Cliente> clientes = new List<Cliente>();
+    private Cliente cliente = new Cliente { Nombre = "Consumidor Final", Apellido = "", IdRegimenImpositivo = 1, IdTipoDocumento = 1};
     private List<FormaPago> formasPago = new List<FormaPago>();
     private List<ConceptoFactura> conceptosFactura = new List<ConceptoFactura>();
     private List<Articulo> articulos = new List<Articulo>();
@@ -138,17 +134,20 @@
     private int? IdCliente;
     private string clienteNombre = string.Empty;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        if (factura.FechaEmision == default) // o == DateTime.MinValue
+        if (FacturaId.HasValue)
+        {
+            factura = await FacturaService.GetFacturaByIdAsync(FacturaId.Value);
+        }
+        else
         {
             factura.FechaEmision = DateTime.Today;
+            await CargarClientePorDefecto();
         }
-        if (factura.Cliente == null)
-        {
-            CargarClientePorDefecto();
-        }
+
     }
+
 
     private async Task GuardarFactura()
     {
@@ -166,43 +165,16 @@
         NavigationManager.NavigateTo("/clientes");
     }
 
-    private string ClienteNombre
-    {
-        get => factura.Cliente?.Nombre ?? "Consumidor Final";
-        set
-        {
-            if (factura.Cliente != null)
-            {
-                factura.Cliente.Nombre = value;
-            }
-        }
-    }
     private async Task BuscarCliente()
     {
         if (IdCliente is null)
             return;
 
-        // Simulamos cargar el cliente desde un servicio
-        factura.Cliente = new Cliente
-            {
-                IdCliente = IdCliente.Value,
-                Nombre = $"Cliente #{IdCliente} - Nombre simulado",
-                Apellido = "",
-                IdRegimenImpositivo = 1,
-                IdTipoDocumento = 1
-            };
     }
 
-    private void CargarClientePorDefecto()
+    private async Task CargarClientePorDefecto()
     {
-        IdCliente = 1;
-        factura.Cliente = new Cliente
-            {
-                IdCliente = 1,
-                Nombre = "Consumidor Final",
-                Apellido = "",
-                IdRegimenImpositivo = 1,
-                IdTipoDocumento = 1
-            };
+        cliente = await ClienteService.GetClientePorDefecto();
+        StateHasChanged();
     }
 }

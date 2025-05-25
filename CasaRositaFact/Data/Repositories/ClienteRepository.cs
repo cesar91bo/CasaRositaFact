@@ -46,5 +46,12 @@ namespace CasaRositaFact.Data.Repositories
             _context.Clientes.Update(cliente);
             await _context.SaveChangesAsync();
         }
+        public async Task<Cliente> GetClientePorDefecto()
+        {
+            var cliente = await _context.Clientes.FirstOrDefaultAsync(c => c.Nombre == "Consumidor");
+            if (cliente == null)
+                throw new Exception("Cliente por defecto no encontrado");
+            return cliente;
+        }
     }
 }

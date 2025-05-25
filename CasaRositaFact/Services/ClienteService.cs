@@ -30,5 +30,9 @@ namespace CasaRositaFact.Services
         {
             return _clienteRepository.DeleteClienteAsync(id);
         }
+        public Task<Cliente> GetClientePorDefecto()
+        {
+            return _clienteRepository.GetClientePorDefecto();
+        }
     }
 }

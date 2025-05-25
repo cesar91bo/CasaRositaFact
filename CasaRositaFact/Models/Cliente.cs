@@ -1,5 +1,6 @@
 ﻿
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CasaRositaFact.Models
 {
@@ -30,6 +31,20 @@ namespace CasaRositaFact.Models
         public string Observaciones { get; set; } = string.Empty;
         public RegimenImpositivo RegimenImpositivo { get; set; } = null!;
         public TipoDocumento TipoDocumento { get; set; } = null!;
+        [NotMapped]
+        public string NombreCompleto
+        {
+            get => $"{Nombre} {Apellido}";
+            set
+            {
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    var partes = value.Split(' ', 2); // Solo divide en dos
+                    Nombre = partes[0];
+                    Apellido = partes.Length > 1 ? partes[1] : "";
+                }
+            }
+        }
 
         public ICollection<Factura> Facturas { get; set; } = new List<Factura>();
 
