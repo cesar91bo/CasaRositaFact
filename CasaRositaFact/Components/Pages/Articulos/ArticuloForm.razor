@@ -68,9 +68,61 @@
     }
 
     <div class="mb-4">
-        <label for="Descripcion" class="form-label">Descripción</label>
-        <InputTextArea id="Descripcion" class="form-control" rows="3" @bind-Value="articulo.Descripcion" />
+        <label for="Descripcion" class="form-label">Descripción e Imagen</label>
+        <div class="row">
+            <!-- Columna de descripción -->
+            <div class="col-md-8">
+                <InputTextArea id="Descripcion" class="form-control" rows="5" @bind-Value="articulo.Descripcion" />
+            </div>
+
+            <!-- Columna con botón + imagen en horizontal -->
+            <div class="col-md-4">
+                <div class="d-flex align-items-start gap-2">
+                    <!-- Botón de seleccionar archivo -->
+                    <div>
+                        <InputFile id="ImagenPath" class="form-control" OnChange="OnInputFileChange" />
+                    </div>
+
+                    <!-- Vista previa -->
+                    @if (!string.IsNullOrEmpty(imagenPreview))
+                    {
+                        <img src="@imagenPreview"
+                             alt="Vista previa"
+                             class="img-thumbnail preview-img"
+                             @onclick="ExpandirImagen"
+                             style="cursor:pointer;" />
+                    }
+                </div>
+            </div>
+        </div>
     </div>
+
+    <!-- Modal para imagen ampliada -->
+    @if (mostrarModal)
+    {
+        <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);" @onclick="CerrarModal">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <img src="@imagenPreview" class="img-fluid" />
+                </div>
+            </div>
+        </div>
+    }
+
+
+    <!-- Modal para imagen expandida -->
+    @if (mostrarModal)
+    {
+        <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);" @onclick="CerrarModal">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <img src="@imagenPreview" class="img-fluid" />
+                </div>
+            </div>
+        </div>
+    }
+
+
 
     <h3 class="mb-3 text-secondary fw-bold border-bottom pb-2">Precios</h3>
 
@@ -325,6 +377,29 @@
             }
         }
     }
+
+    private string? imagenPreview;
+    private bool mostrarModal = false;
+
+    private async Task OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        var archivo = e.File;
+        using var stream = archivo.OpenReadStream(5 * 1024 * 1024);
+        using var ms = new MemoryStream();
+        await stream.CopyToAsync(ms);
+        var base64 = Convert.ToBase64String(ms.ToArray());
+        imagenPreview = $"data:{archivo.ContentType};base64,{base64}";
+    }
+
+    private void ExpandirImagen()
+    {
+        mostrarModal = true;
+    }
+
+    private void CerrarModal()
+    {
+        mostrarModal = false;
+    }
 }
 
 <div class="modal fade" id="articuloExisteModal" tabindex="-1" aria-labelledby="articuloExisteModalLabel" aria-hidden="true">
@@ -349,3 +424,17 @@
         myModal.show();
     }
 </script>
+
+<style>
+    .preview-img {
+        max-height: 250px; /* igual o menor que el alto del textarea */
+        max-width: 250px;
+        object-fit: cover;
+        border: 1px solid #ccc;
+    }
+
+    /* Evita que la imagen tape el botón */
+    .form-control {
+        z-index: 0;
+    }
+</style>
