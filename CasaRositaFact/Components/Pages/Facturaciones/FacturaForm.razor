@@ -57,26 +57,7 @@
         </div>
     </div>
 
-    <div class="row mb-2 align-items-end">
-        <!-- Fecha -->
-        <div class="col-md-3">
-            <label for="FechaEmision" class="form-label">Fecha de Emisión</label>
-            <InputDate id="FechaEmision" class="form-control" @bind-Value="factura.FechaEmision" />
-        </div>
-
-        <!-- Checkbox "No mover Stock" -->
-        <div class="col-md-3 d-flex align-items-center">
-            <div class="form-check form-switch mt-3">
-                <InputCheckbox id="NoMoverStock"
-                class="form-check-input"
-                @bind-Value="factura.MoverStock" />
-                <label class="form-check-label" for="NoMoverStock">No mover Stock</label>
-            </div>
-        </div>
-    </div>
-
-    <div class="row mb-2 align-items-end">
-
+    <div class="row mb-3 align-items-end">
         <!-- Tipo y Número Factura -->
         <div class="col-md-3">
             <label for="TipoFactura" class="form-label">Tipo Factura</label>
@@ -91,9 +72,15 @@
             <label for="NroFactura" class="form-label">Número</label>
             <InputText id="NroFactura" class="form-control" @bind-Value="factura.NroCompFactura" />
         </div>
+        <!-- Fecha -->
+        <div class="col-md-3">
+            <label for="FechaEmision" class="form-label">Fecha de Emisión</label>
+            <InputDate id="FechaEmision" class="form-control" @bind-Value="factura.FechaEmision" />
+        </div>
+
     </div>
 
-    <div class="row mb-2">
+    <div class="row mb-3">
         <!-- Forma de Pago -->
         <div class="col-md-4">
             <label for="FormaPago" class="form-label">Forma de Pago</label>
@@ -104,8 +91,30 @@
             </InputSelect>
         </div>
 
+        <!-- Concepto -->
+        <div class="col-md-4">
+            <label for="FormaPago" class="form-label">Concepto</label>
+            <InputSelect id="FormaPago" class="form-select" @bind-Value="factura.ConceptoFactura">
+                <option value="Producto">Producto</option>
+                <option value="Servicio">Servicio</option>
+                <option value="ProductoServicio">Producto/Servicio</option>
+            </InputSelect>
+        </div>
+
+        <!-- Checkbox "No mover Stock" -->
+        <div class="col-md-3 d-flex align-items-center">
+            <div class="form-check form-switch mt-3">
+                <InputCheckbox id="NoMoverStock"
+                               class="form-check-input"
+                               @bind-Value="factura.MoverStock" />
+                <label class="form-check-label" for="NoMoverStock">No mover Stock</label>
+            </div>
+        </div>
     </div>
 
+    <div class="row mb-4 border-bottom"></div>
+
+    <h3 class="mb-3 text-secondary fw-bold border-bottom pb-2">Detalle de Factura</h3>
     <!-- Detalle -->
     <div class="mb-4">
         <label for="Detalle" class="form-label">Detalle Adicional</label>
