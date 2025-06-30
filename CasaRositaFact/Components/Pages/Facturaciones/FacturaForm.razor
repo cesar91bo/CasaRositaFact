@@ -2,6 +2,7 @@
 @page "/facturas/editar/{FacturaId:int}"
 @using CasaRositaFact.Components.Pages.Auxiliares
 @using CasaRositaFact.Components.Pages.Facturaciones
+@using CasaRositaFact.Components.Pages.Clientes
 @using Services
 @using Models
 @using static CasaRositaFact.Models.Factura
@@ -35,12 +36,22 @@
         </div>
 
         <!-- Botón Listado Clientes -->
-        <div class="col-md-1">
+        @* <div class="col-md-1">
             <label class="form-label d-block">&nbsp;</label>
             <button type="button" class="btn btn-outline-secondary w-100" @onclick="NavigateToClientes">
                 <i class="bi bi-people"></i>
             </button>
+        </div> *@
+        <div class="col-md-1">
+            <label class="form-label d-block">&nbsp;</label>
+            <button type="button" class="btn btn-outline-secondary w-100" @onclick="MostrarModalClientes">
+                <i class="bi bi-people"></i>
+            </button>
         </div>
+        @if (mostrarModalClientes)
+        {
+            <ClientesModal OnClienteSeleccionado="AsignarCliente" OnCerrar="OcultarModalClientes" />
+        }
 
         <!-- Botón Cliente por defecto -->
         <div class="col-md-1">
@@ -135,13 +146,16 @@
 
     private List<TipoDocumentoFiscal> tiposDocumentosFiscales = new List<TipoDocumentoFiscal>();
     private List<LetraFactura> letrasFactura = new List<LetraFactura>();
-    private Cliente cliente = new Cliente { Nombre = "Consumidor Final", Apellido = "", IdRegimenImpositivo = 1, IdTipoDocumento = 1};
+    private Cliente cliente = new Cliente { Nombre = "Consumidor Final", Apellido = "", IdRegimenImpositivo = 1, IdTipoDocumento = 1 };
     private List<FormaPago> formasPago = new List<FormaPago>();
     private List<ConceptoFactura> conceptosFactura = new List<ConceptoFactura>();
     private List<Articulo> articulos = new List<Articulo>();
 
     private int? IdCliente;
     private string clienteNombre = string.Empty;
+    private bool mostrarModalClientes = false;
+    private void MostrarModalClientes() => mostrarModalClientes = true;
+    private void OcultarModalClientes() => mostrarModalClientes = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -185,5 +199,10 @@
     {
         cliente = await ClienteService.GetClientePorDefecto();
         StateHasChanged();
+    }
+
+    private void AsignarCliente(Cliente clienteSel)
+    {
+        cliente = clienteSel;
     }
 }
