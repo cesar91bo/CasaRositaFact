@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
-namespace CasaRositaFact.Models
+namespace CasaRositaFact.Data.Entities
 {
     public class TipoIva
     {

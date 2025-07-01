@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace CasaRositaFact.Models
+namespace CasaRositaFact.Data.Entities
 {
     public class FacturaDetalle
     {

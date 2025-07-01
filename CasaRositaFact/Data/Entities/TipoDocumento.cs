@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace CasaRositaFact.Models
+namespace CasaRositaFact.Data.Entities
 {
     public class TipoDocumento
     {

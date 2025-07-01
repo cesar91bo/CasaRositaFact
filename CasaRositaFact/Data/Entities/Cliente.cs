@@ -1,8 +1,7 @@
-﻿
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace CasaRositaFact.Models
+namespace CasaRositaFact.Data.Entities
 {
     public class Cliente
     {
@@ -10,7 +9,7 @@ namespace CasaRositaFact.Models
         public int IdCliente { get; set; }
         [Required(ErrorMessage = "El nombre es obligatorio")]
         public required string Nombre { get; set; }
-        [Required(ErrorMessage = "El nombre es obligatorio")]
+        [Required(ErrorMessage = "El apellido es obligatorio")]
         public required string Apellido { get; set; }
         public string Documento { get; set; } = string.Empty;
         [Required(ErrorMessage = "El tipo de documento es obligatorio")]

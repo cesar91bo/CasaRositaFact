@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace CasaRositaFact.Models
+namespace CasaRositaFact.Data.Entities
 {
     public class Usuario
     {

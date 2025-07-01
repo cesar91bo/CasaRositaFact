@@ -1,12 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace CasaRositaFact.Models
+namespace CasaRositaFact.Data.Entities
 {
-    public class Rubro
+    public class Categoria
     {
         [Key]
-        public int IdRubro { get; set; }
-        [Required(ErrorMessage = "El nombre del rubro es obligatorio")]
+        public int IdCategoria { get; set; }
+        [Required(ErrorMessage = "El nombre de la categoría es obligatorio")]
         public string Nombre { get; set; } = string.Empty;
 
         public ICollection<Articulo> Articulos { get; set; } = new List<Articulo>();

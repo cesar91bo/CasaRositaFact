@@ -4,8 +4,8 @@
 @using CasaRositaFact.Components.Pages.Facturaciones
 @using CasaRositaFact.Components.Pages.Clientes
 @using Services
-@using Models
-@using static CasaRositaFact.Models.Factura
+@using Data.Entities
+@using static CasaRositaFact.Data.Entities.Factura
 @inject ClienteService ClienteService
 @inject FacturaService FacturaService
 @inject IJSRuntime JS
@@ -24,7 +24,7 @@
         <!-- Input ID Cliente -->
         <div class="col-md-2">
             <label for="IdCliente" class="form-label">ID Cliente</label>
-            <InputNumber id="IdCliente" class="form-control" @bind-Value="cliente.IdCliente" />
+            <InputNumber id="IdCliente" class="form-control" @bind-Value="IdClienteBuscado" />
         </div>
 
         <!-- Botón Buscar -->
@@ -35,13 +35,6 @@
             </button>
         </div>
 
-        <!-- Botón Listado Clientes -->
-        @* <div class="col-md-1">
-            <label class="form-label d-block">&nbsp;</label>
-            <button type="button" class="btn btn-outline-secondary w-100" @onclick="NavigateToClientes">
-                <i class="bi bi-people"></i>
-            </button>
-        </div> *@
         <div class="col-md-1">
             <label class="form-label d-block">&nbsp;</label>
             <button type="button" class="btn btn-outline-secondary w-100" @onclick="MostrarModalClientes">
@@ -116,8 +109,8 @@
         <div class="col-md-3 d-flex align-items-center">
             <div class="form-check form-switch mt-3">
                 <InputCheckbox id="NoMoverStock"
-                               class="form-check-input"
-                               @bind-Value="factura.MoverStock" />
+                class="form-check-input"
+                @bind-Value="factura.MoverStock" />
                 <label class="form-check-label" for="NoMoverStock">No mover Stock</label>
             </div>
         </div>
@@ -151,7 +144,7 @@
     private List<ConceptoFactura> conceptosFactura = new List<ConceptoFactura>();
     private List<Articulo> articulos = new List<Articulo>();
 
-    private int? IdCliente;
+    private int? IdClienteBuscado = 1;
     private string clienteNombre = string.Empty;
     private bool mostrarModalClientes = false;
     private void MostrarModalClientes() => mostrarModalClientes = true;
@@ -190,9 +183,11 @@
 
     private async Task BuscarCliente()
     {
-        if (IdCliente is null)
+        if (IdClienteBuscado is null || IdClienteBuscado == 0)
             return;
 
+        cliente = await ClienteService.GetClienteByIdAsync(IdClienteBuscado.Value);
+        StateHasChanged();
     }
 
     private async Task CargarClientePorDefecto()

@@ -1,5 +1,5 @@
 ﻿using CasaRositaFact.Data.Configurations;
-using CasaRositaFact.Models;
+using CasaRositaFact.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace CasaRositaFact.Data

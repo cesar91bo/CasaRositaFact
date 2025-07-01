@@ -1,4 +1,4 @@
-﻿using CasaRositaFact.Models;
+﻿using CasaRositaFact.Data.Entities;
 
 namespace CasaRositaFact.Data.IRepositories
 {

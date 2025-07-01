@@ -1,4 +1,4 @@
-﻿using CasaRositaFact.Models;
+﻿using CasaRositaFact.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

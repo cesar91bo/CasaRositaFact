@@ -1,5 +1,5 @@
-﻿using CasaRositaFact.Data.IRepositories;
-using CasaRositaFact.Models;
+﻿using CasaRositaFact.Data.Entities;
+using CasaRositaFact.Data.IRepositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace CasaRositaFact.Data.Repositories
