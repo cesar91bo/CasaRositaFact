@@ -184,20 +184,37 @@
     private async Task BuscarCliente()
     {
         if (IdClienteBuscado is null || IdClienteBuscado == 0)
-            return;
+            await CargarClientePorDefecto();
 
-        cliente = await ClienteService.GetClienteByIdAsync(IdClienteBuscado.Value);
+        try
+        {
+            var clienteEncontrado = await ClienteService.GetClienteByIdAsync(IdClienteBuscado.Value);
+            cliente = clienteEncontrado;
+            factura.IdCliente = cliente.IdCliente;
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("alert", $"No se encontró el cliente con ID {IdClienteBuscado}");
+        }
+
         StateHasChanged();
     }
+
 
     private async Task CargarClientePorDefecto()
     {
         cliente = await ClienteService.GetClientePorDefecto();
+        IdClienteBuscado = 1;
         StateHasChanged();
     }
 
     private void AsignarCliente(Cliente clienteSel)
     {
+        Console.WriteLine($"Cliente seleccionado: {clienteSel.IdCliente} - {clienteSel.NombreCompleto}");
+
         cliente = clienteSel;
+        factura.IdCliente = clienteSel.IdCliente;
+        IdClienteBuscado = clienteSel.IdCliente; // 👈 sincronizás el input también
+        StateHasChanged();
     }
 }
