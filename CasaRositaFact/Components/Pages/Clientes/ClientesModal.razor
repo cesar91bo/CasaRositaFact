@@ -3,7 +3,6 @@
 @inject ClienteService ClienteService
 @inject NavigationManager NavigationManager
 
-
 <div class="modal-backdrop fade show"></div>
 <div class="modal show d-block" tabindex="-1">
     <div class="modal-dialog modal-lg">
@@ -12,7 +11,16 @@
                 <h5 class="modal-title">Seleccionar Cliente</h5>
                 <button type="button" class="btn-close" @onclick="() => OnCerrar.InvokeAsync()" />
             </div>
+
             <div class="modal-body">
+                <!-- Buscador -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <input type="text" @bind="filtro" @bind:event="oninput" class="form-control"
+                               placeholder="Buscar por nombre o apellido" />
+                    </div>
+                </div>
+
                 @if (cargando)
                 {
                     <p>Cargando clientes...</p>
@@ -30,18 +38,20 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var cliente in clientes)
+                            @foreach (var cliente in clientesFiltrados)
                             {
                                 <tr>
                                     <td>@cliente.IdCliente</td>
                                     <td>@cliente.Nombre</td>
                                     <td>@cliente.Apellido</td>
                                     <td class="@(cliente.Estado == Cliente.EstadoCliente.Suspendido ? "text-danger fw-bold"
-            :                           cliente.Estado == Cliente.EstadoCliente.Inactivo ? "text-warning fw-bold" : "")">
+                                    : cliente.Estado == Cliente.EstadoCliente.Inactivo ? "text-warning fw-bold" : "")">
                                         @cliente.Estado
                                     </td>
                                     <td>
-                                        <button class="btn btn-primary btn-sm" @onclick="() => Seleccionar(cliente)">Seleccionar</button>
+                                        <button class="btn btn-primary btn-sm" @onclick="() => Seleccionar(cliente)">
+                                            Seleccionar
+                                        </button>
                                     </td>
                                 </tr>
                             }
@@ -53,26 +63,39 @@
     </div>
 </div>
 
-
 @code {
     [Parameter] public EventCallback<Cliente> OnClienteSeleccionado { get; set; }
     [Parameter] public EventCallback OnCerrar { get; set; }
 
-    private List<Cliente> clientes = new List<Cliente>();
+    private List<Cliente> clientes = new();
     private List<Cliente> clientesFiltrados = new();
     private bool cargando = true;
+
+    private string _filtro = "";
+    private string filtro
+    {
+        get => _filtro;
+        set
+        {
+            _filtro = value;
+            FiltrarClientes();
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             clientes = (await ClienteService.GetAllClientesAsync()).ToList();
-            clientesFiltrados = clientes;
-            cargando = false;
+            clientesFiltrados = clientes.ToList();
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error al inicializar el componente: {ex.Message}");
+        }
+        finally
+        {
+            cargando = false;
         }
     }
 
@@ -80,5 +103,19 @@
     {
         await OnClienteSeleccionado.InvokeAsync(cliente);
         await OnCerrar.InvokeAsync();
+    }
+
+    private void FiltrarClientes()
+    {
+        if (_filtro.Length >= 2)
+        {
+            clientesFiltrados = clientes
+                .Where(c => $"{c.Nombre} {c.Apellido}".Contains(_filtro, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+        else
+        {
+            clientesFiltrados = clientes.ToList();
+        }
     }
 }
