@@ -3,6 +3,8 @@
 @using CasaRositaFact.Components.Pages.Auxiliares
 @using CasaRositaFact.Components.Pages.Facturaciones
 @using CasaRositaFact.Components.Pages.Clientes
+@using CasaRositaFact.Components.Pages.Articulos
+@using CasaRositaFact.Models
 @using Services
 @using Data.Entities
 @using static CasaRositaFact.Data.Entities.Factura
@@ -109,8 +111,8 @@
         <div class="col-md-3 d-flex align-items-center">
             <div class="form-check form-switch mt-3">
                 <InputCheckbox id="NoMoverStock"
-                               class="form-check-input"
-                               @bind-Value="factura.MoverStock" />
+                class="form-check-input"
+                @bind-Value="factura.MoverStock" />
                 <label class="form-check-label" for="NoMoverStock">No mover Stock</label>
             </div>
         </div>
@@ -146,10 +148,14 @@
 
                 <!-- Botón Buscar -->
                 <td>
-                    <button type="button" class="btn btn-sm btn-outline-primary">
+                    <button type="button" class="btn btn-sm btn-outline-primary" @onclick="MostrarModalArticulos">
                         <i class="bi bi-search"></i>
                     </button>
                 </td>
+                @if (mostrarModalArticulos)
+                {
+                    <ArticuloModal OnArticuloSeleccionado="AsignarArticulo" OnCerrar="OcultarModalArticulos" />
+                }
 
                 <!-- Botón Artículo Desconocido -->
                 <td>
@@ -160,12 +166,12 @@
 
                 <!-- Número Artículo -->
                 <td>
-                    <input type="text" class="form-control form-control-sm" placeholder="Código" />
+                    <input type="text" class="form-control form-control-sm" placeholder="Código" value="@codigoArticulo"/>
                 </td>
 
                 <!-- Nombre Artículo -->
                 <td>
-                    <input disabled type="text" class="form-control form-control-sm" placeholder="Nombre del producto" />
+                    <input disabled type="text" class="form-control form-control-sm" placeholder="Nombre del producto" value="@nombreArticulo"/>
                 </td>
 
                 <!-- Cantidad -->
@@ -227,12 +233,25 @@
     private List<FormaPago> formasPago = new List<FormaPago>();
     private List<ConceptoFactura> conceptosFactura = new List<ConceptoFactura>();
     private List<Articulo> articulos = new List<Articulo>();
+    private Articulo articulo = new Articulo
+        {
+            Nombre = "Producto Desconocido",
+            PrecioActual = 0,
+            StockActual = 0,
+            IdCategoria = 1,
+            IdUnidadMedida = 1
+        };
 
     private int? IdClienteBuscado = 1;
     private string clienteNombre = string.Empty;
     private bool mostrarModalClientes = false;
+    private bool mostrarModalArticulos = false;
     private void MostrarModalClientes() => mostrarModalClientes = true;
     private void OcultarModalClientes() => mostrarModalClientes = false;
+    private void MostrarModalArticulos() => mostrarModalArticulos = true;
+    private void OcultarModalArticulos() => mostrarModalArticulos = false;
+    private string nombreArticulo = string.Empty;
+    private string codigoArticulo = string.Empty; 
 
     protected override async Task OnInitializedAsync()
     {
@@ -298,7 +317,19 @@
 
         cliente = clienteSel;
         factura.IdCliente = clienteSel.IdCliente;
-        IdClienteBuscado = clienteSel.IdCliente; // 👈 sincronizás el input también
+        IdClienteBuscado = clienteSel.IdCliente; 
         StateHasChanged();
+    }
+
+    private void AsignarArticulo(ArticuloModel articuloSel)
+    {
+        nombreArticulo = articuloSel.Nombre;
+        codigoArticulo = articuloSel.IdArticulo.ToString();
+        StateHasChanged();
+    }
+    private void BuscarArticulo()
+    {
+
+
     }
 }

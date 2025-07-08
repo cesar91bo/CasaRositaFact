@@ -1,0 +1,183 @@
+﻿@using CasaRositaFact.Models
+@using Services
+@using Data.Entities
+@inject ArticuloService ArticuloService
+@inject NavigationManager NavigationManager
+@inject PrecioArticuloService PrecioArticuloService
+
+<div class="modal-backdrop fade show"></div>
+<div class="modal show d-block" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-black">Seleccionar Artículo</h5>
+                <button type="button" class="btn-close" @onclick="() => OnCerrar.InvokeAsync()" />
+            </div>
+
+            <div class="modal-body">
+                <!-- Buscador -->
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <input type="text" @bind="filtro" @bind:event="oninput" class="form-control"
+                        placeholder="Buscar por nombre" />
+                    </div>
+                </div>
+
+                @if (cargando)
+                {
+                    <p>Cargando artículos...</p>
+                }
+                else
+                {
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Nro. Producto</th>
+                                <th>Nombre</th>
+                                <th>Precio</th>
+                                <th>Stock</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var articulo in articulosFiltrados)
+                            {
+                                <tr>
+                                    <td>@articulo.IdArticulo</td>
+                                    <td>@articulo.Nombre</td>
+                                    <td>@articulo.PrecioActual</td>
+                                    <td>@articulo.StockActual</td>
+                                    <td>
+                                        <button class="btn btn-primary btn-sm" @onclick="() => Seleccionar(articulo)">
+                                            Seleccionar
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                @if (mostrarAdvertencia)
+                {
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <strong>Atención:</strong> El artículo <strong>@articuloSinPrecioSeleccionado?.Nombre</strong> no tiene un precio asignado.
+                        <br />
+                        ¿Deseás asignarle un precio ahora?
+                        <div class="mt-2">
+                            <button class="btn btn-sm btn-success me-2" @onclick="AsignarPrecio">
+                                Asignar Precio
+                            </button>
+                            <button class="btn btn-sm btn-primary me-2" @onclick="CargaGenerica">
+                                Cargar Genérico
+                            </button>
+                            <button class="btn btn-sm btn-secondary" @onclick="() => mostrarAdvertencia = false">
+                                Cancelar
+                            </button>
+                        </div>
+                    </div>
+                }
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public EventCallback<ArticuloModel> OnArticuloSeleccionado { get; set; }
+    [Parameter] public EventCallback OnCerrar { get; set; }
+
+    private List<ArticuloModel> articulos = new();
+    private List<ArticuloModel> articulosFiltrados = new();
+    private bool cargando = true;
+
+    private bool mostrarAdvertencia = false;
+    private ArticuloModel? articuloSinPrecioSeleccionado;
+
+
+    private string _filtro = "";
+    private string filtro
+    {
+        get => _filtro;
+        set
+        {
+            _filtro = value;
+            FiltrarArticulos();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var articulosData = await ArticuloService.GetAllAsync();
+
+            foreach (var articulo in articulosData)
+            {
+                var precio = await PrecioArticuloService.GetLastPrecioByArticuloIdAsync(articulo.IdArticulo);
+
+                var model = new ArticuloModel
+                    {
+                        IdArticulo = articulo.IdArticulo,
+                        Nombre = articulo.Nombre,
+                        StockActual = articulo.StockActual,
+                        PrecioActual = precio?.PrecioCosto ?? 0
+                    };
+
+                articulos.Add(model);
+            }
+
+            articulosFiltrados = articulos.ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al inicializar el componente: {ex.Message}");
+        }
+        finally
+        {
+            cargando = false;
+        }
+    }
+
+
+    private async Task Seleccionar(ArticuloModel articulo)
+    {
+        if (articulo.PrecioActual == 0)
+        {
+            articuloSinPrecioSeleccionado = articulo;
+            mostrarAdvertencia = true;
+            return;
+        }
+
+        await OnArticuloSeleccionado.InvokeAsync(articulo);
+        await OnCerrar.InvokeAsync();
+    }
+
+    private void AsignarPrecio()
+    {
+        NavigationManager.NavigateTo($"/articulos/editar/{articuloSinPrecioSeleccionado?.IdArticulo}");
+
+
+        // Oculta el mensaje por ahora
+        mostrarAdvertencia = false;
+    }
+
+    private void CargaGenerica()
+    {
+        
+    }
+
+    private void FiltrarArticulos()
+    {
+        if (_filtro.Length >= 2)
+        {
+            articulosFiltrados = articulos
+                .Where(c => $"{c.Nombre}".Contains(_filtro, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+        else
+        {
+            articulosFiltrados = articulos.ToList();
+        }
+    }
+}
+
