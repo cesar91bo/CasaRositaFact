@@ -1,6 +1,8 @@
 ﻿@using CasaRositaFact.Models
+@using CasaRositaFact.State
 @using Services
 @using Data.Entities
+@using System.Text.Json
 @inject ArticuloService ArticuloService
 @inject NavigationManager NavigationManager
 @inject PrecioArticuloService PrecioArticuloService
@@ -85,6 +87,11 @@
 @code {
     [Parameter] public EventCallback<ArticuloModel> OnArticuloSeleccionado { get; set; }
     [Parameter] public EventCallback OnCerrar { get; set; }
+    [Parameter] public Factura FacturaActual { get; set; } = default!;
+
+    [Inject] public FacturaState facturaState { get; set; }
+    [Inject] public Blazored.LocalStorage.ILocalStorageService localStorage { get; set; }
+
 
     private List<ArticuloModel> articulos = new();
     private List<ArticuloModel> articulosFiltrados = new();
@@ -152,9 +159,16 @@
         await OnCerrar.InvokeAsync();
     }
 
-    private void AsignarPrecio()
+    private async Task AsignarPrecio()
     {
-        NavigationManager.NavigateTo($"/articulos/editar/{articuloSinPrecioSeleccionado?.IdArticulo}");
+        // Guardar estado antes de salir
+        if (FacturaActual != null)
+        {
+            var json = JsonSerializer.Serialize(FacturaActual);
+            await localStorage.SetItemAsync("facturaTemp", FacturaActual);
+        }
+
+        NavigationManager.NavigateTo($"/articulos/editar/{articuloSinPrecioSeleccionado?.IdArticulo}?origen=factura");
 
 
         // Oculta el mensaje por ahora

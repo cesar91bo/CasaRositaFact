@@ -189,6 +189,7 @@
 
 @code {
     [Parameter] public int? ArticuloId { get; set; }
+    private string? origen;
     private Articulo articulo = new Articulo()
         {
             Nombre = ""
@@ -250,6 +251,10 @@
             .ToList();
 
         LlevarStock = articulo.LlevarStock;
+
+        var uri = new Uri(NavigationManager.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        origen = query["origen"];
     }
 
     private async Task SaveArticulo()
@@ -306,7 +311,14 @@
                 await PrecioArticuloService.AddPrecioAsync(precioArticulo);
             }
         }
-        NavigationManager.NavigateTo("/articulos");
+        if (origen == "factura")
+        {
+            NavigationManager.NavigateTo("../facturas/formFactura");
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/articulos");
+        }
     }
 
     private string? _precioCostoTexto;

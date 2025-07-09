@@ -1,6 +1,8 @@
+using Blazored.LocalStorage;
 using CasaRositaFact.Components;
 using CasaRositaFact.Data;
 using CasaRositaFact.Infrastructure;
+using CasaRositaFact.State;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -19,6 +21,9 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddProjectServices();
+
+builder.Services.AddScoped<FacturaState>();
+builder.Services.AddBlazoredLocalStorage();
 
 var app = builder.Build();
 

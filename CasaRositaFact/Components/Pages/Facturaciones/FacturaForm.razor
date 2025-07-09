@@ -5,13 +5,18 @@
 @using CasaRositaFact.Components.Pages.Clientes
 @using CasaRositaFact.Components.Pages.Articulos
 @using CasaRositaFact.Models
+@using CasaRositaFact.State
 @using Services
 @using Data.Entities
 @using static CasaRositaFact.Data.Entities.Factura
+@using Blazored.LocalStorage
 @inject ClienteService ClienteService
 @inject FacturaService FacturaService
+@inject AuxiliarService AuxiliarService
 @inject IJSRuntime JS
 @inject NavigationManager NavigationManager
+@inject FacturaState FacturaState
+@inject ILocalStorageService localStorage
 
 <h3 class="mb-2 text-info fw-bold border-bottom pb-2">@(FacturaId == null ? "Nueva Factura" : "Editar Factura")</h3>
 
@@ -67,10 +72,11 @@
         <!-- Tipo y Número Factura -->
         <div class="col-md-3">
             <label for="TipoFactura" class="form-label">Tipo Factura</label>
-            <InputSelect id="TipoFactura" class="form-select" @bind-Value="factura.LetraFactura">
-                <option value="A">Tipo A</option>
-                <option value="B">Tipo B</option>
-                <option value="C">Tipo C</option>
+            <InputSelect id="TipoFactura" class="form-select" @bind-Value="factura.IdLetraFactura">
+                @foreach (var letra in letrasFactura)
+                {
+                    <option value="@letra.IdLetraFactura">@letra.Nombre</option>
+                }
             </InputSelect>
         </div>
 
@@ -154,7 +160,7 @@
                 </td>
                 @if (mostrarModalArticulos)
                 {
-                    <ArticuloModal OnArticuloSeleccionado="AsignarArticulo" OnCerrar="OcultarModalArticulos" />
+                    <ArticuloModal FacturaActual="factura" OnArticuloSeleccionado="AsignarArticulo" OnCerrar="OcultarModalArticulos" />
                 }
 
                 <!-- Botón Artículo Desconocido -->
@@ -241,6 +247,7 @@
             IdCategoria = 1,
             IdUnidadMedida = 1
         };
+    private List<LetraFactura> letraFacturas = new();
 
     private int? IdClienteBuscado = 1;
     private string clienteNombre = string.Empty;
@@ -255,22 +262,46 @@
 
     protected override async Task OnInitializedAsync()
     {
+        letrasFactura = (await AuxiliarService.GetAllLetraFacturaAsync()).ToList();
+
         if (FacturaId.HasValue)
         {
             factura = await FacturaService.GetFacturaByIdAsync(FacturaId.Value);
         }
         else
         {
-            factura.FechaEmision = DateTime.Today;
-            await CargarClientePorDefecto();
-        }
+            // Intentar recuperar desde localStorage
+            var json = await localStorage.GetItemAsStringAsync("facturaTemp");
+            var tempFactura = await localStorage.GetItemAsync<Factura>("facturaTemp");
+            if (tempFactura is not null)
+            {
+                factura = tempFactura;
 
+                if (factura.IdCliente > 0)
+                {
+                    cliente = await ClienteService.GetClienteByIdAsync(factura.IdCliente);
+                    IdClienteBuscado = cliente.IdCliente;
+                }
+
+                StateHasChanged();
+            }
+            else
+            {
+                // Es una nueva factura
+                factura.FechaEmision = DateTime.Today;
+                factura.IdLetraFactura = letrasFactura.FirstOrDefault()?.IdLetraFactura ?? 1;
+                factura.IdLetraFactura = 2;
+                await CargarClientePorDefecto();
+            }
+        }
+        
     }
 
 
     private async Task GuardarFactura()
     {
-
+        FacturaState.Limpiar();
+        await localStorage.RemoveItemAsync("facturaTemp");
 
     }
 
@@ -313,11 +344,11 @@
 
     private void AsignarCliente(Cliente clienteSel)
     {
-        Console.WriteLine($"Cliente seleccionado: {clienteSel.IdCliente} - {clienteSel.NombreCompleto}");
 
         cliente = clienteSel;
         factura.IdCliente = clienteSel.IdCliente;
         IdClienteBuscado = clienteSel.IdCliente; 
+        FacturaState.FacturaActual = factura;
         StateHasChanged();
     }
 
@@ -325,6 +356,7 @@
     {
         nombreArticulo = articuloSel.Nombre;
         codigoArticulo = articuloSel.IdArticulo.ToString();
+        FacturaState.FacturaActual = factura;
         StateHasChanged();
     }
     private void BuscarArticulo()
