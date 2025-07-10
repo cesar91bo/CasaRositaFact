@@ -29,15 +29,20 @@ namespace CasaRositaFact.Data.Repositories
                 .Include(a => a.Rubro)
                 .Include(a => a.UnidadMedida)
                 .Include(a => a.Proveedor)
+                .Include(a => a.PreciosArticulos)
                 .FirstOrDefaultAsync(a => a.IdArticulo == id);
-            if (articulo != null)
-            {
-                return articulo;
-            }
-            else
-            {
-                throw new Exception("Articulo no encontrado");
-            }
+            if (articulo == null)
+                throw new Exception("Artículo no encontrado");
+
+            // Obtener el último precio (por fecha o por ID, lo que uses)
+            var precioActual = articulo.PreciosArticulos
+                .OrderByDescending(p => p.FechaIncio) // o por ID si no tenés fecha
+                .FirstOrDefault()?.PrecioVentaConIva;
+
+            // Asignar a una propiedad auxiliar (si tenés una en el modelo)
+            articulo.PrecioActual = precioActual ?? 0;
+
+            return articulo;
         }
         public async Task AddAsync(Articulo articulo)
         {

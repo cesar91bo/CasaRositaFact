@@ -6,5 +6,6 @@
         public string Nombre { get; set; } = string.Empty;
         public decimal? StockActual { get; set; }
         public decimal PrecioActual { get; set; }
+        public int IdUnidadMedida { get; set; }
     }
 }

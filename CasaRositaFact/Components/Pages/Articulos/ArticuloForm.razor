@@ -313,7 +313,7 @@
         }
         if (origen == "factura")
         {
-            NavigationManager.NavigateTo("../facturas/formFactura");
+            NavigationManager.NavigateTo($"/facturas/formFactura?idArticulo={articulo.IdArticulo}");
         }
         else
         {

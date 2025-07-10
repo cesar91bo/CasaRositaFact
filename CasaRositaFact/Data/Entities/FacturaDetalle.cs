@@ -36,5 +36,8 @@ namespace CasaRositaFact.Data.Entities
         public TipoIva? TipoIva { get; set; } //Tipo de IVA del artículo
         [ForeignKey("IdUsuario")]
         public Usuario? Usuario { get; set; } //Usuario que generó el detalle
+
+        [NotMapped]
+        public Guid Uid { get; set; } = Guid.NewGuid();
     }
 }

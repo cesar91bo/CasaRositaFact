@@ -17,6 +17,7 @@
 @inject NavigationManager NavigationManager
 @inject FacturaState FacturaState
 @inject ILocalStorageService localStorage
+@inject ArticuloService ArticuloService
 
 <h3 class="mb-2 text-info fw-bold border-bottom pb-2">@(FacturaId == null ? "Nueva Factura" : "Editar Factura")</h3>
 
@@ -117,8 +118,8 @@
         <div class="col-md-3 d-flex align-items-center">
             <div class="form-check form-switch mt-3">
                 <InputCheckbox id="NoMoverStock"
-                class="form-check-input"
-                @bind-Value="factura.MoverStock" />
+                               class="form-check-input"
+                               @bind-Value="factura.MoverStock" />
                 <label class="form-check-label" for="NoMoverStock">No mover Stock</label>
             </div>
         </div>
@@ -144,74 +145,54 @@
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <!-- Botón Borrar -->
-                <td>
-                    <button type="button" class="btn btn-sm btn-danger">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </td>
-
-                <!-- Botón Buscar -->
-                <td>
-                    <button type="button" class="btn btn-sm btn-outline-primary" @onclick="MostrarModalArticulos">
-                        <i class="bi bi-search"></i>
-                    </button>
-                </td>
-                @if (mostrarModalArticulos)
-                {
-                    <ArticuloModal FacturaActual="factura" OnArticuloSeleccionado="AsignarArticulo" OnCerrar="OcultarModalArticulos" />
-                }
-
-                <!-- Botón Artículo Desconocido -->
-                <td>
-                    <button type="button" class="btn btn-sm btn-secondary w-100">
-                        Cargar
-                    </button>
-                </td>
-
-                <!-- Número Artículo -->
-                <td>
-                    <input type="text" class="form-control form-control-sm" placeholder="Código" value="@codigoArticulo"/>
-                </td>
-
-                <!-- Nombre Artículo -->
-                <td>
-                    <input disabled type="text" class="form-control form-control-sm" placeholder="Nombre del producto" value="@nombreArticulo"/>
-                </td>
-
-                <!-- Cantidad -->
-                <td>
-                    <input type="number" class="form-control form-control-sm text-end" min="1" />
-                </td>
-
-                <!-- % IVA -->
-                <td>
-                    <select class="form-select form-select-sm">
-                        <option value="21">21%</option>
-                        <option value="10.5">10.5%</option>
-                        <option value="0">0%</option>
-                    </select>
-                </td>
-
-                <!-- Precio -->
-                <td>
-                    <input disabled type="number" class="form-control form-control-sm text-end" step="0.01" />
-                </td>
-
-                <!-- Total -->
-                <td>
-                    <input disabled type="number" class="form-control form-control-sm text-end" step="0.01" readonly />
-                </td>
-
-                <!-- Botón Cargar Precio Manual -->
-                <td>
-                    <button type="button" class="btn btn-sm btn-secondary w-100">
-                        Cargar Precio
-                    </button>
-                </td>
-            </tr>
+            @for (int i = 0; i < facturaDetalles.Count; i++)
+            {
+                var item = facturaDetalles[i];
+                <tr @key="item.Uid">
+                    <td>
+                        <button type="button" class="btn btn-sm btn-danger" @onclick="() => EliminarFilaPorId(item.IdFacturaDetalle)">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-outline-primary" @onclick="MostrarModalArticulos">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-secondary w-100">Cargar</button>
+                    </td>
+                    <td>@item.IdArticulo</td>
+                    <td>@item.NombreArticulo</td>
+                    <td>
+                        <input id="cantidad_@item.Uid"
+                               type="number"
+                               class="form-control form-control-sm text-end"
+                               min="1"
+                               @bind="item.Cantidad"
+                               @bind:event="oninput" />
+                    </td>
+                    <td>
+                        <select class="form-select form-select-sm"
+                                @bind="item.IdTipoIva">
+                            <option value="1">21%</option>
+                            <option value="2">10.5%</option>
+                            <option value="3">0%</option>
+                        </select>
+                    </td>
+                    <td>@item.PrecioUnitario</td>
+                    <td>@item.TotalArticulo</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-secondary w-100">Cargar Precio</button>
+                    </td>
+                </tr>
+            }
+            @if (mostrarModalArticulos)
+            {
+                <ArticuloModal FacturaActual="factura" OnArticuloSeleccionado="AsignarArticulo" OnCerrar="OcultarModalArticulos" />
+            }
         </tbody>
+
     </table>
 
 
@@ -232,6 +213,8 @@
             IdLetraFactura = 1,
             IdTipoDocumentoFiscal = 1,
         };
+    private List<FacturaDetalle> facturaDetalles = new();
+
 
     private List<TipoDocumentoFiscal> tiposDocumentosFiscales = new List<TipoDocumentoFiscal>();
     private List<LetraFactura> letrasFactura = new List<LetraFactura>();
@@ -258,7 +241,11 @@
     private void MostrarModalArticulos() => mostrarModalArticulos = true;
     private void OcultarModalArticulos() => mostrarModalArticulos = false;
     private string nombreArticulo = string.Empty;
-    private string codigoArticulo = string.Empty; 
+    private string codigoArticulo = string.Empty;
+
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public int? IdArticulo { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -294,7 +281,33 @@
                 await CargarClientePorDefecto();
             }
         }
-        
+
+        if (IdArticulo.HasValue)
+        {
+            var articuloSel = await ArticuloService.GetByIdAsync(IdArticulo.Value);
+            if (articuloSel != null)
+            {
+                facturaDetalles.Add(new FacturaDetalle
+                    {
+                        IdArticulo = articuloSel.IdArticulo,
+                        NombreArticulo = articuloSel.Nombre,
+                        PrecioUnitario = articuloSel.PrecioActual ?? 0,
+                        Cantidad = 1,
+                        TotalArticulo = articuloSel.PrecioActual, // Inicial
+                        IdUnidadMedida = articuloSel.IdUnidadMedida ?? 1
+                    });
+
+                facturaDetalles.Add(new FacturaDetalle());
+            }
+        }
+        else
+        {
+            facturaDetalles.Add(new FacturaDetalle());
+        }
+
+
+        StateHasChanged();
+
     }
 
 
@@ -347,21 +360,96 @@
 
         cliente = clienteSel;
         factura.IdCliente = clienteSel.IdCliente;
-        IdClienteBuscado = clienteSel.IdCliente; 
+        IdClienteBuscado = clienteSel.IdCliente;
         FacturaState.FacturaActual = factura;
         StateHasChanged();
     }
 
     private void AsignarArticulo(ArticuloModel articuloSel)
     {
-        nombreArticulo = articuloSel.Nombre;
-        codigoArticulo = articuloSel.IdArticulo.ToString();
-        FacturaState.FacturaActual = factura;
+        if (articuloSel == null)
+            return;
+
+        // Evitar duplicados
+        var existente = facturaDetalles.FirstOrDefault(d => d.IdArticulo == articuloSel.IdArticulo && d.IdArticulo != 0);
+        if (existente != null)
+        {
+            existente.Cantidad += 1;
+            existente.TotalArticulo = Math.Round(existente.Cantidad * existente.PrecioUnitario, 2);
+        }
+        else
+        {
+            var nuevoDetalle = new FacturaDetalle
+                {
+                    IdArticulo = articuloSel.IdArticulo,
+                    NombreArticulo = articuloSel.Nombre,
+                    PrecioUnitario = articuloSel.PrecioActual,
+                    Cantidad = 1,
+                    TotalArticulo = articuloSel.PrecioActual,
+                    IdUnidadMedida = articuloSel.IdUnidadMedida
+                };
+
+            // Buscar la fila vacía (IdArticulo == 0 y sin nombre)
+            int indexFilaVacia = facturaDetalles.FindIndex(f => f.IdArticulo == 0 && string.IsNullOrEmpty(f.NombreArticulo));
+
+            if (indexFilaVacia >= 0)
+            {
+                // Insertar antes de la fila vacía
+                facturaDetalles.Insert(indexFilaVacia, nuevoDetalle);
+            }
+            else
+            {
+                // Si no hay fila vacía, agregar al final
+                facturaDetalles.Add(nuevoDetalle);
+            }
+        }
+
         StateHasChanged();
     }
+
+
     private void BuscarArticulo()
     {
 
 
     }
+
+    private void CalcularTotalYAgregarNuevaFila(Guid uid)
+    {
+        var item = facturaDetalles.FirstOrDefault(x => x.Uid == uid);
+
+        if (item is null)
+            return;
+
+        if (item.Cantidad > 0 && item.PrecioUnitario > 0)
+        {
+            item.TotalArticulo = Math.Round(item.Cantidad * item.PrecioUnitario, 2);
+
+            // Agrega una nueva fila solo si esta es la última
+            if (item == facturaDetalles.Last())
+            {
+                facturaDetalles.Add(new FacturaDetalle());
+            }
+        }
+
+        StateHasChanged();
+    }
+
+
+    private void EliminarFilaPorId(int idFacturaDetalle)
+    {
+        var item = facturaDetalles.FirstOrDefault(f => f.IdFacturaDetalle == idFacturaDetalle);
+        if (item != null)
+        {
+            facturaDetalles.Remove(item);
+        }
+
+        if (facturaDetalles.Count == 0)
+        {
+            facturaDetalles.Add(new FacturaDetalle());
+        }
+
+        StateHasChanged();
+    }
+
 }
