@@ -1,0 +1,121 @@
+﻿@using CasaRositaFact.Components.Pages.Articulos
+@using CasaRositaFact.Models
+@using CasaRositaFact.State
+@using Data.Entities
+@using static CasaRositaFact.Data.Entities.Factura
+
+<h3 class="mb-3 text-secondary fw-bold border-bottom pb-2">Detalle de Factura</h3>
+
+<table class="table table-bordered table-striped table-dark align-middle">
+    <thead class="thead-dark">
+        <tr>
+            <th style="width: 80px;">Borrar</th>
+            <th style="width: 80px;">Buscar</th>
+            <th style="width: 180px;">Art. Desconocido</th>
+            <th style="width: 100px;">Nro Art.</th>
+            <th>Nombre</th>
+            <th style="width: 100px;">Cantidad</th>
+            <th style="width: 80px;">%IVA</th>
+            <th style="width: 120px;">Precio</th>
+            <th style="width: 120px;">Total</th>
+            <th style="width: 160px;">Precio Manual</th>
+        </tr>
+    </thead>
+    <tbody>
+        @for (int i = 0; i < Detalles.Count; i++)
+        {
+            var item = Detalles[i];
+            <tr @key="item.Uid">
+                <td>
+                    <button type="button" class="btn btn-sm btn-danger" @onclick="() => EliminarFila(item)">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-sm btn-outline-primary" @onclick="MostrarModal">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-sm btn-secondary w-100">Cargar</button>
+                </td>
+                <td>@item.IdArticulo</td>
+                <td>@item.NombreArticulo</td>
+                <td>
+                    <input id="cantidad_@item.Uid"
+                           type="number"
+                           class="form-control form-control-sm text-end"
+                           min="1"
+                           @bind="item.Cantidad"
+                           @bind:event="oninput" />
+                </td>
+                <td>
+                    <select class="form-select form-select-sm" @bind="item.IdTipoIva">
+                        <option value="1">21%</option>
+                        <option value="2">10.5%</option>
+                        <option value="3">0%</option>
+                    </select>
+                </td>
+                <td>@item.PrecioUnitario</td>
+                <td>@item.TotalArticulo</td>
+                <td>
+                    <button type="button" class="btn btn-sm btn-secondary w-100">Cargar Precio</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (MostrarModalArticulos)
+{
+    <ArticuloModal FacturaActual="FacturaActual" 
+                   OnArticuloSeleccionado="AsignarArticulo" 
+                   OnCerrar="OcultarModal" />
+}
+
+@code {
+    [Parameter] public int? FacturaId { get; set; }
+
+    private Factura factura = new()
+    {
+        IdLetraFactura = 1,
+        IdTipoDocumentoFiscal = 1,
+    };
+
+    [Parameter]
+    public List<FacturaDetalle> Detalles { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<FacturaDetalle> OnEliminarDetalle { get; set; }
+
+    [Parameter]
+    public EventCallback<ArticuloModel> OnArticuloSeleccionado { get; set; }
+
+    [Parameter]
+    public Factura? FacturaActual { get; set; }
+
+    private bool MostrarModalArticulos { get; set; } = false;
+
+    private void MostrarModal()
+    {
+        MostrarModalArticulos = true;
+        StateHasChanged(); // por si no actualiza
+    }
+
+    private void OcultarModal()
+    {
+        MostrarModalArticulos = false;
+        StateHasChanged();
+    }
+
+    private async Task EliminarFila(FacturaDetalle detalle)
+    {
+        await OnEliminarDetalle.InvokeAsync(detalle);
+    }
+
+    private async Task AsignarArticulo(ArticuloModel articulo)
+    {
+        await OnArticuloSeleccionado.InvokeAsync(articulo);
+        OcultarModal();
+    }
+}
