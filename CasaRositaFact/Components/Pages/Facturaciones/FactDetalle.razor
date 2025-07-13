@@ -43,11 +43,11 @@
                 <td>@item.NombreArticulo</td>
                 <td>
                     <input id="cantidad_@item.Uid"
-                           type="number"
-                           class="form-control form-control-sm text-end"
-                           min="1"
-                           @bind="item.Cantidad"
-                           @bind:event="oninput" />
+                    type="number"
+                    class="form-control form-control-sm text-end"
+                    min="1"
+                    @bind="item.Cantidad"
+                    @bind:event="oninput" />
                 </td>
                 <td>
                     <select class="form-select form-select-sm" @bind="item.IdTipoIva">
@@ -68,13 +68,16 @@
 
 @if (MostrarModalArticulos)
 {
-    <ArticuloModal FacturaActual="FacturaActual" 
-                   OnArticuloSeleccionado="AsignarArticulo" 
-                   OnCerrar="OcultarModal" />
+    <ArticuloModal FacturaActual="FacturaActual"
+    DetallesFactura="DetallesFacturaCompleta"
+    OnArticuloSeleccionado="AsignarArticulo"
+    OnCerrar="OcultarModal" />
 }
 
 @code {
     [Parameter] public int? FacturaId { get; set; }
+    [Parameter]
+    public List<FacturaDetalle> DetallesFacturaCompleta { get; set; } = default!;
 
     private Factura factura = new()
     {

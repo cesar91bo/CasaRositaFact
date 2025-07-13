@@ -88,9 +88,10 @@
     [Parameter] public EventCallback<ArticuloModel> OnArticuloSeleccionado { get; set; }
     [Parameter] public EventCallback OnCerrar { get; set; }
     [Parameter] public Factura FacturaActual { get; set; } = default!;
+    [Parameter] public List<FacturaDetalle> DetallesFactura { get; set; } = new();
 
-    [Inject] public FacturaState facturaState { get; set; }
-    [Inject] public Blazored.LocalStorage.ILocalStorageService localStorage { get; set; }
+    [Inject] public FacturaState facturaState { get; set; } = default!;
+    [Inject] public Blazored.LocalStorage.ILocalStorageService localStorage { get; set; } = default!;
 
 
     private List<ArticuloModel> articulos = new();
@@ -162,19 +163,23 @@
 
     private async Task AsignarPrecio()
     {
-        // Guardar estado antes de salir
-        if (FacturaActual != null)
+        if (FacturaActual != null && DetallesFactura != null)
         {
-            var json = JsonSerializer.Serialize(FacturaActual);
-            await localStorage.SetItemAsync("facturaTemp", FacturaActual);
+            var temp = new FacturaTempModel
+                {
+                    Factura = FacturaActual,
+                    Detalles = DetallesFactura.ToList()
+                };
+
+            await localStorage.SetItemAsync("facturaTemp", temp);
         }
 
         NavigationManager.NavigateTo($"/articulos/editar/{articuloSinPrecioSeleccionado?.IdArticulo}?origen=factura");
-
-
-        // Oculta el mensaje por ahora
         mostrarAdvertencia = false;
     }
+
+
+
 
     private void CargaGenerica()
     {

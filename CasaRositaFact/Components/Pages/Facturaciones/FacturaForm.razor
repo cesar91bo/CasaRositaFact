@@ -129,8 +129,11 @@
 
     <!-- Detalle -->
     <FactDetalle Detalles="facturaDetalles"
+                 DetallesFacturaCompleta="facturaDetalles"
                  OnEliminarDetalle="EliminarFilaPorId"
-                 OnArticuloSeleccionado="AsignarArticulo" />
+                 OnArticuloSeleccionado="AsignarArticulo"
+                 FacturaActual="factura" />
+
 
 
     <div class="mb-4">
@@ -191,27 +194,42 @@
         }
         else
         {
-            // Intentar recuperar desde localStorage
-            var json = await localStorage.GetItemAsStringAsync("facturaTemp");
-            var tempFactura = await localStorage.GetItemAsync<Factura>("facturaTemp");
-            if (tempFactura is not null)
+            var temp = await localStorage.GetItemAsync<FacturaTempModel>("facturaTemp");
+
+            if (temp != null && temp.Factura != null)
             {
-                factura = tempFactura;
+                factura = temp.Factura;
+                facturaDetalles = temp.Detalles ?? new List<FacturaDetalle>();
 
                 if (factura.IdCliente > 0)
                 {
-                    cliente = await ClienteService.GetClienteByIdAsync(factura.IdCliente);
-                    IdClienteBuscado = cliente.IdCliente;
+                    try
+                    {
+                        cliente = await ClienteService.GetClienteByIdAsync(factura.IdCliente);
+                        IdClienteBuscado = cliente.IdCliente;
+                    }
+                    catch
+                    {
+                        // Si falla la búsqueda del cliente, mantenemos el "Consumidor Final"
+                        cliente = new Cliente { Nombre = "Consumidor Final", Apellido = "", IdRegimenImpositivo = 1, IdTipoDocumento = 1 };
+                        IdClienteBuscado = 1;
+                    }
                 }
 
-                StateHasChanged();
             }
             else
             {
                 // Es una nueva factura
-                factura.FechaEmision = DateTime.Today;
-                factura.IdLetraFactura = letrasFactura.FirstOrDefault()?.IdLetraFactura ?? 1;
-                factura.IdLetraFactura = 2;
+                factura = new Factura
+                    {
+                        FechaEmision = DateTime.Today,
+                        IdLetraFactura = letrasFactura.FirstOrDefault()?.IdLetraFactura ?? 1,
+                        IdTipoDocumentoFiscal = 1,
+                        MoverStock = true
+                    };
+
+                facturaDetalles = new List<FacturaDetalle> { new FacturaDetalle() };
+
                 await CargarClientePorDefecto();
             }
         }
@@ -221,22 +239,60 @@
             var articuloSel = await ArticuloService.GetByIdAsync(IdArticulo.Value);
             if (articuloSel != null)
             {
-                facturaDetalles.Add(new FacturaDetalle
-                    {
-                        IdArticulo = articuloSel.IdArticulo,
-                        NombreArticulo = articuloSel.Nombre,
-                        PrecioUnitario = articuloSel.PrecioActual ?? 0,
-                        Cantidad = 1,
-                        TotalArticulo = articuloSel.PrecioActual, // Inicial
-                        IdUnidadMedida = articuloSel.IdUnidadMedida ?? 1
-                    });
+                // Buscar fila vacía existente
+                var filaVacia = facturaDetalles.FirstOrDefault(f => f.IdArticulo == 0 && string.IsNullOrWhiteSpace(f.NombreArticulo));
 
-                facturaDetalles.Add(new FacturaDetalle());
+                if (filaVacia != null)
+                {
+                    // Rellenar la fila vacía
+                    filaVacia.IdArticulo = articuloSel.IdArticulo;
+                    filaVacia.NombreArticulo = articuloSel.Nombre;
+                    filaVacia.PrecioUnitario = articuloSel.PrecioActual ?? 0;
+                    filaVacia.Cantidad = 1;
+                    filaVacia.TotalArticulo = articuloSel.PrecioActual;
+                    filaVacia.IdUnidadMedida = articuloSel.IdUnidadMedida ?? 1;
+                }
+                else
+                {
+                    // Si no hay fila vacía, agregar una nueva
+                    facturaDetalles.Add(new FacturaDetalle
+                        {
+                            IdArticulo = articuloSel.IdArticulo,
+                            NombreArticulo = articuloSel.Nombre,
+                            PrecioUnitario = articuloSel.PrecioActual ?? 0,
+                            Cantidad = 1,
+                            TotalArticulo = articuloSel.PrecioActual,
+                            IdUnidadMedida = articuloSel.IdUnidadMedida ?? 1
+                        });
+                }
+
+                // Asegurarse de que haya una fila vacía al final
+                var ultimaFila = facturaDetalles.LastOrDefault();
+                if (ultimaFila == null || ultimaFila.IdArticulo != 0 || !string.IsNullOrWhiteSpace(ultimaFila.NombreArticulo))
+                {
+                    facturaDetalles.Add(new FacturaDetalle());
+                }
             }
         }
+
         else
         {
-            facturaDetalles.Add(new FacturaDetalle());
+            // Eliminar filas vacías que NO estén al final
+            for (int i = facturaDetalles.Count - 2; i >= 0; i--)
+            {
+                var detalle = facturaDetalles[i];
+                if (detalle.IdArticulo == 0 && string.IsNullOrWhiteSpace(detalle.NombreArticulo))
+                {
+                    facturaDetalles.RemoveAt(i);
+                }
+            }
+
+            // Verificar si la última fila es vacía
+            var ultimaFila = facturaDetalles.LastOrDefault();
+            if (ultimaFila == null || ultimaFila.IdArticulo != 0 || !string.IsNullOrWhiteSpace(ultimaFila.NombreArticulo))
+            {
+                facturaDetalles.Add(new FacturaDetalle());
+            }
         }
 
 
@@ -304,7 +360,6 @@
         if (articuloSel == null)
             return;
 
-        // Evitar duplicados
         var existente = facturaDetalles.FirstOrDefault(d => d.IdArticulo == articuloSel.IdArticulo && d.IdArticulo != 0);
         if (existente != null)
         {
@@ -323,24 +378,19 @@
                     IdUnidadMedida = articuloSel.IdUnidadMedida
                 };
 
-            // Buscar la fila vacía (IdArticulo == 0 y sin nombre)
-            int indexFilaVacia = facturaDetalles.FindIndex(f => f.IdArticulo == 0 && string.IsNullOrEmpty(f.NombreArticulo));
+            // Eliminar fila vacía si existe
+            var vacía = facturaDetalles.FirstOrDefault(f => f.IdArticulo == 0 && string.IsNullOrWhiteSpace(f.NombreArticulo));
+            if (vacía != null)
+            {
+                facturaDetalles.Remove(vacía);
+            }
 
-            if (indexFilaVacia >= 0)
-            {
-                // Insertar antes de la fila vacía
-                facturaDetalles.Insert(indexFilaVacia, nuevoDetalle);
-            }
-            else
-            {
-                // Si no hay fila vacía, agregar al final
-                facturaDetalles.Add(nuevoDetalle);
-            }
+            facturaDetalles.Add(nuevoDetalle);
+            facturaDetalles.Add(new FacturaDetalle()); // Siempre una vacía al final
         }
 
         StateHasChanged();
     }
-
 
     private void BuscarArticulo()
     {
@@ -370,7 +420,7 @@
     }
 
 
-    private async Task EliminarFilaPorId(FacturaDetalle detalle)
+    private void EliminarFilaPorId(FacturaDetalle detalle)
     {
         facturaDetalles.Remove(detalle);
         if (facturaDetalles.Count == 0)
