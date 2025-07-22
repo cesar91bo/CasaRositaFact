@@ -194,7 +194,7 @@
         }
         else
         {
-            FacturaTempModel temp = new FacturaTempModel();
+            FacturaTempModel? temp = new FacturaTempModel();
             try
             {
                 temp = await localStorage.GetItemAsync<FacturaTempModel>("facturaTemp");
@@ -337,6 +337,11 @@
             var clienteEncontrado = await ClienteService.GetClienteByIdAsync(IdClienteBuscado.Value);
             cliente = clienteEncontrado;
             factura.IdCliente = cliente.IdCliente;
+            await localStorage.SetItemAsync("facturaTemp", new FacturaTempModel
+                {
+                    Factura = factura,
+                    Detalles = facturaDetalles
+                });
         }
         catch (Exception ex)
         {
@@ -361,6 +366,12 @@
         factura.IdCliente = clienteSel.IdCliente;
         IdClienteBuscado = clienteSel.IdCliente;
         FacturaState.FacturaActual = factura;
+
+        localStorage.SetItemAsync("facturaTemp", new FacturaTempModel
+            {
+                Factura = factura,
+                Detalles = facturaDetalles
+            });
         StateHasChanged();
     }
 

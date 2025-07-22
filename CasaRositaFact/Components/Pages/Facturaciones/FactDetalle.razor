@@ -122,10 +122,11 @@
     private async Task AsignarArticulo(ArticuloModel articulo)
     {
         await OnArticuloSeleccionado.InvokeAsync(articulo);
+        await GuardarEnStorage();
         OcultarModal();
     }
 
-    private void OnCantidadChanged(ChangeEventArgs e, FacturaDetalle item)
+    private async void OnCantidadChanged(ChangeEventArgs e, FacturaDetalle item)
     {
         if (int.TryParse(e.Value?.ToString(), out int nuevaCantidad))
         {
@@ -141,15 +142,29 @@
                 }
             }
 
+            await GuardarEnStorage();
             StateHasChanged();
         }
     }
+
+    private async Task GuardarEnStorage()
+    {
+        var tempModel = new FacturaTempModel
+            {
+                Factura = FacturaActual ?? new Factura(){IdLetraFactura = 2, IdTipoDocumentoFiscal = 1},
+                Detalles = DetallesFacturaCompleta
+            };
+
+        await localStorage.SetItemAsync("facturaTemp", tempModel);
+    }
+
 
     private async Task EliminarFilaPorId(FacturaDetalle detalle)
     {
         if (OnEliminarDetalle.HasDelegate)
         {
             await OnEliminarDetalle.InvokeAsync(detalle);
+            await GuardarEnStorage();
         }
     }
 
