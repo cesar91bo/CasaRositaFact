@@ -3,6 +3,9 @@
 @using CasaRositaFact.State
 @using Data.Entities
 @using static CasaRositaFact.Data.Entities.Factura
+@using Blazored.LocalStorage
+
+@inject ILocalStorageService localStorage
 
 <h3 class="mb-3 text-secondary fw-bold border-bottom pb-2">Detalle de Factura</h3>
 
@@ -27,7 +30,7 @@
             var item = Detalles[i];
             <tr @key="item.Uid">
                 <td>
-                    <button type="button" class="btn btn-sm btn-danger" @onclick="() => EliminarFila(item)">
+                    <button type="button" class="btn btn-sm btn-danger" @onclick="() => EliminarFilaPorId(item)">
                         <i class="bi bi-trash"></i>
                     </button>
                 </td>
@@ -47,7 +50,7 @@
                     class="form-control form-control-sm text-end"
                     min="1"
                     @bind="item.Cantidad"
-                    @bind:event="oninput" />
+                    @oninput="(e => OnCantidadChanged(e, item))" />
                 </td>
                 <td>
                     <select class="form-select form-select-sm" @bind="item.IdTipoIva">
@@ -121,4 +124,33 @@
         await OnArticuloSeleccionado.InvokeAsync(articulo);
         OcultarModal();
     }
+
+    private void OnCantidadChanged(ChangeEventArgs e, FacturaDetalle item)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int nuevaCantidad))
+        {
+            item.Cantidad = nuevaCantidad;
+
+            if (item.Cantidad > 0 && item.PrecioUnitario > 0)
+            {
+                item.TotalArticulo = Math.Round(item.Cantidad * item.PrecioUnitario, 2);
+
+                if (item == Detalles.Last())
+                {
+                    Detalles.Add(new FacturaDetalle());
+                }
+            }
+
+            StateHasChanged();
+        }
+    }
+
+    private async Task EliminarFilaPorId(FacturaDetalle detalle)
+    {
+        if (OnEliminarDetalle.HasDelegate)
+        {
+            await OnEliminarDetalle.InvokeAsync(detalle);
+        }
+    }
+
 }

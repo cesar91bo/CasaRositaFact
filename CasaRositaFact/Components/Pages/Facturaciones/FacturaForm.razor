@@ -130,8 +130,8 @@
     <!-- Detalle -->
     <FactDetalle Detalles="facturaDetalles"
                  DetallesFacturaCompleta="facturaDetalles"
-                 OnEliminarDetalle="EliminarFilaPorId"
                  OnArticuloSeleccionado="AsignarArticulo"
+                 OnEliminarDetalle="EliminarDetalle"
                  FacturaActual="factura" />
 
 
@@ -194,7 +194,16 @@
         }
         else
         {
-            var temp = await localStorage.GetItemAsync<FacturaTempModel>("facturaTemp");
+            FacturaTempModel temp = new FacturaTempModel();
+            try
+            {
+                temp = await localStorage.GetItemAsync<FacturaTempModel>("facturaTemp");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al deserializar facturaTemp: {ex.Message}");
+                await localStorage.RemoveItemAsync("facturaTemp"); // lo limpiás para evitar que siga el problema
+            }
 
             if (temp != null && temp.Factura != null)
             {
@@ -398,36 +407,24 @@
 
     }
 
-    private void CalcularTotalYAgregarNuevaFila(Guid uid)
-    {
-        var item = facturaDetalles.FirstOrDefault(x => x.Uid == uid);
-
-        if (item is null)
-            return;
-
-        if (item.Cantidad > 0 && item.PrecioUnitario > 0)
-        {
-            item.TotalArticulo = Math.Round(item.Cantidad * item.PrecioUnitario, 2);
-
-            // Agrega una nueva fila solo si esta es la última
-            if (item == facturaDetalles.Last())
-            {
-                facturaDetalles.Add(new FacturaDetalle());
-            }
-        }
-
-        StateHasChanged();
-    }
-
-
-    private void EliminarFilaPorId(FacturaDetalle detalle)
+    private async Task EliminarDetalle(FacturaDetalle detalle)
     {
         facturaDetalles.Remove(detalle);
+
         if (facturaDetalles.Count == 0)
         {
             facturaDetalles.Add(new FacturaDetalle());
         }
+
+        // Guardar correctamente en localStorage
+        await localStorage.SetItemAsync("facturaTemp", new FacturaTempModel
+            {
+                Factura = factura,
+                Detalles = facturaDetalles
+            });
+
         StateHasChanged();
     }
+
 
 }
