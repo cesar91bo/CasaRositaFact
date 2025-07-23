@@ -40,7 +40,7 @@
                     </button>
                 </td>
                 <td>
-                    <button type="button" class="btn btn-sm btn-secondary w-100">Cargar</button>
+                    <button type="button" class="btn btn-sm btn-secondary w-100" @onclick="AbrirModalArticuloDesconocido">Cargar</button>
                 </td>
                 <td>@item.IdArticulo</td>
                 <td>@item.NombreArticulo</td>
@@ -76,6 +76,14 @@
     OnArticuloSeleccionado="AsignarArticulo"
     OnCerrar="OcultarModal" />
 }
+
+@if (MostrarModalArticuloDesconocido)
+{
+    <ArticuloDesconocidoModal OnConfirmar="ConfirmarArticuloDesconocido"
+                              OnCerrar="CerrarModalArticuloDesconocido" />
+}
+
+
 
 @code {
     [Parameter] public int? FacturaId { get; set; }
@@ -167,5 +175,56 @@
             await GuardarEnStorage();
         }
     }
+
+    private bool MostrarModalArticuloDesconocido { get; set; } = false;
+
+    private void AbrirModalArticuloDesconocido()
+    {
+        MostrarModalArticuloDesconocido = true;
+    }
+
+    private void CerrarModalArticuloDesconocido()
+    {
+        MostrarModalArticuloDesconocido = false;
+    }
+
+    private async Task ConfirmarArticuloDesconocido(FacturaDetalle detalle)
+    {
+        // Buscar si hay una fila vacía (sin Id ni nombre)
+        var filaVacia = Detalles.FirstOrDefault(f =>
+            f.IdArticulo == 0 &&
+            string.IsNullOrWhiteSpace(f.NombreArticulo)
+        );
+
+        if (filaVacia != null)
+        {
+            // Reemplazamos la fila vacía
+            filaVacia.IdArticulo = 0; // 0 para artículos desconocidos
+            filaVacia.NombreArticulo = detalle.NombreArticulo;
+            filaVacia.PrecioUnitario = detalle.PrecioUnitario;
+            filaVacia.Cantidad = detalle.Cantidad;
+            filaVacia.IdTipoIva = detalle.IdTipoIva;
+            filaVacia.TotalArticulo = Math.Round(detalle.Cantidad * detalle.PrecioUnitario, 2);
+        }
+        else
+        {
+            // No hay fila vacía → agregamos el artículo
+            detalle.IdArticulo = 0; // Artículo desconocido
+            detalle.TotalArticulo = Math.Round(detalle.Cantidad * detalle.PrecioUnitario, 2);
+            Detalles.Add(detalle);
+        }
+
+        // Aseguramos que haya siempre una fila vacía al final
+        var ultima = Detalles.LastOrDefault();
+        if (ultima == null || ultima.IdArticulo != 0 || !string.IsNullOrWhiteSpace(ultima.NombreArticulo))
+        {
+            Detalles.Add(new FacturaDetalle());
+        }
+
+        await GuardarEnStorage();
+        CerrarModalArticuloDesconocido();
+        StateHasChanged();
+    }
+
 
 }

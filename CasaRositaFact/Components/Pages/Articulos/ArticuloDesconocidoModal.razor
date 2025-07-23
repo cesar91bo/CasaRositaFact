@@ -1,0 +1,67 @@
+﻿@using CasaRositaFact.Data.Entities
+<!-- ArticuloDesconocidoModal.razor -->
+<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+                <h5 class="modal-title">Cargar Artículo Desconocido</h5>
+                <button type="button" class="btn-close btn-close-white" aria-label="Close" @onclick="CerrarModal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Nombre</label>
+                    <input class="form-control" @bind="NuevoArticulo.NombreArticulo" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Cantidad</label>
+                    <input type="number" class="form-control" @bind="NuevoArticulo.Cantidad" min="1" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Precio</label>
+                    <input type="number" class="form-control" step="0.01" @bind="NuevoArticulo.PrecioUnitario" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">% IVA</label>
+                    <select class="form-select" @bind="NuevoArticulo.IdTipoIva">
+                        <option value="1">21%</option>
+                        <option value="2">10.5%</option>
+                        <option value="3">0%</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" @onclick="CerrarModal">Cancelar</button>
+                <button class="btn btn-primary" @onclick="Confirmar">Aceptar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public EventCallback<FacturaDetalle> OnConfirmar { get; set; }
+    [Parameter] public EventCallback OnCerrar { get; set; }
+
+    private FacturaDetalle NuevoArticulo = new()
+        {
+            Cantidad = 1,
+            IdTipoIva = 1 // 21% por defecto
+        };
+
+    private async Task Confirmar()
+    {
+        if (OnConfirmar.HasDelegate)
+        {
+            NuevoArticulo.TotalArticulo = Math.Round(NuevoArticulo.Cantidad * NuevoArticulo.PrecioUnitario, 2);
+            await OnConfirmar.InvokeAsync(NuevoArticulo);
+        }
+        await CerrarModal();
+    }
+
+    private async Task CerrarModal()
+    {
+        if (OnCerrar.HasDelegate)
+        {
+            await OnCerrar.InvokeAsync();
+        }
+    }
+}
