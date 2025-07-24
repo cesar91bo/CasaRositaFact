@@ -35,12 +35,16 @@
                     </button>
                 </td>
                 <td>
-                    <button type="button" class="btn btn-sm btn-outline-primary" @onclick="MostrarModal">
+                    <button type="button" class="btn btn-sm btn-outline-primary" @onclick="MostrarModal"
+                            disabled="@(item.IdArticulo != 0 || !string.IsNullOrWhiteSpace(item.NombreArticulo))">
                         <i class="bi bi-search"></i>
                     </button>
                 </td>
                 <td>
-                    <button type="button" class="btn btn-sm btn-secondary w-100" @onclick="AbrirModalArticuloDesconocido">Cargar</button>
+                    <button type="button" class="btn btn-sm btn-secondary w-100" @onclick="AbrirModalArticuloDesconocido"
+                            disabled="@(item.IdArticulo != 0 || !string.IsNullOrWhiteSpace(item.NombreArticulo))">
+                        Cargar
+                    </button>
                 </td>
                 <td>@item.IdArticulo</td>
                 <td>@item.NombreArticulo</td>
