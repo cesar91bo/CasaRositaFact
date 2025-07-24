@@ -1,0 +1,34 @@
+﻿<div class="modal show d-block" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+                <h5 class="modal-title">Ingresar Precio Manual</h5>
+                <button type="button" class="btn-close" @onclick="() => OnCerrar.InvokeAsync()" />
+            </div>
+            <div class="modal-body">
+                <input type="number" step="0.01" class="form-control" @bind="nuevoPrecio" placeholder="Nuevo precio" />
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" @onclick="() => OnCerrar.InvokeAsync()">Cancelar</button>
+                <button class="btn btn-primary" @onclick="Confirmar">Aplicar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop fade show"></div>
+
+@code {
+    [Parameter] public EventCallback<decimal> OnConfirmar { get; set; }
+    [Parameter] public EventCallback OnCerrar { get; set; }
+
+    private decimal nuevoPrecio;
+
+    private async Task Confirmar()
+    {
+        if (nuevoPrecio > 0)
+        {
+            await OnConfirmar.InvokeAsync(nuevoPrecio);
+        }
+    }
+}

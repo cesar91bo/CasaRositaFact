@@ -62,9 +62,18 @@
                 <td>@item.PrecioUnitario</td>
                 <td>@item.TotalArticulo</td>
                 <td>
-                    <button type="button" class="btn btn-sm btn-secondary w-100">Cargar Precio</button>
+                    <button type="button"
+                            class="btn btn-sm btn-secondary w-100"
+                            @onclick="() => AbrirModalPrecioManual(item)">
+                        Cargar Precio
+                    </button>
                 </td>
             </tr>
+        }
+        @if (MostrarModalPrecioManual)
+        {
+            <PrecioManualModal OnConfirmar="ConfirmarPrecioManual"
+                               OnCerrar="CerrarModalPrecioManual" />
         }
     </tbody>
 </table>
@@ -226,5 +235,38 @@
         StateHasChanged();
     }
 
+    private bool MostrarModalPrecioManual { get; set; } = false;
+    private FacturaDetalle? ItemSeleccionadoParaPrecioManual { get; set; }
+
+    private void AbrirModalPrecioManual(FacturaDetalle item)
+    {
+        if (item.PrecioUnitario <= 0)
+        {
+            // Si no hay precio previo, no permitimos aplicar precio manual
+            return;
+        }
+
+        ItemSeleccionadoParaPrecioManual = item;
+        MostrarModalPrecioManual = true;
+    }
+
+    private void CerrarModalPrecioManual()
+    {
+        MostrarModalPrecioManual = false;
+        ItemSeleccionadoParaPrecioManual = null;
+    }
+
+    private async Task ConfirmarPrecioManual(decimal nuevoPrecio)
+    {
+        if (ItemSeleccionadoParaPrecioManual is not null)
+        {
+            ItemSeleccionadoParaPrecioManual.PrecioUnitario = nuevoPrecio;
+            ItemSeleccionadoParaPrecioManual.TotalArticulo = Math.Round(nuevoPrecio * ItemSeleccionadoParaPrecioManual.Cantidad, 2);
+            await GuardarEnStorage();
+        }
+
+        CerrarModalPrecioManual();
+        StateHasChanged();
+    }
 
 }

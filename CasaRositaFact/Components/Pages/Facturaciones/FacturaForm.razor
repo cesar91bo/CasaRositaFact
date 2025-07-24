@@ -118,8 +118,8 @@
         <div class="col-md-3 d-flex align-items-center">
             <div class="form-check form-switch mt-3">
                 <InputCheckbox id="NoMoverStock"
-                               class="form-check-input"
-                               @bind-Value="factura.MoverStock" />
+                class="form-check-input"
+                @bind-Value="factura.MoverStock" />
                 <label class="form-check-label" for="NoMoverStock">No mover Stock</label>
             </div>
         </div>
@@ -129,10 +129,10 @@
 
     <!-- Detalle -->
     <FactDetalle Detalles="facturaDetalles"
-                 DetallesFacturaCompleta="facturaDetalles"
-                 OnArticuloSeleccionado="AsignarArticulo"
-                 OnEliminarDetalle="EliminarDetalle"
-                 FacturaActual="factura" />
+    DetallesFacturaCompleta="facturaDetalles"
+    OnArticuloSeleccionado="AsignarArticulo"
+    OnEliminarDetalle="EliminarDetalle"
+    FacturaActual="factura" />
 
 
 
@@ -209,6 +209,7 @@
             {
                 factura = temp.Factura;
                 facturaDetalles = temp.Detalles ?? new List<FacturaDetalle>();
+
 
                 if (factura.IdCliente > 0)
                 {
@@ -407,6 +408,12 @@
 
             facturaDetalles.Add(nuevoDetalle);
             facturaDetalles.Add(new FacturaDetalle()); // Siempre una vacía al final
+
+             localStorage.SetItemAsync("facturaTemp", new FacturaTempModel
+                {
+                    Factura = factura,
+                    Detalles = facturaDetalles
+                });
         }
 
         StateHasChanged();
@@ -420,8 +427,17 @@
 
     private async Task EliminarDetalle(FacturaDetalle detalle)
     {
+        // Si es la última fila y está vacía, no la elimines
+        if (facturaDetalles.Count > 0 &&
+            facturaDetalles.IndexOf(detalle) == facturaDetalles.Count - 1 &&
+            EsDetalleVacio(detalle))
+        {
+            return;
+        }
+
         facturaDetalles.Remove(detalle);
 
+        // Si quedó vacío el listado, agregamos uno vacío
         if (facturaDetalles.Count == 0)
         {
             facturaDetalles.Add(new FacturaDetalle());
@@ -437,5 +453,12 @@
         StateHasChanged();
     }
 
+
+    private bool EsDetalleVacio(FacturaDetalle detalle)
+    {
+        return string.IsNullOrWhiteSpace(detalle.NombreArticulo)
+            && detalle.Cantidad == 0
+            && detalle.PrecioUnitario == 0;
+    }
 
 }
