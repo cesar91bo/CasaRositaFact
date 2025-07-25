@@ -52,7 +52,7 @@
                     <input id="cantidad_@item.Uid"
                     type="number"
                     class="form-control form-control-sm text-end"
-                    min="1"
+                           min="@(item.IdArticulo != 0 ? "1" : null)"
                     @bind="item.Cantidad"
                     @oninput="(e => OnCantidadChanged(e, item))" />
                 </td>
