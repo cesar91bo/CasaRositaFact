@@ -134,12 +134,9 @@
     OnEliminarDetalle="EliminarDetalle"
     FacturaActual="factura" />
 
-
-
-    <div class="mb-4">
-        <label for="Detalle" class="form-label">Detalle Adicional</label>
-        <InputTextArea id="Detalle" class="form-control" rows="2" @bind-Value="factura.Observaciones" />
-    </div>
+    <FactFooter Detalles="facturaDetalles"
+         OnGuardar="GuardarFactura"
+         OnCancelar="NavigateToFacturas" />
 </EditForm>
 
 
