@@ -18,5 +18,8 @@ namespace CasaRositaFact.Data.IRepositories
 
         Task<IEnumerable<FormaPago>> GetAllFormaPagoAsync();
         Task<FormaPago> GetFormaPagoByIdAsync(int id);
+
+        Task<TipoIva> GetTipoIvaByIdAsync(int id);
+        Task<IEnumerable<TipoIva>> GetAllTipoIvaAsync();
     }
 }

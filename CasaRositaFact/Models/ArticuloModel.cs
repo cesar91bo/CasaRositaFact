@@ -7,5 +7,6 @@
         public decimal? StockActual { get; set; }
         public decimal PrecioActual { get; set; }
         public int IdUnidadMedida { get; set; }
+        public int? IdTipoIva { get; set; }
     }
 }

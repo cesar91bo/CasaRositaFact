@@ -51,5 +51,13 @@ namespace CasaRositaFact.Services
         {
             return await auxiliarRepository.GetTipoDocumentoFiscalByIdAsync(id);
         }
+        public async Task<TipoIva> GetTipoIvaByIdAsync(int id)
+        {
+            return await auxiliarRepository.GetTipoIvaByIdAsync(id);
+        }
+        public async Task<IEnumerable<TipoIva>> GetAllTipoIvaAsync()
+        {
+            return await auxiliarRepository.GetAllTipoIvaAsync();
+        }
     }
 }

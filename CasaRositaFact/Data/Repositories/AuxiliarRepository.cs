@@ -95,5 +95,15 @@ namespace CasaRositaFact.Data.Repositories
             }
         }
 
+        public async Task<TipoIva> GetTipoIvaByIdAsync(int id)
+        {
+            return await _context.TiposIva.FirstOrDefaultAsync(ti => ti.IdTipoIva == id)
+                   ?? throw new Exception("Tipo de IVA no encontrado");
+        }
+
+        public async Task<IEnumerable<TipoIva>> GetAllTipoIvaAsync()
+        {
+            return await _context.TiposIva.ToListAsync();
+        }
     }
 }
