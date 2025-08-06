@@ -41,10 +41,17 @@
 
     private readonly System.Globalization.CultureInfo esAr = System.Globalization.CultureInfo.GetCultureInfo("es-AR");
 
-    private decimal SubTotalIva0 => Detalles.Sum(d => d.TotalArticulo ?? 0);
-    private decimal SubTotalIva105 => Detalles.Sum(d => d.TotalArticulo ?? 0);
-    private decimal SubTotalIva21 => Detalles.Sum(d => d.TotalArticulo ?? 0);
+    private decimal SubTotalIva21 => Detalles
+    .Where(d => d.IdTipoIva == 1)
+    .Sum(d => d.TotalArticulo ?? 0);
 
+    private decimal SubTotalIva105 => Detalles
+        .Where(d => d.IdTipoIva == 2)
+        .Sum(d => d.TotalArticulo ?? 0);
+
+    private decimal SubTotalIva0 => Detalles
+        .Where(d => d.IdTipoIva == 3)
+        .Sum(d => d.TotalArticulo ?? 0);
     private decimal Subtotal => SubTotalIva0 + SubTotalIva105 + SubTotalIva21;
     private decimal SubtotalConDescuento => Subtotal - (Subtotal * (DescuentoPorcentaje / 100));
 

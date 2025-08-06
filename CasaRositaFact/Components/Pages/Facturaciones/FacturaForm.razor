@@ -27,103 +27,13 @@
 
     <h3 class="mb-3 text-secondary fw-bold border-bottom pb-2">Cabecera de Factura</h3>
 
-    <!-- Búsqueda de Cliente -->
-    <div class="row mb-3 align-items-end">
-        <!-- Input ID Cliente -->
-        <div class="col-md-2">
-            <label for="IdCliente" class="form-label">ID Cliente</label>
-            <InputNumber id="IdCliente" class="form-control" @bind-Value="IdClienteBuscado" />
-        </div>
-
-        <!-- Botón Buscar -->
-        <div class="col-md-1">
-            <label class="form-label d-block">&nbsp;</label>
-            <button type="button" class="btn btn-outline-primary w-100" @onclick="BuscarCliente">
-                <i class="bi bi-search"></i> <!-- Bootstrap Icons: lupa -->
-            </button>
-        </div>
-
-        <div class="col-md-1">
-            <label class="form-label d-block">&nbsp;</label>
-            <button type="button" class="btn btn-outline-secondary w-100" @onclick="MostrarModalClientes">
-                <i class="bi bi-people"></i>
-            </button>
-        </div>
-        @if (mostrarModalClientes)
-        {
-            <ClientesModal OnClienteSeleccionado="AsignarCliente" OnCerrar="OcultarModalClientes" />
-        }
-
-        <!-- Botón Cliente por defecto -->
-        <div class="col-md-1">
-            <label class="form-label d-block">&nbsp;</label>
-            <button type="button" class="btn btn-outline-success w-100" @onclick="CargarClientePorDefecto">
-                <i class="bi bi-person-check"></i>
-            </button>
-        </div>
-
-        <!-- Nombre del Cliente -->
-        <div class="col-md-5">
-            <label class="form-label">Cliente</label>
-            <input id="Cliente" class="form-control" value="@cliente.NombreCompleto" readonly />
-        </div>
-    </div>
-
-    <div class="row mb-3 align-items-end">
-        <!-- Tipo y Número Factura -->
-        <div class="col-md-3">
-            <label for="TipoFactura" class="form-label">Tipo Factura</label>
-            <InputSelect id="TipoFactura" class="form-select" @bind-Value="factura.IdLetraFactura">
-                @foreach (var letra in letrasFactura)
-                {
-                    <option value="@letra.IdLetraFactura">@letra.Nombre</option>
-                }
-            </InputSelect>
-        </div>
-
-        <div class="col-md-3">
-            <label for="NroFactura" class="form-label">Número</label>
-            <InputText disabled id="NroFactura" class="form-control" @bind-Value="factura.NroCompFactura" />
-        </div>
-        <!-- Fecha -->
-        <div class="col-md-3">
-            <label for="FechaEmision" class="form-label">Fecha de Emisión</label>
-            <InputDate id="FechaEmision" class="form-control" @bind-Value="factura.FechaEmision" />
-        </div>
-
-    </div>
-
-    <div class="row mb-3">
-        <!-- Forma de Pago -->
-        <div class="col-md-4">
-            <label for="FormaPago" class="form-label">Forma de Pago</label>
-            <InputSelect id="FormaPago" class="form-select" @bind-Value="factura.FormaPago">
-                <option value="Contado">Contado</option>
-                <option value="Credito">Crédito</option>
-                <option value="Transferencia">Transferencia</option>
-            </InputSelect>
-        </div>
-
-        <!-- Concepto -->
-        <div class="col-md-4">
-            <label for="FormaPago" class="form-label">Concepto</label>
-            <InputSelect id="FormaPago" class="form-select" @bind-Value="factura.ConceptoFactura">
-                <option value="Producto">Producto</option>
-                <option value="Servicio">Servicio</option>
-                <option value="ProductoServicio">Producto/Servicio</option>
-            </InputSelect>
-        </div>
-
-        <!-- Checkbox "No mover Stock" -->
-        <div class="col-md-3 d-flex align-items-center">
-            <div class="form-check form-switch mt-3">
-                <InputCheckbox id="NoMoverStock"
-                class="form-check-input"
-                @bind-Value="factura.MoverStock" />
-                <label class="form-check-label" for="NoMoverStock">No mover Stock</label>
-            </div>
-        </div>
-    </div>
+    <FacturaCabecera Factura="factura"
+                     Cliente="cliente"
+                     IdClienteBuscado="IdClienteBuscado"
+                     OnClienteBuscadoChanged="@(id => IdClienteBuscado = id)"
+                     OnClienteAsignado="AsignarCliente"
+                     OnMostrarModalClientes="MostrarModalClientes"
+                     LetrasFactura="letrasFactura" />
 
     <div class="row mb-4 border-bottom"></div>
 
@@ -139,10 +49,17 @@
          OnCancelar="NavigateToFacturas" />
 </EditForm>
 
+@if (mostrarModalClientes)
+{
+    <ClientesModal OnClienteSeleccionado="AsignarCliente"
+                   OnCerrar="OcultarModalClientes" />
+}
 
 @code {
     [Parameter] public int? FacturaId { get; set; }
-
+    [Parameter] public Factura Factura { get; set; }
+    [Parameter] public Cliente Cliente { get; set; }
+    [Parameter] public EventCallback<Cliente> OnClienteAsignado { get; set; }
 
     private Factura factura = new Factura
         {
@@ -170,7 +87,7 @@
 
     private int? IdClienteBuscado = 1;
     private string clienteNombre = string.Empty;
-    private bool mostrarModalClientes = false;
+    private bool mostrarModalClientes;
     private void MostrarModalClientes() => mostrarModalClientes = true;
     private void OcultarModalClientes() => mostrarModalClientes = false;
 
@@ -184,62 +101,6 @@
     protected override async Task OnInitializedAsync()
     {
         letrasFactura = (await AuxiliarService.GetAllLetraFacturaAsync()).ToList();
-
-        if (FacturaId.HasValue)
-        {
-            factura = await FacturaService.GetFacturaByIdAsync(FacturaId.Value);
-        }
-        else
-        {
-            FacturaTempModel? temp = new FacturaTempModel();
-            try
-            {
-                temp = await localStorage.GetItemAsync<FacturaTempModel>("facturaTemp");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error al deserializar facturaTemp: {ex.Message}");
-                await localStorage.RemoveItemAsync("facturaTemp"); // lo limpiás para evitar que siga el problema
-            }
-
-            if (temp != null && temp.Factura != null)
-            {
-                factura = temp.Factura;
-                facturaDetalles = temp.Detalles ?? new List<FacturaDetalle>();
-
-
-                if (factura.IdCliente > 0)
-                {
-                    try
-                    {
-                        cliente = await ClienteService.GetClienteByIdAsync(factura.IdCliente);
-                        IdClienteBuscado = cliente.IdCliente;
-                    }
-                    catch
-                    {
-                        // Si falla la búsqueda del cliente, mantenemos el "Consumidor Final"
-                        cliente = new Cliente { Nombre = "Consumidor Final", Apellido = "", IdRegimenImpositivo = 1, IdTipoDocumento = 1 };
-                        IdClienteBuscado = 1;
-                    }
-                }
-
-            }
-            else
-            {
-                // Es una nueva factura
-                factura = new Factura
-                    {
-                        FechaEmision = DateTime.Today,
-                        IdLetraFactura = letrasFactura.FirstOrDefault()?.IdLetraFactura ?? 1,
-                        IdTipoDocumentoFiscal = 1,
-                        MoverStock = true
-                    };
-
-                facturaDetalles = new List<FacturaDetalle> { new FacturaDetalle() };
-
-                await CargarClientePorDefecto();
-            }
-        }
 
         if (IdArticulo.HasValue)
         {
@@ -307,6 +168,101 @@
 
     }
 
+    private bool localStorageCargado = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !localStorageCargado && !FacturaId.HasValue)
+        {
+            try
+            {
+                var temp = await localStorage.GetItemAsync<FacturaTempModel>("facturaTemp");
+
+                if (temp?.Factura != null)
+                {
+                    factura = temp.Factura;
+                    facturaDetalles = temp.Detalles ?? new List<FacturaDetalle>();
+
+                    if (factura.IdCliente > 0)
+                    {
+                        try
+                        {
+                            cliente = await ClienteService.GetClienteByIdAsync(factura.IdCliente);
+                            IdClienteBuscado = cliente.IdCliente;
+                        }
+                        catch
+                        {
+                            cliente = new Cliente { Nombre = "Consumidor Final", Apellido = "", IdRegimenImpositivo = 1, IdTipoDocumento = 1 };
+                            IdClienteBuscado = 1;
+                        }
+                    }
+                }
+                else
+                {
+                    factura = new Factura
+                        {
+                            FechaEmision = DateTime.Today,
+                            IdLetraFactura = letrasFactura.FirstOrDefault()?.IdLetraFactura ?? 1,
+                            IdTipoDocumentoFiscal = 1,
+                            MoverStock = true
+                        };
+
+                    facturaDetalles = new List<FacturaDetalle> { new FacturaDetalle() };
+
+                    await CargarClientePorDefecto();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al deserializar facturaTemp: {ex.Message}");
+                await localStorage.RemoveItemAsync("facturaTemp");
+            }
+
+            localStorageCargado = true;
+            StateHasChanged(); // solo si hiciste cambios visibles
+        }
+    }
+
+
+    private async Task BuscarCliente()
+    {
+        if (IdClienteBuscado is null || IdClienteBuscado == 0)
+            return;
+
+        try
+        {
+            var clienteEncontrado = await ClienteService.GetClienteByIdAsync(IdClienteBuscado.Value);
+            await OnClienteAsignado.InvokeAsync(clienteEncontrado);
+        }
+        catch
+        {
+            await JS.InvokeVoidAsync("alert", $"No se encontró el cliente con ID {IdClienteBuscado}");
+        }
+    }
+
+    private async Task CargarClientePorDefecto()
+    {
+        Cliente = await ClienteService.GetClientePorDefecto();
+        Factura.IdCliente = Cliente.IdCliente;
+        IdClienteBuscado = Cliente.IdCliente;
+        await OnClienteAsignado.InvokeAsync(Cliente);
+    }
+
+    private void AsignarCliente(Cliente clienteSel)
+    {
+
+        cliente = clienteSel;
+        factura.IdCliente = clienteSel.IdCliente;
+        IdClienteBuscado = clienteSel.IdCliente;
+        FacturaState.FacturaActual = factura;
+
+        localStorage.SetItemAsync("facturaTemp", new FacturaTempModel
+            {
+                Factura = factura,
+                Detalles = facturaDetalles
+            });
+        StateHasChanged();
+    }
 
     private async Task GuardarFactura()
     {
@@ -325,53 +281,7 @@
         NavigationManager.NavigateTo("/clientes");
     }
 
-    private async Task BuscarCliente()
-    {
-        if (IdClienteBuscado is null || IdClienteBuscado == 0)
-            await CargarClientePorDefecto();
-
-        try
-        {
-            var clienteEncontrado = await ClienteService.GetClienteByIdAsync(IdClienteBuscado.Value);
-            cliente = clienteEncontrado;
-            factura.IdCliente = cliente.IdCliente;
-            await localStorage.SetItemAsync("facturaTemp", new FacturaTempModel
-                {
-                    Factura = factura,
-                    Detalles = facturaDetalles
-                });
-        }
-        catch (Exception ex)
-        {
-            await JS.InvokeVoidAsync("alert", $"No se encontró el cliente con ID {IdClienteBuscado}");
-        }
-
-        StateHasChanged();
-    }
-
-
-    private async Task CargarClientePorDefecto()
-    {
-        cliente = await ClienteService.GetClientePorDefecto();
-        IdClienteBuscado = 1;
-        StateHasChanged();
-    }
-
-    private void AsignarCliente(Cliente clienteSel)
-    {
-
-        cliente = clienteSel;
-        factura.IdCliente = clienteSel.IdCliente;
-        IdClienteBuscado = clienteSel.IdCliente;
-        FacturaState.FacturaActual = factura;
-
-        localStorage.SetItemAsync("facturaTemp", new FacturaTempModel
-            {
-                Factura = factura,
-                Detalles = facturaDetalles
-            });
-        StateHasChanged();
-    }
+   
 
     private void AsignarArticulo(ArticuloModel articuloSel)
     {

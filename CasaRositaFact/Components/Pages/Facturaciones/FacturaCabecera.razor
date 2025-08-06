@@ -1,0 +1,160 @@
+﻿@using CasaRositaFact.Models
+@using Data.Entities
+@using Services
+@using Blazored.LocalStorage
+@using CasaRositaFact.Components.Pages.Clientes
+@using CasaRositaFact.State
+@inject ClienteService ClienteService
+@inject IJSRuntime JS
+@inject ILocalStorageService localStorage
+@inject FacturaState FacturaState
+
+<!-- Búsqueda de Cliente -->
+    <div class="row mb-3 align-items-end">
+        <!-- Input ID Cliente -->
+        <div class="col-md-2">
+            <label for="IdCliente" class="form-label">ID Cliente</label>
+        <InputNumber TValue="int?"
+                     Value="idClienteBuscadoInterno"
+                     ValueChanged="@(async value => await OnIdClienteChanged(value))"
+                     ValueExpression="() => idClienteBuscadoInterno"
+                     class="form-control" />
+
+        </div>
+
+        <!-- Botón Buscar -->
+        <div class="col-md-1">
+            <label class="form-label d-block">&nbsp;</label>
+            <button type="button" class="btn btn-outline-primary w-100" @onclick="BuscarCliente">
+                <i class="bi bi-search"></i> <!-- Bootstrap Icons: lupa -->
+            </button>
+        </div>
+
+        <div class="col-md-1">
+            <label class="form-label d-block">&nbsp;</label>
+            <button type="button" class="btn btn-outline-secondary w-100" @onclick="() => OnMostrarModalClientes.InvokeAsync()">
+                <i class="bi bi-people"></i>
+            </button>
+        </div>
+
+        <!-- Botón Cliente por defecto -->
+        <div class="col-md-1">
+            <label class="form-label d-block">&nbsp;</label>
+            <button type="button" class="btn btn-outline-success w-100" @onclick="CargarClientePorDefecto">
+                <i class="bi bi-person-check"></i>
+            </button>
+        </div>
+
+        <!-- Nombre del Cliente -->
+        <div class="col-md-5">
+            <label class="form-label">Cliente</label>
+        <input id="Cliente" class="form-control" value="@Cliente.NombreCompleto" readonly />
+        </div>
+    </div>
+
+    <div class="row mb-3 align-items-end">
+        <!-- Tipo y Número Factura -->
+        <div class="col-md-3">
+            <label for="TipoFactura" class="form-label">Tipo Factura</label>
+        <InputSelect id="TipoFactura" class="form-select" @bind-Value="Factura.IdLetraFactura">
+                @foreach (var letra in LetrasFactura)
+                {
+                    <option value="@letra.IdLetraFactura">@letra.Nombre</option>
+                }
+            </InputSelect>
+        </div>
+
+        <div class="col-md-3">
+            <label for="NroFactura" class="form-label">Número</label>
+        <InputText disabled id="NroFactura" class="form-control" @bind-Value="Factura.NroCompFactura" />
+        </div>
+        <!-- Fecha -->
+        <div class="col-md-3">
+            <label for="FechaEmision" class="form-label">Fecha de Emisión</label>
+        <InputDate id="FechaEmision" class="form-control" @bind-Value="Factura.FechaEmision" />
+        </div>
+
+    </div>
+
+    <div class="row mb-3">
+        <!-- Forma de Pago -->
+        <div class="col-md-4">
+            <label for="FormaPago" class="form-label">Forma de Pago</label>
+        <InputSelect id="FormaPago" class="form-select" @bind-Value="Factura.FormaPago">
+                <option value="Contado">Contado</option>
+                <option value="Credito">Crédito</option>
+                <option value="Transferencia">Transferencia</option>
+            </InputSelect>
+        </div>
+
+        <!-- Concepto -->
+        <div class="col-md-4">
+            <label for="FormaPago" class="form-label">Concepto</label>
+            <InputSelect id="FormaPago" class="form-select" @bind-Value="Factura.ConceptoFactura">
+                <option value="Producto">Producto</option>
+                <option value="Servicio">Servicio</option>
+                <option value="ProductoServicio">Producto/Servicio</option>
+            </InputSelect>
+        </div>
+
+        <!-- Checkbox "No mover Stock" -->
+        <div class="col-md-3 d-flex align-items-center">
+            <div class="form-check form-switch mt-3">
+                <InputCheckbox id="NoMoverStock"
+                class="form-check-input"
+                @bind-Value="Factura.MoverStock" />
+                <label class="form-check-label" for="NoMoverStock">No mover Stock</label>
+            </div>
+        </div>
+    </div>
+
+@code {
+    [Parameter] public Factura Factura { get; set; }
+    [Parameter] public Cliente Cliente { get; set; }
+    [Parameter] public EventCallback<Cliente> OnClienteAsignado { get; set; }
+    [Parameter] public EventCallback OnMostrarModalClientes { get; set; }
+    [Parameter] public int? IdClienteBuscado { get; set; }
+    [Parameter] public EventCallback<int?> OnClienteBuscadoChanged { get; set; }
+    [Parameter] public List<LetraFactura> LetrasFactura { get; set; } = new();
+    private int? idClienteBuscadoInterno;
+    private bool mostrarModalClientes;
+
+    private void MostrarModalClientes() => mostrarModalClientes = true;
+    private void OcultarModalClientes() => mostrarModalClientes = false;
+
+    protected override void OnParametersSet()
+    {
+        idClienteBuscadoInterno = IdClienteBuscado;
+    }
+
+    private async Task OnIdClienteChanged(int? nuevoId)
+    {
+        idClienteBuscadoInterno = nuevoId;
+        await OnClienteBuscadoChanged.InvokeAsync(nuevoId);
+    }
+
+
+    private async Task BuscarCliente()
+    {
+        if (IdClienteBuscado is null || IdClienteBuscado == 0)
+            return;
+
+        try
+        {
+            var clienteEncontrado = await ClienteService.GetClienteByIdAsync(IdClienteBuscado.Value);
+            await OnClienteAsignado.InvokeAsync(clienteEncontrado); // Notificás al padre
+        }
+        catch
+        {
+            await JS.InvokeVoidAsync("alert", $"No se encontró el cliente con ID {IdClienteBuscado}");
+        }
+    }
+
+    private async Task CargarClientePorDefecto()
+    {
+        var clienteDefecto = await ClienteService.GetClientePorDefecto();
+        IdClienteBuscado = clienteDefecto.IdCliente;
+        await OnClienteAsignado.InvokeAsync(clienteDefecto); // Notificás al padre
+    }
+}
+
