@@ -50,11 +50,11 @@
                 <td>@item.NombreArticulo</td>
                 <td>
                     <input id="cantidad_@item.Uid"
-                    type="number"
-                    class="form-control form-control-sm text-end"
+                           type="number"
+                           class="form-control form-control-sm text-end"
                            min="@(item.IdArticulo != 0 ? "1" : null)"
-                    @bind="item.Cantidad"
-                    @oninput="(e => OnCantidadChanged(e, item))" />
+                           @bind="item.Cantidad"
+                           @oninput="(e => OnCantidadChanged(e, item))" />
                 </td>
                 <td>
                     <select class="form-select form-select-sm" @bind="item.IdTipoIva">
@@ -85,9 +85,9 @@
 @if (MostrarModalArticulos)
 {
     <ArticuloModal FacturaActual="FacturaActual"
-    DetallesFactura="DetallesFacturaCompleta"
-    OnArticuloSeleccionado="AsignarArticulo"
-    OnCerrar="OcultarModal" />
+                   DetallesFactura="Detalles"
+                   OnArticuloSeleccionado="AsignarArticulo"
+                   OnCerrar="OcultarModal" />
 }
 
 @if (MostrarModalArticuloDesconocido)
@@ -100,14 +100,12 @@
 
 @code {
     [Parameter] public int? FacturaId { get; set; }
-    [Parameter]
-    public List<FacturaDetalle> DetallesFacturaCompleta { get; set; } = default!;
 
     private Factura factura = new()
-    {
-        IdLetraFactura = 1,
-        IdTipoDocumentoFiscal = 1,
-    };
+        {
+            IdLetraFactura = 1,
+            IdTipoDocumentoFiscal = 1,
+        };
 
     [Parameter]
     public List<FacturaDetalle> Detalles { get; set; } = new();
@@ -172,8 +170,8 @@
     {
         var tempModel = new FacturaTempModel
             {
-                Factura = FacturaActual ?? new Factura(){IdLetraFactura = 2, IdTipoDocumentoFiscal = 1},
-                Detalles = DetallesFacturaCompleta
+                Factura = FacturaActual ?? new Factura() { IdLetraFactura = 2, IdTipoDocumentoFiscal = 1 },
+                Detalles = Detalles
             };
 
         await localStorage.SetItemAsync("facturaTemp", tempModel);

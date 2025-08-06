@@ -39,14 +39,13 @@
 
     <!-- Detalle -->
     <FactDetalle Detalles="facturaDetalles"
-    DetallesFacturaCompleta="facturaDetalles"
-    OnArticuloSeleccionado="AsignarArticulo"
-    OnEliminarDetalle="EliminarDetalle"
-    FacturaActual="factura" />
+                 OnArticuloSeleccionado="AsignarArticulo"
+                 OnEliminarDetalle="EliminarDetalle"
+                 FacturaActual="factura" />
 
     <FactFooter Detalles="facturaDetalles"
-         OnGuardar="GuardarFactura"
-         OnCancelar="NavigateToFacturas" />
+                OnGuardar="GuardarFactura"
+                OnCancelar="NavigateToFacturas" />
 </EditForm>
 
 @if (mostrarModalClientes)
@@ -281,7 +280,7 @@
         NavigationManager.NavigateTo("/clientes");
     }
 
-   
+
 
     private void AsignarArticulo(ArticuloModel articuloSel)
     {
@@ -316,7 +315,7 @@
             facturaDetalles.Add(nuevoDetalle);
             facturaDetalles.Add(new FacturaDetalle()); // Siempre una vacía al final
 
-             localStorage.SetItemAsync("facturaTemp", new FacturaTempModel
+            localStorage.SetItemAsync("facturaTemp", new FacturaTempModel
                 {
                     Factura = factura,
                     Detalles = facturaDetalles
