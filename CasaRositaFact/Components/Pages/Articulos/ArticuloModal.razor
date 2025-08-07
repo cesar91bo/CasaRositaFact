@@ -128,8 +128,9 @@
                         IdArticulo = articulo.IdArticulo,
                         Nombre = articulo.Nombre,
                         StockActual = articulo.StockActual,
-                        PrecioActual = precio?.PrecioCosto ?? 0,
-                        IdUnidadMedida = articulo.IdUnidadMedida ?? 1
+                        PrecioActual = precio?.PrecioVentaConIva ?? 0,
+                        IdUnidadMedida = articulo.IdUnidadMedida ?? 1,
+                        IdTipoIva = precio?.IdTipoIva ?? 1
                     };
 
                 articulos.Add(model);

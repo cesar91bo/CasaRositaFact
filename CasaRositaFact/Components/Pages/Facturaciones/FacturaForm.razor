@@ -41,8 +41,11 @@
     <FactDetalle Detalles="facturaDetalles"
                  OnArticuloSeleccionado="AsignarArticulo"
                  OnEliminarDetalle="EliminarDetalle"
-                 FacturaActual="factura" />
+                 FacturaActual="factura"
+                 OnDetalleActualizado="ActualizarTotales" />
+    <div class="row mb-4 border-bottom"></div>
 
+    <!-- Totales -->
     <FactFooter Detalles="facturaDetalles"
                 OnGuardar="GuardarFactura"
                 OnCancelar="NavigateToFacturas" />
@@ -302,7 +305,8 @@
                     PrecioUnitario = articuloSel.PrecioActual,
                     Cantidad = 1,
                     TotalArticulo = articuloSel.PrecioActual,
-                    IdUnidadMedida = articuloSel.IdUnidadMedida
+                    IdUnidadMedida = articuloSel.IdUnidadMedida,
+                    IdTipoIva = articuloSel.IdTipoIva
                 };
 
             // Eliminar fila vacía si existe
@@ -365,6 +369,11 @@
         return string.IsNullOrWhiteSpace(detalle.NombreArticulo)
             && detalle.Cantidad == 0
             && detalle.PrecioUnitario == 0;
+    }
+
+    private void ActualizarTotales()
+    {
+        StateHasChanged(); // forza el re-render del padre y sus hijos (incluido el footer)
     }
 
 }

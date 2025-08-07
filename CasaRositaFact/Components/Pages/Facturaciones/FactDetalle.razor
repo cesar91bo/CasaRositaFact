@@ -119,6 +119,9 @@
     [Parameter]
     public Factura? FacturaActual { get; set; }
 
+    [Parameter] 
+    public EventCallback OnDetalleActualizado { get; set; }
+
     private bool MostrarModalArticulos { get; set; } = false;
 
     private void MostrarModal()
@@ -163,6 +166,9 @@
 
             await GuardarEnStorage();
             StateHasChanged();
+
+            if (OnDetalleActualizado.HasDelegate)
+                await OnDetalleActualizado.InvokeAsync();
         }
     }
 
