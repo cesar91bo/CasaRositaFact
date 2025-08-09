@@ -6,45 +6,66 @@ namespace CasaRositaFact.Data.Repositories
 {
     public class ParametroRepository : IParametroRepository
     {
-        private readonly ApplicationDbContext _context;
-        public ParametroRepository(ApplicationDbContext context)
+        private readonly IDbContextFactory<ApplicationDbContext> _factory;
+
+        public ParametroRepository(IDbContextFactory<ApplicationDbContext> factory)
         {
-            _context = context;
+            _factory = factory;
         }
-        public Task AddParametroAsync(Parametro parametro)
+
+        public async Task AddParametroAsync(Parametro parametro)
         {
-            _context.Parametros.Add(parametro);
-            return _context.SaveChangesAsync();
+            await using var db = await _factory.CreateDbContextAsync();
+            db.Parametros.Add(parametro);
+            await db.SaveChangesAsync();
         }
-        public Task DeleteParametroAsync(int id)
+
+        public async Task DeleteParametroAsync(int id)
         {
-            var parametro = _context.Parametros.Find(id);
-            if (parametro != null)
-            {
-                _context.Parametros.Remove(parametro);
-                return _context.SaveChangesAsync();
-            }
-            return Task.CompletedTask; // Or handle the case where the parameter is not found
+            await using var db = await _factory.CreateDbContextAsync();
+
+            // Ajustá el campo de PK si corresponde (IdParametro vs IdEmpresa)
+            var parametro = await db.Parametros.FirstOrDefaultAsync(p => p.IdEmpresa == id);
+            // Alternativa si tu PK es IdParametro: var parametro = await db.Parametros.FindAsync(id);
+
+            if (parametro is null) return;
+
+            db.Parametros.Remove(parametro);
+            await db.SaveChangesAsync();
         }
+
         public async Task<IEnumerable<Parametro>> GetAllParametrosAsync()
         {
-            return await _context.Parametros.ToListAsync();
+            await using var db = await _factory.CreateDbContextAsync();
+            return await db.Parametros
+                           .AsNoTracking()
+                           .ToListAsync();
         }
+
         public async Task<Parametro?> GetParametroByIdAsync(int id)
         {
-            return await _context.Parametros.FirstOrDefaultAsync(p => p.IdEmpresa == id);
+            await using var db = await _factory.CreateDbContextAsync();
+            // Mantengo tu criterio de búsqueda por IdEmpresa
+            return await db.Parametros
+                           .AsNoTracking()
+                           .FirstOrDefaultAsync(p => p.IdEmpresa == id);
+            // Si tu PK real es IdParametro, cambiá el predicado o usá FindAsync(id).
         }
 
-        public Task UpdateParametroAsync(Parametro parametro)
+        public async Task UpdateParametroAsync(Parametro parametro)
         {
-            _context.Parametros.Update(parametro);
-            return _context.SaveChangesAsync();
+            await using var db = await _factory.CreateDbContextAsync();
+            db.Parametros.Update(parametro);
+            await db.SaveChangesAsync();
         }
+
         public async Task<decimal> GetPorcentajeGanancia()
         {
-            var parametro = await _context.Parametros.FirstOrDefaultAsync();
-            return parametro?.PorcentajeGanancia ?? 0;
+            await using var db = await _factory.CreateDbContextAsync();
+            var parametro = await db.Parametros
+                                    .AsNoTracking()
+                                    .FirstOrDefaultAsync();
+            return parametro?.PorcentajeGanancia ?? 0m;
         }
-
     }
 }

@@ -6,37 +6,55 @@ namespace CasaRositaFact.Data.Repositories
 {
     public class UnidadMedidaRepository : IUnidadMedidaRepository
     {
-        private readonly ApplicationDbContext _context;
-        public UnidadMedidaRepository(ApplicationDbContext context)
+        private readonly IDbContextFactory<ApplicationDbContext> _factory;
+
+        public UnidadMedidaRepository(IDbContextFactory<ApplicationDbContext> factory)
         {
-            _context = context;
+            _factory = factory;
         }
+
         public async Task<IEnumerable<UnidadMedida>> GetAllUnidadMedidaAsync()
         {
-            return await _context.UnidadesMedida.ToListAsync();
+            await using var db = await _factory.CreateDbContextAsync();
+            return await db.UnidadesMedida
+                           .AsNoTracking()
+                           .ToListAsync();
         }
+
         public async Task<UnidadMedida?> GetUnidadMedidaByIdAsync(int id)
         {
-            return await _context.UnidadesMedida.FindAsync(id);
+            await using var db = await _factory.CreateDbContextAsync();
+            // Si tu PK es IdUnidadMedida:
+            return await db.UnidadesMedida
+                           .AsNoTracking()
+                           .FirstOrDefaultAsync(u => u.IdUnidadMedida == id);
+            // Alternativa si FindAsync aplica a tu PK: return await db.UnidadesMedida.FindAsync(id);
         }
+
         public async Task AddUnidadMedidaAsync(UnidadMedida unidadMedida)
         {
-            _context.UnidadesMedida.Add(unidadMedida);
-            await _context.SaveChangesAsync();
+            await using var db = await _factory.CreateDbContextAsync();
+            db.UnidadesMedida.Add(unidadMedida);
+            await db.SaveChangesAsync();
         }
+
         public async Task UpdateUnidadMedidaAsync(UnidadMedida unidadMedida)
         {
-            _context.UnidadesMedida.Update(unidadMedida);
-            await _context.SaveChangesAsync();
+            await using var db = await _factory.CreateDbContextAsync();
+            db.UnidadesMedida.Update(unidadMedida);
+            await db.SaveChangesAsync();
         }
+
         public async Task DeleteUnidadMedidaAsync(int id)
         {
-            var unidadMedida = await GetUnidadMedidaByIdAsync(id);
-            if (unidadMedida != null)
-            {
-                _context.UnidadesMedida.Remove(unidadMedida);
-                await _context.SaveChangesAsync();
-            }
+            await using var db = await _factory.CreateDbContextAsync();
+
+            var unidadMedida = await db.UnidadesMedida
+                                       .FirstOrDefaultAsync(u => u.IdUnidadMedida == id);
+            if (unidadMedida is null) return;
+
+            db.UnidadesMedida.Remove(unidadMedida);
+            await db.SaveChangesAsync();
         }
     }
 }

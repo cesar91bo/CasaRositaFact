@@ -6,42 +6,62 @@ namespace CasaRositaFact.Data.Repositories
 {
     public class ProveedorRepository : IProveedorRepository
     {
-        private readonly ApplicationDbContext _context;
-        public ProveedorRepository(ApplicationDbContext context)
+        private readonly IDbContextFactory<ApplicationDbContext> _factory;
+
+        public ProveedorRepository(IDbContextFactory<ApplicationDbContext> factory)
         {
-            _context = context;
+            _factory = factory;
         }
-        public Task AddProveedorAsync(Proveedor proveedor)
+
+        public async Task AddProveedorAsync(Proveedor proveedor)
         {
-            _context.Proveedores.Add(proveedor);
-            return _context.SaveChangesAsync();
+            await using var db = await _factory.CreateDbContextAsync();
+            db.Proveedores.Add(proveedor);
+            await db.SaveChangesAsync();
         }
-        public Task DeleteProveedorAsync(int id)
+
+        public async Task DeleteProveedorAsync(int id)
         {
-            var proveedor = _context.Proveedores.Find(id);
-            if (proveedor != null)
-            {
-                _context.Proveedores.Remove(proveedor);
-                return _context.SaveChangesAsync();
-            }
-            return Task.CompletedTask;
+            await using var db = await _factory.CreateDbContextAsync();
+
+            // Si tu PK es IdProveedor:
+            var proveedor = await db.Proveedores.FirstOrDefaultAsync(p => p.IdProveedor == id);
+            // (Si FindAsync funciona con tu PK: var proveedor = await db.Proveedores.FindAsync(id);)
+
+            if (proveedor is null) return;
+
+            db.Proveedores.Remove(proveedor);
+            await db.SaveChangesAsync();
         }
+
         public async Task<IEnumerable<Proveedor>> GetAllProveedoresAsync()
         {
-            return await _context.Proveedores.ToListAsync();
+            await using var db = await _factory.CreateDbContextAsync();
+            return await db.Proveedores
+                           .AsNoTracking()
+                           .ToListAsync();
         }
+
         public async Task<Proveedor> GetProveedorByIdAsync(int id)
         {
-            var proveedor = await _context.Proveedores
-                .Include(p => p.Banco)
-                .FirstOrDefaultAsync(p => p.IdProveedor == id);
+            await using var db = await _factory.CreateDbContextAsync();
+            var proveedor = await db.Proveedores
+                                    .AsNoTracking()
+                                    .Include(p => p.Banco)
+                                    .FirstOrDefaultAsync(p => p.IdProveedor == id);
+
+            // Mantengo la firma no-nullable; si no existe, lanzo excepción.
+            if (proveedor is null)
+                throw new Exception("Proveedor no encontrado");
 
             return proveedor;
         }
-        public Task UpdateProveedorAsync(Proveedor proveedor)
+
+        public async Task UpdateProveedorAsync(Proveedor proveedor)
         {
-            _context.Proveedores.Update(proveedor);
-            return _context.SaveChangesAsync();
+            await using var db = await _factory.CreateDbContextAsync();
+            db.Proveedores.Update(proveedor);
+            await db.SaveChangesAsync();
         }
     }
 }

@@ -6,48 +6,70 @@ namespace CasaRositaFact.Data.Repositories
 {
     public class FacturaDetalleRepository : IFacturaDetalleRepository
     {
-        private readonly ApplicationDbContext _context;
-        public FacturaDetalleRepository(ApplicationDbContext context)
+        private readonly IDbContextFactory<ApplicationDbContext> _factory;
+
+        public FacturaDetalleRepository(IDbContextFactory<ApplicationDbContext> factory)
         {
-            _context = context;
+            _factory = factory;
         }
+
         public async Task AddFacturaDetalleAsync(FacturaDetalle facturaDetalle)
         {
-            _context.FacturaDetalles.Add(facturaDetalle);
-            await _context.SaveChangesAsync();
+            await using var db = await _factory.CreateDbContextAsync();
+            db.FacturaDetalles.Add(facturaDetalle);
+            await db.SaveChangesAsync();
         }
+
         public async Task DeleteFacturaDetalleAsync(int id)
         {
-            var facturaDetalle = await _context.FacturaDetalles.FindAsync(id);
-            if (facturaDetalle != null)
-            {
-                _context.FacturaDetalles.Remove(facturaDetalle);
-                await _context.SaveChangesAsync();
-            }
+            await using var db = await _factory.CreateDbContextAsync();
+
+            // Si tu PK es IdFacturaDetalle:
+            var facturaDetalle = await db.FacturaDetalles
+                                         .FirstOrDefaultAsync(fd => fd.IdFacturaDetalle == id);
+            // (Alternativa si FindAsync funciona con tu PK: var facturaDetalle = await db.FacturaDetalles.FindAsync(id);)
+
+            if (facturaDetalle is null) return;
+
+            db.FacturaDetalles.Remove(facturaDetalle);
+            await db.SaveChangesAsync();
         }
+
         public async Task<IEnumerable<FacturaDetalle>> GetAllFacturaDetallesAsync()
         {
-            return await _context.FacturaDetalles.ToListAsync();
+            await using var db = await _factory.CreateDbContextAsync();
+            return await db.FacturaDetalles
+                           .AsNoTracking()
+                           .ToListAsync();
         }
+
         public async Task<FacturaDetalle> GetFacturaDetalleByIdAsync(int id)
         {
-            var facturaDetalle = await _context.FacturaDetalles.FirstOrDefaultAsync(fd => fd.IdFacturaDetalle == id);
-            if (facturaDetalle == null)
+            await using var db = await _factory.CreateDbContextAsync();
+            var facturaDetalle = await db.FacturaDetalles
+                                         .AsNoTracking()
+                                         .FirstOrDefaultAsync(fd => fd.IdFacturaDetalle == id);
+
+            if (facturaDetalle is null)
                 throw new Exception("Factura Detalle no encontrado");
+
             return facturaDetalle;
         }
+
         public async Task<IEnumerable<FacturaDetalle>> GetFacturaDetallesByFacturaIdAsync(int facturaId)
         {
-            return await _context.FacturaDetalles.Where(fd => fd.IdFactura == facturaId).ToListAsync();
+            await using var db = await _factory.CreateDbContextAsync();
+            return await db.FacturaDetalles
+                           .AsNoTracking()
+                           .Where(fd => fd.IdFactura == facturaId)
+                           .ToListAsync();
         }
+
         public async Task UpdateFacturaDetalleAsync(FacturaDetalle facturaDetalle)
         {
-            var existingFacturaDetalle = await _context.FacturaDetalles.FindAsync(facturaDetalle.IdFacturaDetalle);
-            if (existingFacturaDetalle != null)
-            {
-                _context.Entry(existingFacturaDetalle).CurrentValues.SetValues(facturaDetalle);
-                await _context.SaveChangesAsync();
-            }
+            await using var db = await _factory.CreateDbContextAsync();
+            db.FacturaDetalles.Update(facturaDetalle);
+            await db.SaveChangesAsync();
         }
     }
 }

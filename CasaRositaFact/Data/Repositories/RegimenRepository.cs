@@ -6,18 +6,32 @@ namespace CasaRositaFact.Data.Repositories
 {
     public class RegimenRepository : IRegimenRepository
     {
-        private readonly ApplicationDbContext _context;
-        public RegimenRepository(ApplicationDbContext context)
+        private readonly IDbContextFactory<ApplicationDbContext> _factory;
+
+        public RegimenRepository(IDbContextFactory<ApplicationDbContext> factory)
         {
-            _context = context;
+            _factory = factory;
         }
+
         public async Task<IEnumerable<RegimenImpositivo>> GetAllRegimenesAsync()
         {
-            return await _context.RegimenesImpositivos.ToListAsync();
+            await using var db = await _factory.CreateDbContextAsync();
+            return await db.RegimenesImpositivos
+                           .AsNoTracking()
+                           .ToListAsync();
         }
-        public Task<RegimenImpositivo> GetRegimenByIdAsync(int id)
+
+        public async Task<RegimenImpositivo> GetRegimenByIdAsync(int id)
         {
-            return _context.RegimenesImpositivos.FirstAsync(r => r.IdRegimenImpositivo == id);
+            await using var db = await _factory.CreateDbContextAsync();
+            var regimen = await db.RegimenesImpositivos
+                                  .AsNoTracking()
+                                  .FirstOrDefaultAsync(r => r.IdRegimenImpositivo == id);
+
+            if (regimen is null)
+                throw new InvalidOperationException($"No se encontró el régimen impositivo con Id '{id}'.");
+
+            return regimen;
         }
     }
 }

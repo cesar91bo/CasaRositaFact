@@ -6,42 +6,54 @@ namespace CasaRositaFact.Data.Repositories
 {
     public class RubroRepository : IRubroRepository
     {
-        private readonly ApplicationDbContext _context;
-        public RubroRepository(ApplicationDbContext context)
+        private readonly IDbContextFactory<ApplicationDbContext> _factory;
+
+        public RubroRepository(IDbContextFactory<ApplicationDbContext> factory)
         {
-            _context = context;
-        }
-        public Task AddRubroAsync(Rubro rubro)
-        {
-            _context.Rubros.Add(rubro);
-            return _context.SaveChangesAsync();
+            _factory = factory;
         }
 
-        public Task DeleteRubroAsync(int id)
+        public async Task AddRubroAsync(Rubro rubro)
         {
-            var rubro = _context.Rubros.Find(id);
-            if (rubro != null)
-            {
-                _context.Rubros.Remove(rubro);
-                return _context.SaveChangesAsync();
-            }
-            return _context.SaveChangesAsync();
+            await using var db = await _factory.CreateDbContextAsync();
+            db.Rubros.Add(rubro);
+            await db.SaveChangesAsync();
+        }
+
+        public async Task DeleteRubroAsync(int id)
+        {
+            await using var db = await _factory.CreateDbContextAsync();
+
+            // Si tu PK es IdRubro, podés usar FindAsync(id)
+            var rubro = await db.Rubros.FirstOrDefaultAsync(r => r.IdRubro == id);
+            if (rubro is null) return;
+
+            db.Rubros.Remove(rubro);
+            await db.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<Rubro>> GetAllRubrosAsync()
         {
-            return await _context.Rubros.ToListAsync();
+            await using var db = await _factory.CreateDbContextAsync();
+            return await db.Rubros
+                           .AsNoTracking()
+                           .ToListAsync();
         }
 
-        public Task<Rubro?> GetRubroByIdAsync(int id)
+        public async Task<Rubro?> GetRubroByIdAsync(int id)
         {
-            return _context.Rubros.FindAsync(id).AsTask();
+            await using var db = await _factory.CreateDbContextAsync();
+            return await db.Rubros
+                           .AsNoTracking()
+                           .FirstOrDefaultAsync(r => r.IdRubro == id);
+            // Alternativa si la PK coincide: return await db.Rubros.FindAsync(id);
         }
 
-        public Task UpdateRubroAsync(Rubro rubro)
+        public async Task UpdateRubroAsync(Rubro rubro)
         {
-            _context.Rubros.Update(rubro);
-            return _context.SaveChangesAsync();
+            await using var db = await _factory.CreateDbContextAsync();
+            db.Rubros.Update(rubro);
+            await db.SaveChangesAsync();
         }
     }
 }

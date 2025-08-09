@@ -6,41 +6,60 @@ namespace CasaRositaFact.Data.Repositories
 {
     public class EmpresaRepository : IEmpresaRepository
     {
-        private readonly ApplicationDbContext context;
+        private readonly IDbContextFactory<ApplicationDbContext> _factory;
 
-        public EmpresaRepository(ApplicationDbContext context) 
+        public EmpresaRepository(IDbContextFactory<ApplicationDbContext> factory)
         {
-            this.context = context;
+            _factory = factory;
         }
+
         public async Task AddAsync(Empresa empresa)
         {
-            context.Empresas.Add(empresa);
-            await context.SaveChangesAsync();
+            await using var db = await _factory.CreateDbContextAsync();
+            db.Empresas.Add(empresa);
+            await db.SaveChangesAsync();
         }
+
         public async Task DeleteAsync(int id)
         {
-            var empresa = await context.Empresas.FindAsync(id);
-            if (empresa != null)
-            {
-                context.Empresas.Remove(empresa);
-                await context.SaveChangesAsync();
-            }
+            await using var db = await _factory.CreateDbContextAsync();
+
+            // Si tu PK es IdEmpresa:
+            var empresa = await db.Empresas.FirstOrDefaultAsync(e => e.IdEmpresa == id);
+            // (Si FindAsync funciona con tu PK: var empresa = await db.Empresas.FindAsync(id);)
+
+            if (empresa is null) return;
+
+            db.Empresas.Remove(empresa);
+            await db.SaveChangesAsync();
         }
+
         public async Task<IEnumerable<Empresa>> GetAllAsync()
         {
-            return await context.Empresas.ToListAsync();
+            await using var db = await _factory.CreateDbContextAsync();
+            return await db.Empresas
+                           .AsNoTracking()
+                           .ToListAsync();
         }
+
         public async Task<Empresa> GetByIdAsync(int id)
         {
-            var empresa = await context.Empresas.FirstOrDefaultAsync(e => e.IdEmpresa == id);
-            if (empresa == null)
+            await using var db = await _factory.CreateDbContextAsync();
+            var empresa = await db.Empresas
+                                  .AsNoTracking()
+                                  .FirstOrDefaultAsync(e => e.IdEmpresa == id);
+
+            if (empresa is null)
                 throw new Exception("Empresa no encontrada");
+
             return empresa;
         }
+
         public async Task UpdateAsync(Empresa empresa)
         {
-            context.Empresas.Update(empresa);
-            await context.SaveChangesAsync();
+            await using var db = await _factory.CreateDbContextAsync();
+            db.Empresas.Update(empresa);
+            await db.SaveChangesAsync();
         }
     }
 }

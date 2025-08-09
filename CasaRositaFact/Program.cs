@@ -12,8 +12,11 @@ var builder = WebApplication.CreateBuilder(args);
 //Configuracion de Razor Pages
 builder.Services.AddRazorPages();
 
-//Configuracion de entity framework core
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+////Configuracion de entity framework core
+//builder.Services.AddDbContext<ApplicationDbContext>(options =>
+//    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Add services to the container.

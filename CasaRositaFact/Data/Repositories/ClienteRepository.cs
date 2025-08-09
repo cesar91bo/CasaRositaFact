@@ -6,52 +6,64 @@ namespace CasaRositaFact.Data.Repositories
 {
     public class ClienteRepository : IClienteRepository
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IDbContextFactory<ApplicationDbContext> _factory;
 
-        public ClienteRepository(ApplicationDbContext context)
+        public ClienteRepository(IDbContextFactory<ApplicationDbContext> factory)
         {
-            _context = context;
+            _factory = factory;
         }
+
         public async Task AddClienteAsync(Cliente cliente)
         {
-            _context.Clientes.Add(cliente);
-            await _context.SaveChangesAsync();
+            await using var db = await _factory.CreateDbContextAsync();
+            db.Clientes.Add(cliente);
+            await db.SaveChangesAsync();
         }
 
         public async Task DeleteClienteAsync(int id)
         {
-            var cliente = await _context.Clientes.FindAsync(id);
-            if (cliente != null)
-            {
-                _context.Clientes.Remove(cliente);
-                await _context.SaveChangesAsync();
-            }
+            await using var db = await _factory.CreateDbContextAsync();
+
+            // Si la PK es IdCliente:
+            var cliente = await db.Clientes.FirstOrDefaultAsync(c => c.IdCliente == id);
+            // Si la PK es Id y FindAsync funciona, podrías usar: var cliente = await db.Clientes.FindAsync(id);
+
+            if (cliente is null) return;
+
+            db.Clientes.Remove(cliente);
+            await db.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<Cliente>> GetAllClienteAsync()
         {
-            return await _context.Clientes.ToListAsync();
+            await using var db = await _factory.CreateDbContextAsync();
+            return await db.Clientes
+                           .AsNoTracking()
+                           .OrderBy(c => c.Nombre)
+                           .ToListAsync();
         }
 
-        public async Task<Cliente> GetClienteByIdAsync(int id)
+        public async Task<Cliente?> GetClienteByIdAsync(int id)
         {
-            var cliente = await _context.Clientes.FirstOrDefaultAsync(c => c.IdCliente == id);
-            if (cliente == null)
-                throw new Exception("Cliente no encontrado");
-            return cliente;
+            await using var db = await _factory.CreateDbContextAsync();
+            return await db.Clientes
+                           .AsNoTracking()
+                           .FirstOrDefaultAsync(c => c.IdCliente == id);
         }
 
         public async Task UpdateClienteAsync(Cliente cliente)
         {
-            _context.Clientes.Update(cliente);
-            await _context.SaveChangesAsync();
+            await using var db = await _factory.CreateDbContextAsync();
+            db.Clientes.Update(cliente);
+            await db.SaveChangesAsync();
         }
-        public async Task<Cliente> GetClientePorDefecto()
+
+        public async Task<Cliente?> GetClientePorDefecto()
         {
-            var cliente = await _context.Clientes.FirstOrDefaultAsync(c => c.Nombre == "Consumidor");
-            if (cliente == null)
-                throw new Exception("Cliente por defecto no encontrado");
-            return cliente;
+            await using var db = await _factory.CreateDbContextAsync();
+            return await db.Clientes
+                           .AsNoTracking()
+                           .FirstOrDefaultAsync(c => c.Nombre == "Consumidor");
         }
     }
 }

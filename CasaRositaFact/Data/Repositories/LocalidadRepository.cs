@@ -6,26 +6,43 @@ namespace CasaRositaFact.Data.Repositories
 {
     public class LocalidadRepository : ILocalidadRepository
     {
-        private readonly ApplicationDbContext _context;
-        public LocalidadRepository(ApplicationDbContext context)
+        private readonly IDbContextFactory<ApplicationDbContext> _factory;
+
+        public LocalidadRepository(IDbContextFactory<ApplicationDbContext> factory)
         {
-            _context = context;
-        }
-        public async Task<IEnumerable<Localidad>> GetAllLocalidadesAsync()
-        {
-            return await _context.Localidades
-                .Include(l => l.Provincia)
-                .ToListAsync();
+            _factory = factory;
         }
 
-        public Task<Localidad> GetLocalidadByIdAsync(int id)
+        public async Task<IEnumerable<Localidad>> GetAllLocalidadesAsync()
         {
-            return _context.Localidades.FirstAsync(l => l.IdLocalidad == id);
+            await using var db = await _factory.CreateDbContextAsync();
+            return await db.Localidades
+                           .AsNoTracking()
+                           .Include(l => l.Provincia)
+                           .ToListAsync();
+        }
+
+        public async Task<Localidad> GetLocalidadByIdAsync(int id)
+        {
+            await using var db = await _factory.CreateDbContextAsync();
+            var localidad = await db.Localidades
+                                    .AsNoTracking()
+                                    .Include(l => l.Provincia)
+                                    .FirstOrDefaultAsync(l => l.IdLocalidad == id);
+
+            if (localidad is null)
+                throw new Exception("Localidad no encontrada");
+
+            return localidad;
         }
 
         public async Task<IEnumerable<Localidad>> GetLocalidadByProvinciaIdAsync(int provinciaId)
         {
-            return await _context.Localidades.Where(l => l.IdProvincia == provinciaId).ToListAsync();
+            await using var db = await _factory.CreateDbContextAsync();
+            return await db.Localidades
+                           .AsNoTracking()
+                           .Where(l => l.IdProvincia == provinciaId)
+                           .ToListAsync();
         }
     }
 }

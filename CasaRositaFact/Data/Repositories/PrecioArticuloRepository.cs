@@ -6,53 +6,69 @@ namespace CasaRositaFact.Data.Repositories
 {
     public class PrecioArticuloRepository : IPrecioArticuloRepository
     {
-        private readonly ApplicationDbContext _context;
-        public PrecioArticuloRepository(ApplicationDbContext context)
+        private readonly IDbContextFactory<ApplicationDbContext> _factory;
+
+        public PrecioArticuloRepository(IDbContextFactory<ApplicationDbContext> factory)
         {
-            _context = context;
+            _factory = factory;
         }
+
         public async Task AddPrecioAsync(PrecioArticulo precioArticulo)
         {
-            _context.PreciosArticulos.Add(precioArticulo);
-            await _context.SaveChangesAsync();
+            await using var db = await _factory.CreateDbContextAsync();
+            db.PreciosArticulos.Add(precioArticulo);
+            await db.SaveChangesAsync();
         }
-        public Task DeletePrecioAsync(int id)
+
+        public async Task DeletePrecioAsync(int id)
         {
-            var precioArticulo = _context.PreciosArticulos.Find(id);
-            if (precioArticulo != null)
-            {
-                _context.PreciosArticulos.Remove(precioArticulo);
-                return _context.SaveChangesAsync();
-            }
-            else
-            {
+            await using var db = await _factory.CreateDbContextAsync();
+
+            // Si tu PK es IdPrecioArticulo, podrías usar FindAsync(id)
+            var precioArticulo = await db.PreciosArticulos
+                                         .FirstOrDefaultAsync(p => p.IdPrecioArticulo == id);
+
+            if (precioArticulo is null)
                 throw new Exception("Precio no encontrado");
-            }
+
+            db.PreciosArticulos.Remove(precioArticulo);
+            await db.SaveChangesAsync();
         }
+
         public async Task<IEnumerable<PrecioArticulo?>> GetAllPreciosAsync()
         {
-            return await _context.PreciosArticulos
-                .Include(p => p.Articulo)
-                .Include(p => p.TipoIva)
-                .ToListAsync();
+            await using var db = await _factory.CreateDbContextAsync();
+            return await db.PreciosArticulos
+                           .AsNoTracking()
+                           .Include(p => p.Articulo)
+                           .Include(p => p.TipoIva)
+                           .ToListAsync();
         }
-        public Task<List<PrecioArticulo>> GetPrecioByArticuloIdAsync(int idArticulo)
+
+        public async Task<List<PrecioArticulo>> GetPrecioByArticuloIdAsync(int idArticulo)
         {
-            return _context.PreciosArticulos
-                .Where(p => p.IdArticulo == idArticulo)
-                .ToListAsync();
+            await using var db = await _factory.CreateDbContextAsync();
+            return await db.PreciosArticulos
+                           .AsNoTracking()
+                           .Where(p => p.IdArticulo == idArticulo)
+                           .ToListAsync();
         }
-        public Task UpdatePrecioAsync(PrecioArticulo precioArticulo)
+
+        public async Task UpdatePrecioAsync(PrecioArticulo precioArticulo)
         {
-            _context.PreciosArticulos.Update(precioArticulo);
-            return _context.SaveChangesAsync();
+            await using var db = await _factory.CreateDbContextAsync();
+            db.PreciosArticulos.Update(precioArticulo);
+            await db.SaveChangesAsync();
         }
+
         public async Task<PrecioArticulo?> GetLastPrecioByArticuloIdAsync(int idArticulo)
         {
-            return await _context.PreciosArticulos
-                .Where(p => p.IdArticulo == idArticulo)
-                .OrderByDescending(p => p.FechaIncio)
-                .FirstOrDefaultAsync();
+            await using var db = await _factory.CreateDbContextAsync();
+            return await db.PreciosArticulos
+                           .AsNoTracking()
+                           .Where(p => p.IdArticulo == idArticulo)
+                           .OrderByDescending(p => p.FechaIncio) // ajustá el nombre si es FechaInicio
+                           .FirstOrDefaultAsync();
         }
-        }
+    }
 }

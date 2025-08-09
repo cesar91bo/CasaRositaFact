@@ -6,48 +6,57 @@ namespace CasaRositaFact.Data.Repositories
 {
     public class BancoRepository : IBancoRepository
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IDbContextFactory<ApplicationDbContext> _factory;
 
-        public BancoRepository(ApplicationDbContext context)
+        public BancoRepository(IDbContextFactory<ApplicationDbContext> factory)
         {
-            _context = context;
+            _factory = factory;
         }
 
-        public Task AddBancoAsync(Banco banco)
+        public async Task AddBancoAsync(Banco banco)
         {
-            _context.Bancos.Add(banco);
-            return _context.SaveChangesAsync();
+            await using var db = await _factory.CreateDbContextAsync();
+            db.Bancos.Add(banco);
+            await db.SaveChangesAsync();
         }
 
-        public Task DeleteBancoAsync(int id)
+        public async Task DeleteBancoAsync(int id)
         {
-            var banco = _context.Bancos.Find(id);
-            if (banco != null)
-            {
-                _context.Bancos.Remove(banco);
-                return _context.SaveChangesAsync();
-            }
-            return Task.CompletedTask;
+            await using var db = await _factory.CreateDbContextAsync();
+
+            // Si la PK es IdBanco:
+            var banco = await db.Bancos.FirstOrDefaultAsync(b => b.IdBanco == id);
+            // (Alternativa si FindAsync funciona con tu PK: var banco = await db.Bancos.FindAsync(id);)
+
+            if (banco is null) return;
+
+            db.Bancos.Remove(banco);
+            await db.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<Banco>> GetAllBancosAsync()
         {
-            return await _context.Bancos
-                .Include(b => b.Proveedores)
-                .ToListAsync();
+            await using var db = await _factory.CreateDbContextAsync();
+            return await db.Bancos
+                           .AsNoTracking()
+                           .Include(b => b.Proveedores)
+                           .ToListAsync();
         }
 
         public async Task<Banco?> GetBancoByIdAsync(int id)
         {
-            return await _context.Bancos
-                .Include(b => b.Proveedores)
-                .FirstOrDefaultAsync(b => b.IdBanco == id);
+            await using var db = await _factory.CreateDbContextAsync();
+            return await db.Bancos
+                           .AsNoTracking()
+                           .Include(b => b.Proveedores)
+                           .FirstOrDefaultAsync(b => b.IdBanco == id);
         }
 
-        public Task UpdateBancoAsync(Banco banco)
+        public async Task UpdateBancoAsync(Banco banco)
         {
-            _context.Bancos.Update(banco);
-            return _context.SaveChangesAsync();
+            await using var db = await _factory.CreateDbContextAsync();
+            db.Bancos.Update(banco);
+            await db.SaveChangesAsync();
         }
     }
 }
