@@ -10,6 +10,7 @@
 @using Data.Entities
 @using static CasaRositaFact.Data.Entities.Factura
 @using Blazored.LocalStorage
+@using CasaRositaFact.Components.Shared
 @inject ClienteService ClienteService
 @inject FacturaService FacturaService
 @inject AuxiliarService AuxiliarService
@@ -49,6 +50,15 @@
     <FactFooter Detalles="facturaDetalles"
                 OnGuardar="GuardarFactura"
                 OnCancelar="NavigateToFacturas" />
+
+    <!-- Botonera reutilizable -->
+    <FormActions OnCancel="NavigateToFacturas"
+                 OnClear="LimpiarFormulario"
+                 IsBusy="@isGuardando"
+                 IsDirty="@hayCambios"
+                 SaveText="Guardar"
+                 CancelText="Cancelar"
+                 ClearText="Limpiar" />
 </EditForm>
 
 @if (mostrarModalClientes)
@@ -99,6 +109,11 @@
     [Parameter]
     [SupplyParameterFromQuery]
     public int? IdArticulo { get; set; }
+
+
+    // Bandera de cambios y guardado
+    private bool hayCambios = false;
+    private bool isGuardando = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -263,14 +278,18 @@
                 Factura = factura,
                 Detalles = facturaDetalles
             });
+        hayCambios = true;
         StateHasChanged();
     }
 
     private async Task GuardarFactura()
     {
+        isGuardando = true;
+        StateHasChanged();
+
         FacturaState.Limpiar();
         await localStorage.RemoveItemAsync("facturaTemp");
-
+        hayCambios = false;
     }
 
     private void NavigateToFacturas()
@@ -373,7 +392,49 @@
 
     private void ActualizarTotales()
     {
+        hayCambios = true;
         StateHasChanged(); // forza el re-render del padre y sus hijos (incluido el footer)
+    }
+
+    private void MarcarCambios()
+    {
+        hayCambios = true;
+    }
+
+    private async Task LimpiarFormulario()
+    {
+        // Reiniciar factura (ajustá según tus defaults)
+        factura = new Factura
+        {
+            FechaEmision = DateTime.Today,
+            IdLetraFactura = letrasFactura.FirstOrDefault()?.IdLetraFactura ?? 1,
+            IdTipoDocumentoFiscal = 1,
+            MoverStock = true
+        };
+
+        // Reiniciar detalles con una fila vacía
+        facturaDetalles = new List<FacturaDetalle> { new FacturaDetalle() };
+
+        // Cliente por defecto
+        try
+        {
+            await CargarClientePorDefecto();
+        }
+        catch
+        {
+            cliente = new Cliente { Nombre = "Consumidor Final", Apellido = "", IdRegimenImpositivo = 1, IdTipoDocumento = 1 };
+            IdClienteBuscado = 1;
+        }
+
+        // Actualizar temp
+        await localStorage.SetItemAsync("facturaTemp", new FacturaTempModel
+        {
+            Factura = factura,
+            Detalles = facturaDetalles
+        });
+
+        hayCambios = false;
+        StateHasChanged();
     }
 
 }

@@ -1,0 +1,90 @@
+﻿@using Microsoft.AspNetCore.Components.Forms
+@inject IJSRuntime JS
+
+<div class="d-flex gap-2 justify-content-end mt-3">
+    @if (ShowClear)
+    {
+        <button type="button"
+                class="btn btn-outline-secondary"
+                @onclick="OnClearClick"
+                disabled="@IsBusy">
+            <i class="bi bi-eraser"></i> @ClearText
+        </button>
+    }
+
+    @if (ShowCancel)
+    {
+        <button type="button"
+                class="btn btn-outline-danger"
+                @onclick="OnCancelClick"
+                disabled="@IsBusy">
+            <i class="bi bi-x-circle"></i> @CancelText
+        </button>
+    }
+
+    @if (ShowSave)
+    {
+        <button type="submit"
+                class="btn btn-primary"
+                disabled="@(!CanSave || IsBusy)">
+            @if (IsBusy)
+            {
+                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+            }
+            <i class="bi bi-save"></i> @SaveText
+        </button>
+    }
+</div>
+
+@code {
+    // ==== Parámetros públicos ====
+    [Parameter] public EventCallback OnSave { get; set; }          // se ejecuta con el submit del EditForm (no llamar directo)
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback OnClear { get; set; }
+    [Parameter] public bool IsBusy { get; set; }                   // para mostrar spinner y deshabilitar
+    [Parameter] public bool IsDirty { get; set; }                  // si hay cambios sin guardar
+    [Parameter] public bool ShowSave { get; set; } = true;
+    [Parameter] public bool ShowCancel { get; set; } = true;
+    [Parameter] public bool ShowClear { get; set; } = true;
+    [Parameter] public string SaveText { get; set; } = "Guardar";
+    [Parameter] public string CancelText { get; set; } = "Cancelar";
+    [Parameter] public string ClearText { get; set; } = "Limpiar";
+
+    // ==== Integración con EditForm ====
+    [CascadingParameter] private EditContext? CurrentEditContext { get; set; }
+
+    private bool CanSave => CurrentEditContext?.Validate() == true;
+
+    protected override void OnInitialized()
+    {
+        if (CurrentEditContext == null)
+        {
+            throw new InvalidOperationException($"{nameof(FormActions)} debe estar dentro de un EditForm para habilitar/deshabilitar Guardar automáticamente.");
+        }
+
+        // Recalcular validación al cambiar campos
+        CurrentEditContext.OnFieldChanged += (_, __) => StateHasChanged();
+    }
+
+    private async Task<bool> Confirm(string message)
+    {
+        return await JS.InvokeAsync<bool>("confirm", message);
+    }
+
+    private async Task OnCancelClick()
+    {
+        if (IsDirty)
+        {
+            var ok = await Confirm("Hay cambios sin guardar. ¿Seguro que querés cancelar?");
+            if (!ok) return;
+        }
+        await OnCancel.InvokeAsync();
+    }
+
+    private async Task OnClearClick()
+    {
+        var ok = await Confirm("Esto limpiará el formulario. ¿Continuar?");
+        if (!ok) return;
+        await OnClear.InvokeAsync();
+    }
+}
